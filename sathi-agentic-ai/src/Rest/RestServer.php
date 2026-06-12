@@ -30,6 +30,9 @@ class RestServer {
     /** @var CommerceController */
     private CommerceController $commerce;
 
+    /** @var LicenseController */
+    private LicenseController $license;
+
     public function __construct() {
         $this->chat      = new ChatController();
         $this->settings  = new SettingsController();
@@ -37,6 +40,7 @@ class RestServer {
         $this->personas  = new PersonasController();
         $this->memory    = new MemoryController();
         $this->commerce  = new CommerceController();
+        $this->license   = new LicenseController();
     }
 
     /**
@@ -49,6 +53,7 @@ class RestServer {
         $this->personas->register_routes();
         $this->memory->register_routes();
         $this->commerce->register_routes();
+        $this->license->register_routes();
 
         do_action( 'sathi_rest_routes_registered' );
     }

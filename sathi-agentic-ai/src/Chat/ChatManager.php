@@ -88,6 +88,11 @@ class ChatManager {
             return false;
         }
 
+        // License gating (no-op unless enforcement is enabled in the License tab).
+        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager( $this->settings ) )->is_active() ) {
+            return false;
+        }
+
         // Never on admin screens or feeds.
         if ( is_admin() || is_feed() ) {
             return false;
@@ -141,7 +146,7 @@ class ChatManager {
             'siteName'          => get_bloginfo( 'name' ),
             'siteDescription'   => get_bloginfo( 'description' ),
             'position'          => $this->settings->get( Settings::KEY_FLOATING_POSITION, 'bottom-right' ),
-            'accentColor'       => $this->settings->get( Settings::KEY_ACCENT_COLOR, '#7c3aed' ),
+            'accentColor'       => $this->settings->get( Settings::KEY_ACCENT_COLOR, '#1B3A6B' ),
             'greeting'          => $this->settings->get( Settings::KEY_CHAT_GREETING, '' ),
             'title'             => $this->settings->get( Settings::KEY_WIDGET_TITLE, '' ) ?: ( $persona['name'] ?? get_bloginfo( 'name' ) ),
             'theme'             => $this->settings->get( Settings::KEY_WIDGET_THEME, 'light' ),

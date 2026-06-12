@@ -107,6 +107,15 @@ class ChatController {
             ], 400 );
         }
 
+        // License gating (no-op unless enforcement is enabled).
+        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager() )->is_active() ) {
+            return new WP_REST_Response( [
+                'success' => true,
+                'conversation_id' => '',
+                'message' => [ 'role' => 'assistant', 'content' => __( 'Sathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ],
+            ] );
+        }
+
         $settings = new Settings();
         $factory  = new Factory( $settings );
         $memory   = new MemoryStore();

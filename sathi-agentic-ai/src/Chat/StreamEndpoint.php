@@ -115,6 +115,13 @@ class StreamEndpoint {
         $user_id        = get_current_user_id() ?: null;
         $available_tools = apply_filters( 'sathi_chat_tools', [], null );
 
+        // ── License gating (no-op unless enforcement is enabled) ───
+        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager() )->is_active() ) {
+            $this->emit( 'token', [ 'token' => __( 'Sathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ] );
+            $this->done();
+            return;
+        }
+
         // ── Load or create conversation ────────────────────────────
         $settings = new Settings();
         $factory  = new Factory( $settings );

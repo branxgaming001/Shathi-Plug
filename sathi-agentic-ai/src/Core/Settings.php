@@ -61,6 +61,11 @@ class Settings {
     public const KEY_STRICT_SCOPE  = 'sathi_strict_scope';   // answer only from site content
     public const KEY_PRODUCT_CARDS = 'sathi_product_cards';  // show WooCommerce product cards in chat
 
+    // ── Licensing ─────────────────────────────────────────────────────
+    public const KEY_LICENSE_KEY        = 'sathi_license_key';        // encrypted; NOT registered (kept out of generic settings)
+    public const KEY_LICENSE_SERVER_URL = 'sathi_license_server_url';
+    public const KEY_LICENSE_ENFORCE    = 'sathi_license_enforce';    // gating OFF by default
+
     /**
      * Get a single option with type-safe default.
      *
@@ -193,7 +198,7 @@ class Settings {
             ],
             self::KEY_ACCENT_COLOR => [
                 'type'    => 'string',
-                'default' => '#7c3aed',
+                'default' => '#1B3A6B',
                 'sanitize'=> 'sanitize_hex_color',
             ],
             self::KEY_MEMORY_ENABLED => [
@@ -299,6 +304,16 @@ class Settings {
             self::KEY_PRODUCT_CARDS => [
                 'type'    => 'boolean',
                 'default' => true,
+                'sanitize'=> 'rest_sanitize_boolean',
+            ],
+            self::KEY_LICENSE_SERVER_URL => [
+                'type'    => 'string',
+                'default' => '',
+                'sanitize'=> 'esc_url_raw',
+            ],
+            self::KEY_LICENSE_ENFORCE => [
+                'type'    => 'boolean',
+                'default' => false,
                 'sanitize'=> 'rest_sanitize_boolean',
             ],
         ];

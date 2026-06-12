@@ -92,6 +92,9 @@ final class Plugin {
         // inert on the front end, so this is safe and bulletproof.
         $this->get( 'admin' )->register();
 
+        // License: daily re-check cron + admin notice (gating is OFF by default).
+        $this->get( 'license' )->register();
+
         // Sathi's React bundles are ES modules — make WordPress emit them as such.
         add_filter( 'script_loader_tag', [ $this, 'filter_module_script_tag' ], 10, 2 );
 
@@ -116,6 +119,7 @@ final class Plugin {
         $this->services['navigation']  = new NavigationManager();
         $this->services['rest']        = new RestServer();
         $this->services['admin']       = new AdminBoot( $this->get( 'settings' ) );
+        $this->services['license']     = new \RaiLabs\Sathi\License\LicenseManager( $this->get( 'settings' ) );
         $this->services['wp7bridge']   = new WP7Bridge();
         $this->services['usage']       = new \RaiLabs\Sathi\Support\UsageTracker();
         $this->services['gdpr']        = new \RaiLabs\Sathi\Support\GDPRManager();
