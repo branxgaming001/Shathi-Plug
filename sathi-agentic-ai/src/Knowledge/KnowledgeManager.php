@@ -258,8 +258,8 @@ class KnowledgeManager {
         }
 
         try {
-            $provider = $this->factory->for_task( 'embed' );
-            $vector   = $provider->embed( $chunk['content'] );
+            $provider = $this->factory->for_embeddings();
+            $vector   = $provider->embed( $chunk['content'], [ 'model' => $this->factory->embedding_model() ] );
         } catch ( \Throwable $e ) {
             // Log failure but don't crash — the chunk remains in the
             // unembedded queue for the next cron run.
@@ -298,19 +298,19 @@ class KnowledgeManager {
         $ids   = array_column( $chunks, 'id' );
 
         try {
-            $provider = $this->factory->for_task( 'embed' );
+            $provider = $this->factory->for_embeddings();
         } catch ( \Throwable $e ) {
             return; // No embed provider configured — nothing to do
         }
 
         try {
-            $vectors = $provider->embed( $texts ); // Batch embed
+            $vectors = $provider->embed( $texts, [ 'model' => $this->factory->embedding_model() ] ); // Batch embed
         } catch ( \Throwable $e ) {
             // If batch API fails, fall back to one-at-a-time
             $vectors = [];
             foreach ( $chunks as $chunk ) {
                 try {
-                    $vectors[] = $provider->embed( (string) $chunk['content'] );
+                    $vectors[] = $provider->embed( (string) $chunk['content'], [ 'model' => $this->factory->embedding_model() ] );
                 } catch ( \Throwable $e2 ) {
                     $vectors[] = null; // Placeholder for failed
                 }
@@ -348,7 +348,7 @@ class KnowledgeManager {
         $per_run = min( $this->embed_batch_size, $max_chunks );
 
         try {
-            $provider = $this->factory->for_task( 'embed' );
+            $provider = $this->factory->for_embeddings();
         } catch ( \Throwable $e ) {
             return 0; // No embed provider configured
         }
@@ -363,12 +363,12 @@ class KnowledgeManager {
             $ids   = array_column( $chunks, 'id' );
 
             try {
-                $vectors = $provider->embed( $texts );
+                $vectors = $provider->embed( $texts, [ 'model' => $this->factory->embedding_model() ] );
             } catch ( \Throwable $e ) {
                 $vectors = [];
                 foreach ( $chunks as $chunk ) {
                     try {
-                        $vectors[] = $provider->embed( (string) $chunk['content'] );
+                        $vectors[] = $provider->embed( (string) $chunk['content'], [ 'model' => $this->factory->embedding_model() ] );
                     } catch ( \Throwable $e2 ) {
                         $vectors[] = null;
                     }
@@ -461,8 +461,8 @@ class KnowledgeManager {
      */
     public function semanticSearch( string $query, int $limit = 5, array $filters = [] ): array {
         try {
-            $provider = $this->factory->for_task( 'embed' );
-            $query_vector = $provider->embed( $query );
+            $provider = $this->factory->for_embeddings();
+            $query_vector = $provider->embed( $query, [ 'model' => $this->factory->embedding_model() ] );
         } catch ( \Throwable $e ) {
             return []; // Provider unavailable — fall back gracefully
         }
