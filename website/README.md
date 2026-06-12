@@ -1,18 +1,61 @@
-# Sathi — Product Website
+# Sathi — Marketing Website
 
-A complete, deployable marketing + docs + pricing website for **Sathi** (a product by RAI), in the new Sathi brand.
+The official product website for **Sathi**, the AI support companion for WordPress (a product by RAI Labs).
 
-- `index.html` — self-contained single file (HTML/CSS/JS, GSAP via CDN). Host it anywhere: a subdomain, a WordPress page/template, or GitHub Pages.
+This is a **single, self-contained `index.html`** — no build step, no external assets, no npm. All 8 mascots are embedded inline as optimized WebP data URIs, so the page loads instantly even on shared hosting.
 
-## Features
-- Hero with a **scroll-linked moving mascot**, floating cards, animated rings.
-- **Micro-interactions** + scroll-reveal everywhere, scroll progress bar, count-up stats.
-- Sections: Features, How it works, **5 mascots**, conversational-commerce showcase, full **Docs/Installation**, **Pricing** (monthly/yearly toggle) with **Buy** buttons.
-- **Login with two demo roles** (client-side, for preview):
-  - User → `user` / `user123` → account dashboard (license key, domains, buy more, download).
-  - Admin → `admin` / `admin123` → backend dashboard (revenue, active licenses, customers, chart, licenses table).
+## What's inside
 
-## Deploy
-Upload `index.html` to your subdomain's `public_html`, or enable GitHub Pages on this repo (Settings → Pages → branch `main`, folder `/website`). For real auth + payments, connect it to the PHP license server in `../sathi-license-server` (Buy buttons → checkout).
+- Hero with cursor-parallax mascot + click-to-swap (8 mascots)
+- Scroll-reveal sections, animated stat counters, provider marquee, 3D tilt cards
+- Confetti on the **Buy** action, floating sparkles, rotating speech bubbles
+- Pricing / Buy License section
+- Docs: Installation, Configuration, Providers, Knowledge Base, FAQ
+- Two-role demo login:
+  - **admin / admin123** → admin dashboard (full backend view)
+  - **user / user123** → user dashboard (account + buy)
+- `prefers-reduced-motion` respected for accessibility
 
-— by RAI · The Conscious Intelligence
+## Performance
+
+- Page weight ≈ **80 KB total** (HTML + all 8 mascots inline as WebP).
+- Zero render-blocking remote images. Fonts load async from Google Fonts.
+- No JS frameworks — vanilla JS + IntersectionObserver.
+
+## Deploy to Hostinger (WordPress)
+
+You can host this as a standalone landing page alongside WordPress:
+
+1. **As a static page in WP:** Use a "Custom HTML" / full-page template plugin (e.g. a blank page template) and paste the contents of `index.html`. Because everything is inline, it just works.
+2. **As a static file (recommended, fastest):**
+   - Log into Hostinger **hPanel → File Manager** (or use SFTP).
+   - Go to `public_html/`.
+   - Create a folder, e.g. `public_html/sathi/`.
+   - Upload `index.html` into it.
+   - Visit `https://yourdomain.com/sathi/`.
+3. **As the site root:** upload `index.html` to `public_html/` directly (note: this can conflict with a WP install at the root — prefer a subfolder or subdomain like `sathi.yourdomain.com`).
+
+### Subdomain (cleanest)
+
+1. hPanel → **Subdomains** → create `sathi.yourdomain.com`.
+2. Upload `index.html` to that subdomain's document root.
+3. Done.
+
+## Preview with GitHub Pages
+
+1. Repo **Settings → Pages**.
+2. Source: deploy from branch `main`, folder `/website` (or move `index.html` to `/docs` and select `/docs`).
+3. Wait ~1 min → GitHub gives you a live URL.
+
+> Note: GitHub Pages serves the folder root. If you keep the site under `/website`, set the Pages source to that folder; otherwise the page will appear under the `/website/` path.
+
+## Connecting the Buy button
+
+The **Buy License** button currently runs a local confetti demo. To wire it to the real
+license server, point it at your license server checkout URL (Stripe/Razorpay) once that
+server is live. Search the JS for `function buy(` and replace the demo with a redirect to
+your checkout endpoint.
+
+---
+
+© RAI Labs P. Ltd. — Sathi is a product by RAI.
