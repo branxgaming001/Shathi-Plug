@@ -1,0 +1,6 @@
+{
+  "name": "sathi-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sathi marketing website with a live chat bot (Vercel serverless + OpenRouter)."
+}
