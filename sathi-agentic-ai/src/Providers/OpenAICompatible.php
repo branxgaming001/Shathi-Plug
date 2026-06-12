@@ -62,24 +62,41 @@ class OpenAICompatible implements ProviderInterface {
         $content = '';
         $tool_calls = [];
 
-        $this->request_stream( 'POST', '/chat/completions', $body, function ( array $chunk ) use ( &$content, &$tool_calls, $callback ) {
-            $delta = $chunk['choices'][0]['delta'] ?? [];
-            if ( isset( $delta['content'] ) && $delta['content'] ) {
-                $content .= $delta['content'];
-                $callback( $delta['content'] );
-            }
-            if ( isset( $delta['tool_calls'] ) ) {
-                foreach ( $delta['tool_calls'] as $tc ) {
-                    $idx = $tc['index'] ?? 0;
-                    if ( ! isset( $tool_calls[ $idx ] ) ) {
-                        $tool_calls[ $idx ] = [ 'id' => $tc['id'] ?? '', 'type' => 'function', 'function' => [ 'name' => '', 'arguments' => '' ] ];
-                    }
-                    if ( isset( $tc['id'] ) ) { $tool_calls[ $idx ]['id'] = $tc['id']; }
-                    if ( isset( $tc['function']['name'] ) ) { $tool_calls[ $idx ]['function']['name'] .= $tc['function']['name']; }
-                    if ( isset( $tc['function']['arguments'] ) ) { $tool_calls[ $idx ]['function']['arguments'] .= $tc['function']['arguments']; }
+        try {
+            $this->request_stream( 'POST', '/chat/completions', $body, function ( array $chunk ) use ( &$content, &$tool_calls, $callback ) {
+                $delta = $chunk['choices'][0]['delta'] ?? [];
+                if ( isset( $delta['content'] ) && $delta['content'] ) {
+                    $content .= $delta['content'];
+                    $callback( $delta['content'] );
                 }
+                if ( isset( $delta['tool_calls'] ) ) {
+                    foreach ( $delta['tool_calls'] as $tc ) {
+                        $idx = $tc['index'] ?? 0;
+                        if ( ! isset( $tool_calls[ $idx ] ) ) {
+                            $tool_calls[ $idx ] = [ 'id' => $tc['id'] ?? '', 'type' => 'function', 'function' => [ 'name' => '', 'arguments' => '' ] ];
+                        }
+                        if ( isset( $tc['id'] ) ) { $tool_calls[ $idx ]['id'] = $tc['id']; }
+                        if ( isset( $tc['function']['name'] ) ) { $tool_calls[ $idx ]['function']['name'] .= $tc['function']['name']; }
+                        if ( isset( $tc['function']['arguments'] ) ) { $tool_calls[ $idx ]['function']['arguments'] .= $tc['function']['arguments']; }
+                    }
+                }
+            } );
+        } catch ( \Throwable $e ) {
+            // Streaming failed entirely — handled by the fallback below.
+            $content = '';
+        }
+
+        // RESILIENCE: many hosts (LiteSpeed, restrictive proxies, no temp-file
+        // write) silently break the streaming transport even though the normal
+        // completion endpoint works. If streaming produced nothing, fall back to
+        // a non-streaming completion so the visitor always gets a reply.
+        if ( $content === '' && empty( $tool_calls ) ) {
+            $message = $this->chat( $messages, $options );
+            if ( $message->content !== '' ) {
+                $callback( $message->content );
             }
-        } );
+            return $message;
+        }
 
         return new Message( 'assistant', $content, $tool_calls ? array_values( $tool_calls ) : null, null, Helpers::estimate_tokens( $content ) );
     }
