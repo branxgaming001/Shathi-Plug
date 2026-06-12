@@ -44,9 +44,14 @@ class Settings {
     public const KEY_WIDGET_TITLE         = 'sathi_widget_title';
     public const KEY_WIDGET_THEME         = 'sathi_widget_theme';          // light | dark | auto
     public const KEY_WIDGET_LAUNCHER_ICON = 'sathi_widget_launcher_icon';  // emoji or "chat"
-    public const KEY_WIDGET_AVATAR        = 'sathi_widget_avatar';         // mascot-1..5 | spark | none
+    public const KEY_WIDGET_AVATAR        = 'sathi_widget_avatar';         // mascot-1..8 | custom | spark | none
+    public const KEY_WIDGET_AVATAR_CUSTOM = 'sathi_widget_avatar_custom';  // user-supplied image (URL or data URI) when avatar = "custom"
     public const KEY_WIDGET_AUTO_OPEN     = 'sathi_widget_auto_open';
     public const KEY_WIDGET_AUTO_OPEN_DELAY = 'sathi_widget_auto_open_delay';
+
+    // ── Persona (single, user-defined) ────────────────────────────────
+    public const KEY_PERSONA_NAME = 'sathi_persona_name';  // assistant display name
+    public const KEY_PERSONA_TEXT = 'sathi_persona_text';  // free-form persona/instructions ('' = sensible default)
 
     // ── Widget placement ──────────────────────────────────────────────
     public const KEY_WIDGET_DISPLAY_MODE  = 'sathi_widget_display_mode';   // all | include | exclude
@@ -145,9 +150,34 @@ class Settings {
 
     /**
      * Get the default persona slug.
+     *
+     * @deprecated Preset personas were removed in 1.6.0 in favour of a single
+     *             user-defined persona (see get_persona()). Kept for back-compat
+     *             with any stored conversations / shortcodes.
      */
     public function get_default_persona(): string {
-        return $this->get( self::KEY_DEFAULT_PERSONA, 'sathi-guru' );
+        return $this->get( self::KEY_DEFAULT_PERSONA, 'custom' );
+    }
+
+    /**
+     * Get the user-defined persona: name + free-form instructions.
+     *
+     * @return array{name:string,text:string}
+     */
+    public function get_persona(): array {
+        $name = trim( (string) $this->get( self::KEY_PERSONA_NAME, 'Sathi' ) );
+        $text = trim( (string) $this->get( self::KEY_PERSONA_TEXT, '' ) );
+        return [
+            'name' => $name !== '' ? $name : 'Sathi',
+            'text' => $text,
+        ];
+    }
+
+    /**
+     * The user-supplied custom avatar image (URL or data URI), or '' if none.
+     */
+    public function get_custom_avatar(): string {
+        return trim( (string) $this->get( self::KEY_WIDGET_AVATAR_CUSTOM, '' ) );
     }
 
     /**
@@ -261,6 +291,21 @@ class Settings {
                 'type'    => 'string',
                 'default' => 'mascot-1',
                 'sanitize'=> 'sanitize_text_field',
+            ],
+            self::KEY_WIDGET_AVATAR_CUSTOM => [
+                'type'    => 'string',
+                'default' => '',
+                'sanitize'=> [ $this, 'sanitize_custom_avatar' ],
+            ],
+            self::KEY_PERSONA_NAME => [
+                'type'    => 'string',
+                'default' => 'Sathi',
+                'sanitize'=> 'sanitize_text_field',
+            ],
+            self::KEY_PERSONA_TEXT => [
+                'type'    => 'string',
+                'default' => '',
+                'sanitize'=> 'sanitize_textarea_field',
             ],
             self::KEY_WIDGET_AUTO_OPEN => [
                 'type'    => 'boolean',
@@ -405,6 +450,35 @@ class Settings {
     public function sanitize_widget_theme( $value ): string {
         $value = sanitize_text_field( (string) $value );
         return in_array( $value, [ 'light', 'dark', 'auto' ], true ) ? $value : 'light';
+    }
+
+    /**
+     * Sanitize a user-supplied custom avatar. Accepts an https(s) image URL or
+     * an inline data:image URI (png/jpeg/gif/webp/svg). Anything else → ''.
+     * Data URIs are capped to keep the option row sane.
+     *
+     * @param  mixed $value
+     * @return string
+     */
+    public function sanitize_custom_avatar( $value ): string {
+        $value = trim( (string) $value );
+        if ( $value === '' ) {
+            return '';
+        }
+        if ( stripos( $value, 'data:image/' ) === 0 ) {
+            // Allow common inline image data URIs, capped at ~700KB of base64.
+            if ( strlen( $value ) <= 700000
+                && preg_match( '#^data:image/(png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=\s]+$#i', $value ) ) {
+                return preg_replace( '/\s+/', '', $value );
+            }
+            return '';
+        }
+        // Only allow explicit http(s) URLs — never javascript:, data:text, etc.
+        if ( ! preg_match( '#^https?://#i', $value ) ) {
+            return '';
+        }
+        $url = esc_url_raw( $value, [ 'http', 'https' ] );
+        return $url ?: '';
     }
 
     /**

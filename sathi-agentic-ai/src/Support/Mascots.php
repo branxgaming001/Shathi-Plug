@@ -1,7 +1,10 @@
 <?php
 /**
- * Sathi mascots — bundled as base64 WebP data URIs (git-safe, self-contained, fast).
- * Used for the chat avatar/launcher and the admin picker.
+ * Mascots — bundled chat avatars as base64 WebP data URIs.
+ *
+ * Hand-tuned raster mascots, each with its own styled background. Git-safe,
+ * self-contained, and instant to load. Users pick one in the admin, or supply
+ * their own Custom image which ChatManager resolves separately.
  *
  * @package RaiLabs\Sathi\Support
  */
@@ -24,13 +27,28 @@ class Mascots {
         ];
     }
 
+    /** @return array<string,string> id => label */
+    public static function labels(): array {
+        return [
+            'mascot-1' => __( 'Companion', 'sathi-agentic-ai' ),
+            'mascot-2' => __( 'Flat', 'sathi-agentic-ai' ),
+            'mascot-3' => __( 'Robot', 'sathi-agentic-ai' ),
+            'mascot-4' => __( 'Orb', 'sathi-agentic-ai' ),
+            'mascot-5' => __( 'Sticker', 'sathi-agentic-ai' ),
+            'mascot-6' => __( 'Headset', 'sathi-agentic-ai' ),
+            'mascot-7' => __( 'Animal', 'sathi-agentic-ai' ),
+            'mascot-8' => __( 'Crystal', 'sathi-agentic-ai' ),
+        ];
+    }
+
+    /** Get a single mascot data URI by id. Empty string for unknown ids. */
     public static function get( string $id ): string {
         $all = self::all();
         return $all[ $id ] ?? '';
     }
 
-    /** @return array<string,string> id => human label */
-    public static function labels(): array {
-        return [ 'mascot-1' => 'Companion', 'mascot-2' => 'Flat', 'mascot-3' => 'Robot', 'mascot-4' => 'Orb', 'mascot-5' => 'Sticker', 'mascot-6' => 'Headset', 'mascot-7' => 'Animal', 'mascot-8' => 'Crystal' ];
+    /** Whether an id is a known bundled mascot. */
+    public static function exists( string $id ): bool {
+        return isset( self::all()[ $id ] );
     }
 }

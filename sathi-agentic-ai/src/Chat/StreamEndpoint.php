@@ -15,7 +15,6 @@ use RaiLabs\Sathi\Core\Data\Message;
 use RaiLabs\Sathi\Core\Settings;
 use RaiLabs\Sathi\Memory\MemoryStore;
 use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Personas\PersonaRegistry;
 use RaiLabs\Sathi\Personas\PromptComposer;
 use RaiLabs\Sathi\Support\Helpers;
 
@@ -138,9 +137,7 @@ class StreamEndpoint {
         }
 
         // ── Build system prompt ───────────────────────────────────
-        $persona_registry = new PersonaRegistry();
-        $persona_data     = $persona_registry->get( $persona );
-        $composer         = new PromptComposer();
+        $composer = new PromptComposer();
 
         // ── Retrieve relevant site content (RAG) ──────────────────
         $knowledge_summary = '';

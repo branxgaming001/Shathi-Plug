@@ -136,8 +136,8 @@ class ChatManager {
      * Build the configuration object for the React widget.
      */
     public function get_widget_config(): array {
-        $persona_slug = $this->settings->get_default_persona();
-        $persona      = $this->get_persona_data( $persona_slug );
+        $persona = $this->settings->get_persona();
+        $accent  = $this->settings->get( Settings::KEY_ACCENT_COLOR, '#6D5DFB' );
 
         return [
             'restUrl'           => rest_url( 'sathi/v1' ),
@@ -148,13 +148,13 @@ class ChatManager {
             'position'          => $this->settings->get( Settings::KEY_FLOATING_POSITION, 'bottom-right' ),
             'accentColor'       => $this->settings->get( Settings::KEY_ACCENT_COLOR, '#6D5DFB' ),
             'greeting'          => $this->settings->get( Settings::KEY_CHAT_GREETING, '' ),
-            'title'             => $this->settings->get( Settings::KEY_WIDGET_TITLE, '' ) ?: ( $persona['name'] ?? get_bloginfo( 'name' ) ),
+            'title'             => $this->settings->get( Settings::KEY_WIDGET_TITLE, '' ) ?: $persona['name'],
             'theme'             => $this->settings->get( Settings::KEY_WIDGET_THEME, 'light' ),
             'launcherIcon'      => $this->settings->get( Settings::KEY_WIDGET_LAUNCHER_ICON, 'chat' ),
             'avatar'            => $this->resolve_avatar(),
             'autoOpen'          => (bool) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN, false ),
             'autoOpenDelay'     => (int) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN_DELAY, 5 ),
-            'persona'           => $persona,
+            'persona'           => [ 'name' => $persona['name'], 'color' => $accent ],
             'streamingEnabled'  => $this->settings->get( Settings::KEY_STREAMING_ENABLED, true ),
             'memoryEnabled'     => $this->settings->get( Settings::KEY_MEMORY_ENABLED, true ),
             'guestId'           => Helpers::guest_id(),
@@ -177,6 +177,9 @@ class ChatManager {
      */
     private function resolve_avatar(): string {
         $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        if ( $id === 'custom' ) {
+            return $this->settings->get_custom_avatar();
+        }
         if ( strpos( $id, 'mascot-' ) === 0 ) {
             return \RaiLabs\Sathi\Support\Mascots::get( $id );
         }
@@ -358,21 +361,11 @@ class ChatManager {
 
         $conv->add_message( $user_msg );
 
-        // Get provider and persona
+        // Get provider and build the full system prompt (persona + memory + RAG + safety)
         $provider       = $this->factory->for_task( 'chat' );
-        $persona_system = $this->build_system_prompt( $conv );
-
-        // Retrieve memory context
-        $memory_ctx = '';
-        if ( $this->settings->get( Settings::KEY_MEMORY_ENABLED, true ) ) {
-            $memory_ctx = $this->memory->summarize( $conv->user_id, $conv->guest_id );
-        }
+        $persona_system = $this->build_system_prompt( $conv, $user_input );
 
         $messages = $conv->messages;
-        if ( $memory_ctx ) {
-            // Inject memory as a system context message at the front
-            array_unshift( $messages, Message::system( "Previous user context: {$memory_ctx}" ) );
-        }
 
         // Get optional function tools
         $tools = apply_filters( 'sathi_chat_tools', [], $conv );
@@ -422,60 +415,49 @@ class ChatManager {
     }
 
     /**
-     * Build the system prompt from persona.
+     * Build the full system prompt: user-defined persona + memory + retrieved
+     * site knowledge (RAG) + scope + safety. Delegates to PromptComposer so the
+     * widget, REST fallback, and SSE stream all speak with one voice.
+     *
+     * @param Conversation $conv
+     * @param string       $user_input The latest user message (drives RAG retrieval).
      */
-    private function build_system_prompt( Conversation $conv ): string {
-        $persona_data = $this->get_persona_data( $conv->persona_id );
-
-        return apply_filters( 'sathi_system_prompt', sprintf(
-            __( 'You are %s, a %s support agent on %s. %s. Speak in a %s tone. %s', 'sathi-agentic-ai' ),
-            $persona_data['name'],
-            $persona_data['role'],
-            get_bloginfo( 'name' ),
-            $persona_data['description'],
-            $persona_data['tone'],
-            $persona_data['style']
-        ), $conv );
-    }
-
-    /**
-     * Get persona data (from custom post type or predefined defaults).
-     */
-    private function get_persona_data( string $slug ): array {
-        $defaults = [
-            'sathi-guru'     => [ 'name' => 'Sathi Guru',     'role' => 'Mentor',     'description' => 'Wise, patient, and philosophical.', 'tone' => 'calm and reflective', 'style' => 'Uses metaphors.', 'avatar' => '🎓', 'color' => '#6366f1' ],
-            'sathi-ninja'    => [ 'name' => 'Sathi Ninja',    'role' => 'Efficiency Expert', 'description' => 'Fast, precise, no-nonsense.', 'tone' => 'direct and crisp', 'style' => 'Actionable steps.', 'avatar' => '🥷', 'color' => '#0ea5e9' ],
-            'sathi-buddy'    => [ 'name' => 'Sathi Buddy',    'role' => 'Friendly Companion', 'description' => 'Cheerful, empathetic friend.', 'tone' => 'warm and encouraging', 'style' => 'Conversational.', 'avatar' => '🐶', 'color' => '#f59e0b' ],
-            'sathi-sage'     => [ 'name' => 'Sathi Sage',     'role' => 'Knowledge Oracle', 'description' => 'Encyclopedic, data-driven expert.', 'tone' => 'authoritative yet approachable', 'style' => 'Structured answers.', 'avatar' => '🦉', 'color' => '#10b981' ],
-            'sathi-spark'    => [ 'name' => 'Sathi Spark',    'role' => 'Creative Catalyst', 'description' => 'Energetic, imaginative, bold.', 'tone' => 'enthusiastic and inventive', 'style' => 'Brainstorming format.', 'avatar' => '⚡', 'color' => '#ec4899' ],
-            'sathi-guardian' => [ 'name' => 'Sathi Guardian', 'role' => 'Security Sentinel', 'description' => 'Vigilant, precise, protective.', 'tone' => 'serious and reassuring', 'style' => 'Checklist format.', 'avatar' => '🛡️', 'color' => '#ef4444' ],
+    private function build_system_prompt( Conversation $conv, string $user_input = '' ): string {
+        $context = [
+            'site_name'        => get_bloginfo( 'name' ),
+            'site_description' => get_bloginfo( 'description' ),
+            'site_url'         => home_url(),
         ];
 
-        if ( isset( $defaults[ $slug ] ) ) {
-            return $defaults[ $slug ];
+        // Memory of this visitor.
+        if ( $this->settings->get( Settings::KEY_MEMORY_ENABLED, true ) ) {
+            $context['memory'] = $this->memory->summarize( $conv->user_id, $conv->guest_id );
         }
 
-        // Look up custom persona from DB
-        global $wpdb;
-        $row = $wpdb->get_row(
-            $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}sathi_personas WHERE slug = %s AND is_active = 1", $slug ),
-            ARRAY_A
-        );
-
-        if ( $row ) {
-            return [
-                'name'        => $row['name'],
-                'role'        => $row['role'] ?? '',
-                'description' => $row['description'] ?? '',
-                'tone'        => $row['tone'] ?? '',
-                'style'       => $row['style'] ?? '',
-                'avatar'      => $row['avatar'] ?? '🤖',
-                'color'       => $row['color'] ?? '#7c3aed',
-            ];
+        // Retrieve relevant site content for grounding (RAG).
+        if ( $user_input !== '' ) {
+            try {
+                $km    = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+                $hits  = $km->hybridSearch( $user_input, 5 );
+                $parts = [];
+                foreach ( $hits as $h ) {
+                    $excerpt = trim( (string) ( $h['excerpt'] ?? '' ) );
+                    if ( $excerpt !== '' ) {
+                        $src     = $h['source_url'] ?? '';
+                        $parts[] = '- ' . $excerpt . ( $src ? " (source: {$src})" : '' );
+                    }
+                }
+                if ( $parts ) {
+                    $context['knowledge_summary'] = implode( "\n", $parts );
+                }
+            } catch ( \Throwable $e ) {
+                // Knowledge base optional — ignore retrieval failures.
+            }
         }
 
-        // Fallback to default guru
-        return $defaults['sathi-guru'];
+        $prompt = ( new \RaiLabs\Sathi\Personas\PromptComposer() )->compose( '', $context );
+
+        return apply_filters( 'sathi_system_prompt', $prompt, $conv );
     }
 
     /**

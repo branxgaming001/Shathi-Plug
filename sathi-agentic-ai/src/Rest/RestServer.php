@@ -33,14 +33,18 @@ class RestServer {
     /** @var LicenseController */
     private LicenseController $license;
 
+    /** @var PlaygroundController */
+    private PlaygroundController $playground;
+
     public function __construct() {
-        $this->chat      = new ChatController();
-        $this->settings  = new SettingsController();
-        $this->knowledge = new KnowledgeController();
-        $this->personas  = new PersonasController();
-        $this->memory    = new MemoryController();
-        $this->commerce  = new CommerceController();
-        $this->license   = new LicenseController();
+        $this->chat       = new ChatController();
+        $this->settings   = new SettingsController();
+        $this->knowledge  = new KnowledgeController();
+        $this->personas   = new PersonasController();
+        $this->memory     = new MemoryController();
+        $this->commerce   = new CommerceController();
+        $this->license    = new LicenseController();
+        $this->playground = new PlaygroundController();
     }
 
     /**
@@ -54,6 +58,7 @@ class RestServer {
         $this->memory->register_routes();
         $this->commerce->register_routes();
         $this->license->register_routes();
+        $this->playground->register_routes();
 
         do_action( 'sathi_rest_routes_registered' );
     }

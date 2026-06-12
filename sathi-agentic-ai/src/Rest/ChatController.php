@@ -166,27 +166,13 @@ class ChatController {
             ] );
         }
 
-        // Non-streaming path
-        $provider = $factory->for_task( 'chat' );
-        $persona_data = $this->get_persona_data( $persona );
-
-        $system_prompt = sprintf(
-            'You are %s, %s. %s. Speak in a %s tone. %s',
-            $persona_data['name'],
-            $persona_data['role'],
-            $persona_data['description'],
-            $persona_data['tone'],
-            $persona_data['style']
-        );
-
+        // Non-streaming path — let ChatManager build the unified system prompt
+        // (persona + memory + retrieved site knowledge + scope + safety).
         $response = $chat->send_message(
             $conv,
             $message,
             function ( $d ) {},
-            [
-                'tools'         => $tools,
-                'system_prompt' => $system_prompt,
-            ]
+            [ 'tools' => $tools ]
         );
 
         return new WP_REST_Response( [
@@ -404,19 +390,4 @@ class ChatController {
         ];
     }
 
-    /**
-     * Get persona data.
-     */
-    private function get_persona_data( string $slug ): array {
-        $defaults = [
-            'sathi-guru'     => [ 'name' => 'Sathi Guru',     'role' => 'Mentor',             'description' => 'Wise, patient, philosophical.', 'tone' => 'calm',   'style' => 'Uses metaphors.' ],
-            'sathi-ninja'    => [ 'name' => 'Sathi Ninja',    'role' => 'Efficiency Expert',  'description' => 'Fast, precise, no-nonsense.',     'tone' => 'direct', 'style' => 'Actionable steps.' ],
-            'sathi-buddy'    => [ 'name' => 'Sathi Buddy',    'role' => 'Friendly Companion', 'description' => 'Cheerful, empathetic.',           'tone' => 'warm',   'style' => 'Conversational.' ],
-            'sathi-sage'     => [ 'name' => 'Sathi Sage',     'role' => 'Knowledge Oracle',   'description' => 'Encyclopedic, data-driven.',      'tone' => 'authoritative', 'style' => 'Structured answers.' ],
-            'sathi-spark'    => [ 'name' => 'Sathi Spark',    'role' => 'Creative Catalyst',  'description' => 'Energetic, imaginative.',         'tone' => 'enthusiastic',  'style' => 'Brainstorming.' ],
-            'sathi-guardian' => [ 'name' => 'Sathi Guardian', 'role' => 'Security Sentinel',  'description' => 'Vigilant, protective.',           'tone' => 'serious',   'style' => 'Checklist format.' ],
-        ];
-
-        return $defaults[ $slug ] ?? $defaults['sathi-guru'];
-    }
 }
