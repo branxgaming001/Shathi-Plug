@@ -64,7 +64,8 @@ class SettingsController {
      */
     public function list_mascots( WP_REST_Request $request ): WP_REST_Response {
         return new WP_REST_Response( [
-            'mascots' => \RaiLabs\Sathi\Support\Mascots::all(),
+            'mascots' => \RaiLabs\Sathi\Support\Mascots::all(),     // id => first (neutral) frame
+            'frames'  => \RaiLabs\Sathi\Support\Mascots::frames(),  // id => [expression frames]
             'labels'  => \RaiLabs\Sathi\Support\Mascots::labels(),
         ] );
     }

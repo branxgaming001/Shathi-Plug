@@ -152,6 +152,7 @@ class ChatManager {
             'theme'             => $this->settings->get( Settings::KEY_WIDGET_THEME, 'light' ),
             'launcherIcon'      => $this->settings->get( Settings::KEY_WIDGET_LAUNCHER_ICON, 'chat' ),
             'avatar'            => $this->resolve_avatar(),
+            'avatarFrames'      => $this->resolve_avatar_frames(),
             'autoOpen'          => (bool) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN, false ),
             'autoOpenDelay'     => (int) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN_DELAY, 5 ),
             'persona'           => [ 'name' => $persona['name'], 'color' => $accent ],
@@ -184,6 +185,24 @@ class ChatManager {
             return \RaiLabs\Sathi\Support\Mascots::get( $id );
         }
         return '';
+    }
+
+    /**
+     * All expression frames for the selected avatar so the widget can animate
+     * it (neutral → laughing → …). Single-element or empty arrays are fine.
+     *
+     * @return string[]
+     */
+    private function resolve_avatar_frames(): array {
+        $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        if ( $id === 'custom' ) {
+            $c = $this->settings->get_custom_avatar();
+            return $c !== '' ? [ $c ] : [];
+        }
+        if ( strpos( $id, 'mascot-' ) === 0 ) {
+            return \RaiLabs\Sathi\Support\Mascots::frames_for( $id );
+        }
+        return [];
     }
 
     /**
