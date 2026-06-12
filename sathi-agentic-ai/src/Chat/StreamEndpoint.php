@@ -135,11 +135,30 @@ class StreamEndpoint {
         $persona_data     = $persona_registry->get( $persona );
         $composer         = new PromptComposer();
 
+        // ── Retrieve relevant site content (RAG) ──────────────────
+        $knowledge_summary = '';
+        try {
+            $km   = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+            $hits = $km->hybridSearch( $message, 5 );
+            $parts = [];
+            foreach ( $hits as $h ) {
+                $excerpt = trim( (string) ( $h['excerpt'] ?? '' ) );
+                if ( $excerpt !== '' ) {
+                    $src = $h['source_url'] ?? '';
+                    $parts[] = '- ' . $excerpt . ( $src ? " (source: {$src})" : '' );
+                }
+            }
+            $knowledge_summary = implode( "\n", $parts );
+        } catch ( \Throwable $e ) {
+            $knowledge_summary = '';
+        }
+
         $system_prompt = $composer->compose( $persona, [
-            'site_name'        => get_bloginfo( 'name' ),
-            'site_description' => get_bloginfo( 'description' ),
-            'site_url'         => home_url(),
-            'memory'           => $memory->summarize( $user_id, $guest_id ),
+            'site_name'         => get_bloginfo( 'name' ),
+            'site_description'  => get_bloginfo( 'description' ),
+            'site_url'          => home_url(),
+            'memory'            => $memory->summarize( $user_id, $guest_id ),
+            'knowledge_summary' => $knowledge_summary,
         ] );
 
         // ── Persist user message ──────────────────────────────────
@@ -228,6 +247,21 @@ class StreamEndpoint {
                 'tokens'          => $response->token_count ?? Helpers::estimate_tokens( $streamed_content ),
                 'model'           => $options['model'] ?? $provider->default_model(),
             ] );
+
+            // ── Emit matching WooCommerce product cards ──────────
+            if ( $settings->get( Settings::KEY_PRODUCT_CARDS, true ) ) {
+                try {
+                    $ps = new \RaiLabs\Sathi\Commerce\ProductSearch();
+                    if ( $ps->available() ) {
+                        $products = $ps->search( $message, 3 );
+                        if ( ! empty( $products ) ) {
+                            $this->emit( 'products', [ 'products' => $products ] );
+                        }
+                    }
+                } catch ( \Throwable $e ) {
+                    // Non-fatal: product cards are an enhancement.
+                }
+            }
 
             // ── Auto-ingest memory ──────────────────────────────
             if ( $settings->get( Settings::KEY_MEMORY_ENABLED, true ) ) {

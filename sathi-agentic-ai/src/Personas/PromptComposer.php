@@ -66,8 +66,20 @@ class PromptComposer {
 
         // Knowledge context
         if ( ! empty( $context['knowledge_summary'] ) ) {
-            $lines[] = 'Relevant site content you can reference:';
+            $lines[] = 'Relevant site content you can reference (use this to answer):';
             $lines[] = $context['knowledge_summary'];
+        }
+
+        // Strict scope — answer only from this website's content/products.
+        $strict = (bool) ( new \RaiLabs\Sathi\Core\Settings() )->get( \RaiLabs\Sathi\Core\Settings::KEY_STRICT_SCOPE, true );
+        if ( $strict ) {
+            $site = $context['site_name'] ?? 'this website';
+            $lines[] = sprintf(
+                'SCOPE — IMPORTANT: You are strictly an assistant for %1$s. Answer only using this website\'s content, products, and the information provided above. '
+                . 'If the visitor asks about anything unrelated to %1$s (general knowledge, world facts, other companies, coding help, etc.), do NOT answer it — reply exactly: '
+                . '"I can only help with questions about this website, its products, and its content." Never invent facts that are not supported by the site content above.',
+                $site
+            );
         }
 
         // Available actions

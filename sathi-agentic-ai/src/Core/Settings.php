@@ -57,6 +57,10 @@ class Settings {
     public const KEY_EMBED_PROVIDER = 'sathi_embed_provider';
     public const KEY_EMBED_MODEL    = 'sathi_embed_model';
 
+    // ── Knowledge scope + commerce ────────────────────────────────────
+    public const KEY_STRICT_SCOPE  = 'sathi_strict_scope';   // answer only from site content
+    public const KEY_PRODUCT_CARDS = 'sathi_product_cards';  // show WooCommerce product cards in chat
+
     /**
      * Get a single option with type-safe default.
      *
@@ -286,6 +290,16 @@ class Settings {
                 'type'    => 'string',
                 'default' => 'text-embedding-3-small',
                 'sanitize'=> 'sanitize_text_field',
+            ],
+            self::KEY_STRICT_SCOPE => [
+                'type'    => 'boolean',
+                'default' => true,
+                'sanitize'=> 'rest_sanitize_boolean',
+            ],
+            self::KEY_PRODUCT_CARDS => [
+                'type'    => 'boolean',
+                'default' => true,
+                'sanitize'=> 'rest_sanitize_boolean',
             ],
         ];
 
