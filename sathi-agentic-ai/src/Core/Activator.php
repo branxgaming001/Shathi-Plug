@@ -61,7 +61,7 @@ class Activator {
             'sathi_log_level'               => 'warning',
             'sathi_floating_widget'         => true,
             'sathi_floating_position'       => 'bottom-right',
-            'sathi_accent_color'            => '#1B3A6B',
+            'sathi_accent_color'            => '#6D5DFB',
             'sathi_knowledge_auto_crawl'    => true,
             'sathi_knowledge_crawl_interval'=> 'daily',
             'sathi_memory_enabled'          => true,

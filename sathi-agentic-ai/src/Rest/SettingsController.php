@@ -51,6 +51,22 @@ class SettingsController {
             'callback'            => [ $this, 'list_models' ],
             'permission_callback' => [ $this, 'check_admin_permission' ],
         ] );
+
+        register_rest_route( self::NAMESPACE, '/settings/mascots', [
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'list_mascots' ],
+            'permission_callback' => [ $this, 'check_admin_permission' ],
+        ] );
+    }
+
+    /**
+     * Return the bundled mascots (data URIs) + labels for the avatar picker.
+     */
+    public function list_mascots( WP_REST_Request $request ): WP_REST_Response {
+        return new WP_REST_Response( [
+            'mascots' => \RaiLabs\Sathi\Support\Mascots::all(),
+            'labels'  => \RaiLabs\Sathi\Support\Mascots::labels(),
+        ] );
     }
 
     /**

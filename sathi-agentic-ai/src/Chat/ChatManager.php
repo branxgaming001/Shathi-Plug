@@ -146,11 +146,12 @@ class ChatManager {
             'siteName'          => get_bloginfo( 'name' ),
             'siteDescription'   => get_bloginfo( 'description' ),
             'position'          => $this->settings->get( Settings::KEY_FLOATING_POSITION, 'bottom-right' ),
-            'accentColor'       => $this->settings->get( Settings::KEY_ACCENT_COLOR, '#1B3A6B' ),
+            'accentColor'       => $this->settings->get( Settings::KEY_ACCENT_COLOR, '#6D5DFB' ),
             'greeting'          => $this->settings->get( Settings::KEY_CHAT_GREETING, '' ),
             'title'             => $this->settings->get( Settings::KEY_WIDGET_TITLE, '' ) ?: ( $persona['name'] ?? get_bloginfo( 'name' ) ),
             'theme'             => $this->settings->get( Settings::KEY_WIDGET_THEME, 'light' ),
             'launcherIcon'      => $this->settings->get( Settings::KEY_WIDGET_LAUNCHER_ICON, 'chat' ),
+            'avatar'            => $this->resolve_avatar(),
             'autoOpen'          => (bool) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN, false ),
             'autoOpenDelay'     => (int) $this->settings->get( Settings::KEY_WIDGET_AUTO_OPEN_DELAY, 5 ),
             'persona'           => $persona,
@@ -169,6 +170,17 @@ class ChatManager {
                 'copied'        => __( 'Copied!', 'sathi-agentic-ai' ),
             ],
         ];
+    }
+
+    /**
+     * Resolve the selected mascot avatar to a data URI (empty for spark/none).
+     */
+    private function resolve_avatar(): string {
+        $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        if ( strpos( $id, 'mascot-' ) === 0 ) {
+            return \RaiLabs\Sathi\Support\Mascots::get( $id );
+        }
+        return '';
     }
 
     /**

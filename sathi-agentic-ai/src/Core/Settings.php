@@ -44,6 +44,7 @@ class Settings {
     public const KEY_WIDGET_TITLE         = 'sathi_widget_title';
     public const KEY_WIDGET_THEME         = 'sathi_widget_theme';          // light | dark | auto
     public const KEY_WIDGET_LAUNCHER_ICON = 'sathi_widget_launcher_icon';  // emoji or "chat"
+    public const KEY_WIDGET_AVATAR        = 'sathi_widget_avatar';         // mascot-1..5 | spark | none
     public const KEY_WIDGET_AUTO_OPEN     = 'sathi_widget_auto_open';
     public const KEY_WIDGET_AUTO_OPEN_DELAY = 'sathi_widget_auto_open_delay';
 
@@ -198,7 +199,7 @@ class Settings {
             ],
             self::KEY_ACCENT_COLOR => [
                 'type'    => 'string',
-                'default' => '#1B3A6B',
+                'default' => '#6D5DFB',
                 'sanitize'=> 'sanitize_hex_color',
             ],
             self::KEY_MEMORY_ENABLED => [
@@ -254,6 +255,11 @@ class Settings {
             self::KEY_WIDGET_LAUNCHER_ICON => [
                 'type'    => 'string',
                 'default' => 'chat',
+                'sanitize'=> 'sanitize_text_field',
+            ],
+            self::KEY_WIDGET_AVATAR => [
+                'type'    => 'string',
+                'default' => 'mascot-1',
                 'sanitize'=> 'sanitize_text_field',
             ],
             self::KEY_WIDGET_AUTO_OPEN => [
