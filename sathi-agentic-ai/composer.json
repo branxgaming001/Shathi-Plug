@@ -1,0 +1,45 @@
+{
+    "name": "railabs/sathi-agentic-ai",
+    "description": "Intelligent WordPress support agent with multi-provider AI, persistent memory, knowledge base, and real-time site navigation.",
+    "type": "wordpress-plugin",
+    "version": "1.2.0",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "RAI Labs P. Ltd.",
+            "homepage": "https://railabs.in"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpstan/phpstan": "^1.10",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RaiLabs\\Sathi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RaiLabs\\Sathi\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "lint": "phpcs --standard=WordPress src/",
+        "lint:fix": "phpcbf --standard=WordPress src/",
+        "test": "phpunit",
+        "analyse": "phpstan analyse src/ --level=5"
+    }
+}
