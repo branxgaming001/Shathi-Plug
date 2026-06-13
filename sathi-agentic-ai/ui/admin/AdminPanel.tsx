@@ -18,6 +18,13 @@ const POSITIONS = [
   { v: 'top-right', l: 'Top Right' }, { v: 'top-left', l: 'Top Left' },
 ];
 const LAUNCHER_ICONS = ['chat', '💬', '🤖', '✨', '🎓', '🛟', '👋', '⚡'];
+// Ready-made brand palettes for the header/widget colour.
+const BRAND_PRESETS = ['#6D5DFB', '#5B6CF0', '#2DB4FF', '#19C37D', '#FF6B5E', '#F0567A', '#F59E0B', '#0E9F6E', '#7C3AED', '#111827'];
+// Signature colour per mascot — picking a mascot tints the whole bot window.
+const MASCOT_COLORS: Record<string, string> = {
+  'mascot-1': '#6D5DFB', 'mascot-2': '#5B6CF0', 'mascot-3': '#FF6B5E', 'mascot-4': '#7A5CFF',
+  'mascot-5': '#2DB4FF', 'mascot-6': '#7C3AED', 'mascot-7': '#19C37D', 'mascot-8': '#F0567A',
+};
 const GROUP_LABELS: Record<string, string> = {
   cloud: 'Cloud providers', aggregator: 'Aggregators & fast inference', local: 'Self-hosted / local', custom: 'Universal',
 };
@@ -362,11 +369,22 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
           <Field label="Greeting message"><input className={inp} value={g('sathi_chat_greeting', '')} placeholder="How can I help you today?" onChange={(e) => set('sathi_chat_greeting', e.target.value)} /></Field>
           <Field label="Position"><select className={inp} value={g('sathi_floating_position', 'bottom-right')} onChange={(e) => set('sathi_floating_position', e.target.value)}>{POSITIONS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}</select></Field>
           <Field label="Theme"><select className={inp} value={g('sathi_widget_theme', 'light')} onChange={(e) => set('sathi_widget_theme', e.target.value)}><option value="light">Light</option><option value="dark">Dark</option><option value="auto">Auto (system)</option></select></Field>
-          <Field label="Accent color">
+          <Field label="Header & widget colour">
             <div className="flex items-center gap-2">
               <input type="color" value={g('sathi_accent_color', accent || '#6D5DFB')} onChange={(e) => set('sathi_accent_color', e.target.value)} className="w-10 h-9 rounded-lg border border-gray-200" />
               <input className={inp} value={g('sathi_accent_color', accent || '#6D5DFB')} onChange={(e) => set('sathi_accent_color', e.target.value)} />
             </div>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {BRAND_PRESETS.map((c) => {
+                const cur = String(g('sathi_accent_color', accent || '#6D5DFB') || '').toLowerCase() === c.toLowerCase();
+                return (
+                  <button key={c} type="button" title={c} aria-label={`Use ${c}`} onClick={() => set('sathi_accent_color', c)}
+                    className={`w-7 h-7 rounded-full border-2 transition ${cur ? 'border-gray-800 scale-110' : 'border-white shadow hover:scale-110'}`}
+                    style={{ background: c }} />
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1.5">Pick your brand colour — or it auto-matches the mascot you choose below.</p>
           </Field>
           <Field label="Launcher icon (if no mascot)">
             <div className="flex flex-wrap gap-1.5">
@@ -380,7 +398,7 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
               <div className="flex flex-wrap gap-3 items-start">
                 {Object.keys(mascots).length === 0 && <span className="text-xs text-gray-400">Loading mascots…</span>}
                 {Object.entries(mascots).map(([id, src]) => (
-                  <button key={id} type="button" onClick={() => set('sathi_widget_avatar', id)} title={mascotLabels[id] || id}
+                  <button key={id} type="button" onClick={() => { set('sathi_widget_avatar', id); if (MASCOT_COLORS[id]) set('sathi_accent_color', MASCOT_COLORS[id]); }} title={mascotLabels[id] || id}
                     className="flex flex-col items-center gap-1">
                     <span className={`w-16 h-16 rounded-2xl border-2 p-1 bg-white flex items-center justify-center transition ${avatar === id ? 'border-rai-blue-500 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
                       <img src={src as string} alt={id} className="w-full h-full object-contain rounded-xl" />

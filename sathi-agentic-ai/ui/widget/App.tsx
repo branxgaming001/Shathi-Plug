@@ -434,10 +434,20 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
   ];
   const tagline = taglines[(sName.length + pName.length) % taglines.length];
 
+  // The chosen accent (admin colour / per-mascot colour) drives the WHOLE
+  // window — header, user bubbles, send button, launcher — via CSS variables.
+  const accentColor = persona?.color || config.accentColor || '#6D5DFB';
+  const rootStyle = {
+    fontFamily: 'Plus Jakarta Sans, Inter, system-ui, -apple-system, sans-serif',
+    ['--sathi-600' as any]: accentColor,
+    ['--sathi-500' as any]: accentColor,
+    ['--sathi-700' as any]: accentColor,
+  } as React.CSSProperties;
+
   return (
     <div
       className={`sathi-floating-root ${themeClass} fixed ${posClasses[position] || 'bottom-5 right-5'} z-[9999]`}
-      style={{ fontFamily: 'Plus Jakarta Sans, Inter, system-ui, -apple-system, sans-serif' }}
+      style={rootStyle}
     >
       {/* Floating launcher — bare mascot + dynamic speech bubble */}
       {!isOpen && (
