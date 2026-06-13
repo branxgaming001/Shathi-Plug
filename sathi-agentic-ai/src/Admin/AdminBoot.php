@@ -43,12 +43,14 @@ class AdminBoot {
      * Add menu pages to the WordPress admin sidebar.
      */
     public function add_menu_pages(): void {
-        // Saathi mark — a friendly chat bubble with a spark. Monochrome so the
-        // WordPress admin menu can tint it like the other icons.
+        // Saathi mark — two overlapping chat bubbles (companionship) + a spark
+        // dot. Brand-coloured so it stays visible and recognisable on the dark
+        // admin menu.
         $icon_svg = 'data:image/svg+xml;base64,' . base64_encode(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#a7aaad">'
-            . '<path d="M12 3.6C6.6 3.6 2.5 7.1 2.5 11.4c0 2.4 1.3 4.6 3.4 6-.2 1.2-.8 2.4-1.7 3.3 1.6-.2 3.1-.8 4.3-1.7 1.1.3 2.2.4 3.5.4 5.4 0 9.5-3.5 9.5-7.9S17.4 3.6 12 3.6z"/>'
-            . '<path d="M12 6.7l1.05 2.32 2.55.26-1.9 1.72.53 2.5L12 12.96 9.77 14.5l.53-2.5-1.9-1.72 2.55-.26z" fill="#1e1e2e"/>'
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+            . '<path d="M2.5 5.6c0-1.16.94-2.1 2.1-2.1h7.8c1.16 0 2.1.94 2.1 2.1v4.3c0 1.16-.94 2.1-2.1 2.1H7.2l-3.1 2.5v-2.5h-.5c-.66 0-1.1-.5-1.1-1.1z" fill="#9a8bff"/>'
+            . '<path d="M9.4 11.1c0-1.16.94-2.1 2.1-2.1h7.9c1.16 0 2.1.94 2.1 2.1v4.3c0 1.16-.94 2.1-2.1 2.1h-1.4v2.5l-3.1-2.5h-3.4c-1.16 0-2.1-.94-2.1-2.1z" fill="#ff8a7d"/>'
+            . '<circle cx="20.6" cy="6.6" r="1.7" fill="#37d99a"/>'
             . '</svg>'
         );
 

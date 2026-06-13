@@ -2,7 +2,7 @@
     "name": "railabs/sathi-agentic-ai",
     "description": "Intelligent WordPress support agent with multi-provider AI, persistent memory, knowledge base, and real-time site navigation.",
     "type": "wordpress-plugin",
-    "version": "1.7.1",
+    "version": "1.7.2",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
