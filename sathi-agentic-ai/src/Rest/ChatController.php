@@ -140,52 +140,66 @@ class ChatController {
         // Get available tools
         $tools = apply_filters( 'sathi_chat_tools', [], $conv );
 
-        if ( $stream ) {
-            // For streaming, we'd use Server-Sent Events or similar
-            // WP REST API doesn't natively support SSE well, so we collect and return
+        // Always answer with a helpful message — never a bare 500. If the model
+        // call fails (bad/expired model, no quota, network) we surface a clear,
+        // actionable reason instead of a generic "something went wrong".
+        try {
             $full_response = '';
-            $response_msg = $chat->send_message(
+            $response = $chat->send_message(
                 $conv,
                 $message,
-                function ( string $delta ) use ( &$full_response ) {
-                    $full_response .= $delta;
-                },
+                function ( string $delta ) use ( &$full_response ) { $full_response .= $delta; },
                 [ 'tools' => $tools ]
             );
+            $content = trim( (string) ( $full_response ?: $response->content ) );
+            if ( $content === '' ) {
+                $content = __( "I didn't get a reply from the AI model just now — it may be busy or unavailable. Please try again, or pick a different model in Sathi AI → AI Providers.", 'sathi-agentic-ai' );
+            }
 
             return new WP_REST_Response( [
                 'success'         => true,
                 'conversation_id' => $conv->uuid,
                 'message'         => [
                     'role'       => 'assistant',
-                    'content'    => $full_response ?: $response_msg->content,
-                    'tool_calls' => $response_msg->tool_calls,
-                    'tokens'     => $response_msg->token_count,
+                    'content'    => $content,
+                    'tool_calls' => $response->tool_calls,
+                    'tokens'     => $response->token_count,
                 ],
-                'actions'         => apply_filters( 'sathi_chat_actions', [], $full_response ?: $response_msg->content ),
+                'actions'         => apply_filters( 'sathi_chat_actions', [], $content ),
+            ] );
+        } catch ( \Throwable $e ) {
+            return new WP_REST_Response( [
+                'success'         => true,
+                'conversation_id' => $conv->uuid,
+                'message'         => [ 'role' => 'assistant', 'content' => $this->friendly_error( $e ) ],
             ] );
         }
+    }
 
-        // Non-streaming path — let ChatManager build the unified system prompt
-        // (persona + memory + retrieved site knowledge + scope + safety).
-        $response = $chat->send_message(
-            $conv,
-            $message,
-            function ( $d ) {},
-            [ 'tools' => $tools ]
-        );
+    /**
+     * Turn a provider/runtime exception into a short, friendly, actionable
+     * message the visitor (or admin) can understand.
+     */
+    private function friendly_error( \Throwable $e ): string {
+        $code = (int) $e->getCode();
+        $msg  = strtolower( $e->getMessage() );
+        $has  = static function ( array $n ) use ( $msg ) { foreach ( $n as $x ) { if ( strpos( $msg, $x ) !== false ) { return true; } } return false; };
 
-        return new WP_REST_Response( [
-            'success'         => true,
-            'conversation_id' => $conv->uuid,
-            'message'         => [
-                'role'       => 'assistant',
-                'content'    => $response->content,
-                'tool_calls' => $response->tool_calls,
-                'tokens'     => $response->token_count,
-            ],
-            'actions'         => apply_filters( 'sathi_chat_actions', [], $response->content ),
-        ] );
+        if ( $code === 401 || $has( [ 'invalid api key', 'unauthorized', 'authentication', 'no auth' ] ) ) {
+            return __( "⚠️ The AI provider rejected the API key. Please re-enter a valid key in Sathi AI → AI Providers and save again.", 'sathi-agentic-ai' );
+        }
+        if ( $code === 404 || $has( [ 'model not found', 'no such model', 'does not exist', 'not a valid model', 'invalid model' ] ) ) {
+            return __( "⚠️ The selected AI model isn't available. Open Sathi AI → AI Providers, click the ⟳ button to load models, and pick a valid one.", 'sathi-agentic-ai' );
+        }
+        if ( $code === 429 || $has( [ 'rate limit', 'too many requests', 'quota', 'insufficient' ] ) ) {
+            return __( "⚠️ The AI provider is rate-limited or out of quota right now. Please wait a moment and try again, or switch to another provider/model.", 'sathi-agentic-ai' );
+        }
+        if ( $code === 0 || $has( [ 'could not resolve', 'timed out', 'timeout', 'curl', 'connection', 'ssl' ] ) ) {
+            return __( "⚠️ I couldn't reach the AI provider from the server. Please check the site's internet/firewall and try again.", 'sathi-agentic-ai' );
+        }
+        // Include the provider's own message — it usually says exactly what's wrong.
+        $detail = trim( $e->getMessage() );
+        return sprintf( __( "⚠️ I hit an error reaching the AI model: %s. Please try again, or check Sathi AI → AI Providers.", 'sathi-agentic-ai' ), $detail !== '' ? $detail : 'unknown error' );
     }
 
     /**

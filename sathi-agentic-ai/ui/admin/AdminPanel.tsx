@@ -91,12 +91,12 @@ const AdminPanel: React.FC = () => {
     <div className="sathi-admin-panel" style={{ maxWidth: 1080, margin: '0 auto', padding: '21px 34px 55px' }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-md" style={{ background: 'linear-gradient(135deg,#6D5DFB,#5646E0)' }}>
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md" style={{ background: 'linear-gradient(135deg,#6D5DFB,#5646E0)' }}>
           <span style={{ color: '#FFC542' }}>✦</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-xl font-semibold text-rai-black leading-tight tracking-tight">Sathi AI</h1>
-          <p className="text-xs text-gray-500">v{admin.version} · {admin.siteName}</p>
+          <h1 className="text-2xl font-bold text-rai-black leading-tight tracking-tight">Sathi AI</h1>
+          <p className="text-xs text-gray-500">v{admin.version} · {admin.siteName} · a product by RAI</p>
         </div>
         {configuredCount === 0 && (
           <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-rai-gold-50 text-rai-gold-600 border border-rai-gold-100">
@@ -109,7 +109,7 @@ const AdminPanel: React.FC = () => {
       <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 w-fit max-w-full overflow-x-auto">
         {TABS.map((t) => (
           <button key={t.k} onClick={() => setTab(t.k)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${tab === t.k ? 'bg-white text-rai-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all ${tab === t.k ? 'sathi-tab-active' : 'text-gray-500 hover:text-gray-800'}`}>
             {t.label}
           </button>
         ))}
@@ -692,9 +692,9 @@ const Card: React.FC<any> = ({ title, subtitle, children }) => (
   </div>
 );
 const Stat: React.FC<any> = ({ label, value, icon, tone }) => (
-  <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-    <div className="flex items-center justify-between"><span className="text-lg">{icon}</span>{tone === 'warn' && <span className="w-2 h-2 rounded-full bg-rai-gold-500" />}{tone === 'good' && <span className="w-2 h-2 rounded-full bg-emerald-400" />}</div>
-    <div className="text-2xl font-bold text-rai-black mt-2 leading-none truncate">{value}</div>
+  <div className="sathi-card rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="flex items-center justify-between"><span className="sathi-stat-ic">{icon}</span>{tone === 'warn' && <span className="w-2 h-2 rounded-full bg-rai-gold-500" />}{tone === 'good' && <span className="w-2 h-2 rounded-full bg-emerald-400" />}</div>
+    <div className="text-2xl font-extrabold text-rai-black mt-2.5 leading-none truncate">{value}</div>
     <div className="text-xs text-gray-500 mt-1">{label}</div>
   </div>
 );

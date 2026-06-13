@@ -175,7 +175,7 @@ function getDarkModeState(): 'auto' | 'dark' | 'light' {
 }
 
 const ChatHeader: React.FC<HeaderProps> = ({ onSidebarToggle }) => {
-  const { persona, clearMessages, toggleSidebar } = useChatStore();
+  const { persona, clearMessages, toggle } = useChatStore();
   const [darkState, setDarkState] = useState<'auto' | 'dark' | 'light'>(getDarkModeState);
   const p = persona || (config.persona as any) || {
     name: 'Sathi',
@@ -202,117 +202,52 @@ const ChatHeader: React.FC<HeaderProps> = ({ onSidebarToggle }) => {
 
   return (
     <div
-      className="sathi-header flex items-center justify-between px-3 py-3 flex-shrink-0"
+      className="sathi-header flex items-center gap-2.5 px-3.5 py-3 flex-shrink-0"
       style={{
         background: `linear-gradient(135deg, ${p.color}, ${p.color}dd)`,
       }}
       role="banner"
       aria-label="Chat header"
     >
-      <div className="flex items-center gap-2">
-        {/* Sidebar toggle */}
-        <button
-          className="sathi-header-btn"
-          onClick={toggleSidebar}
-          title={config.i18n?.history || 'Conversation history'}
-          aria-label={
-            config.i18n?.history || 'Conversation history'
-          }
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
-        </button>
+      {/* Avatar — the mascot, no background */}
+      <div className="sathi-avatar" aria-hidden="true" style={{ overflow: 'hidden' }}>
+        {config.avatar ? <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={40} style={{ width: '100%', height: '100%' }} /> : (p.avatar || '🤖')}
+      </div>
 
-        {/* Avatar */}
-        <div
-          className="sathi-avatar"
-          aria-hidden="true"
-          style={config.avatar ? { background: '#fff', overflow: 'hidden' } : undefined}
-        >
-          {config.avatar ? <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={38} style={{ width: '100%', height: '100%' }} /> : (p.avatar || '🤖')}
+      {/* Title + status */}
+      <div className="flex-1 min-w-0">
+        <div className="text-white font-semibold text-sm leading-tight truncate" id="sathi-header-title">
+          {config.title || p.name || 'Sathi'}
         </div>
-
-        {/* Title */}
-        <div>
-          <div className="text-white font-semibold text-sm" id="sathi-header-title">
-            {config.title || p.name || 'Sathi'}
-          </div>
-          <div className="text-white/70 text-[10px]">
-            {p.role || config.i18n?.title || 'Support Agent'}
-          </div>
+        <div className="text-white/85 text-[11px] flex items-center gap-1.5">
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#7CF0BD', display: 'inline-block' }} />
+          {config.i18n?.online || 'Online'}
         </div>
       </div>
 
-      {/* Right-side buttons */}
-      <div className="flex items-center gap-0.5">
-        {/* Dark mode quick toggle */}
-        <button
-          className="sathi-header-btn sathi-dark-toggle"
-          title={`Color mode: ${darkState}. Click to cycle.`}
-          aria-label={`Color mode: ${darkState}. Click to change.`}
-          onClick={handleDarkModeToggle}
-        >
-          {/* Sun icon (shown in light mode) */}
-          <svg
-            className="sathi-icon-sun"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="5" />
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-          </svg>
-          {/* Moon icon (shown in dark mode) */}
-          <svg
-            className="sathi-icon-moon"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-          </svg>
-        </button>
+      {/* New chat */}
+      <button
+        className="sathi-header-btn"
+        title={config.i18n?.newChat || 'New chat'}
+        aria-label={config.i18n?.newChat || 'Start a new chat'}
+        onClick={clearMessages}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
 
-        {/* New chat */}
-        <button
-          className="sathi-header-btn"
-          title={config.i18n?.newChat || 'New Chat'}
-          aria-label={config.i18n?.newChat || 'Start a new chat'}
-          onClick={clearMessages}
-        >
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </button>
-
-        {/* Theme Customizer gear */}
-        <ThemeCustomizer personaColor={p.color} />
-      </div>
+      {/* Close */}
+      <button
+        className="sathi-header-btn"
+        title="Close"
+        aria-label="Close chat"
+        onClick={() => toggle()}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   );
 };
@@ -710,9 +645,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onStop }) => {
         )}
       </div>
 
-      {/* RAI brand credit */}
+      {/* Brand credit */}
       <div className="sathi-credit" style={{ textAlign: 'center', fontSize: '10px', letterSpacing: '0.02em', color: '#9ca3af', marginTop: '6px' }}>
-        by <strong style={{ color: '#6D5DFB', fontWeight: 600 }}>RAI</strong> · The Conscious Intelligence
+        <strong style={{ color: '#6D5DFB', fontWeight: 700 }}>Sathi</strong> · a product by RAI
       </div>
     </div>
   );

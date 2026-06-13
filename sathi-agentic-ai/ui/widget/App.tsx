@@ -34,6 +34,21 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
   } = useChatStore();
 
   const abortRef = useRef<AbortController | null>(null);
+  const windowRef = useRef<HTMLDivElement | null>(null);
+
+  // Close the chat when the visitor clicks anywhere outside the chat window.
+  useEffect(() => {
+    if (embedded || !isOpen) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (windowRef.current && !windowRef.current.contains(t)) {
+        useChatStore.getState().toggle();
+      }
+    };
+    // Attach on the next tick so the click that opened it isn't caught.
+    const id = window.setTimeout(() => document.addEventListener('mousedown', onDown), 0);
+    return () => { window.clearTimeout(id); document.removeEventListener('mousedown', onDown); };
+  }, [isOpen, embedded]);
 
   // Reliable non-streaming fallback. Used when the SSE stream endpoint is
   // unreachable or the host breaks streaming (LiteSpeed, proxies, temp-file
@@ -360,31 +375,40 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
       className={`sathi-floating-root ${themeClass} fixed ${posClasses[position] || 'bottom-5 right-5'} z-[9999]`}
       style={{ fontFamily: 'Plus Jakarta Sans, Inter, system-ui, -apple-system, sans-serif' }}
     >
-      {/* Floating toggle button */}
+      {/* Floating launcher — just the mascot (no background), a bit larger */}
       {!isOpen && (
-        <button
-          className="sathi-trigger w-14 h-14 rounded-full shadow-float flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:shadow-xl active:scale-95"
-          style={{
-            background: `linear-gradient(135deg, ${persona?.color || config.accentColor || '#6D5DFB'}, ${persona?.color || config.accentColor || '#6D5DFB'}dd)`,
-          }}
-          onClick={() => toggle()}
-          aria-label="Open chat"
-        >
-          {config.avatar ? (
-            <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={46} />
-          ) : launcher === 'chat' ? (
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-            </svg>
-          ) : (
-            <span className="text-2xl">{launcher}</span>
-          )}
-        </button>
+        config.avatar ? (
+          <button
+            className="sathi-trigger-mascot transition-transform duration-300 hover:scale-110 active:scale-95"
+            style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer', lineHeight: 0, filter: 'drop-shadow(0 12px 20px rgba(109,93,251,.5))' }}
+            onClick={() => toggle()}
+            aria-label="Open chat"
+          >
+            <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={78} />
+          </button>
+        ) : (
+          <button
+            className="sathi-trigger w-14 h-14 rounded-full shadow-float flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:shadow-xl active:scale-95"
+            style={{
+              background: `linear-gradient(135deg, ${persona?.color || config.accentColor || '#6D5DFB'}, ${persona?.color || config.accentColor || '#6D5DFB'}dd)`,
+            }}
+            onClick={() => toggle()}
+            aria-label="Open chat"
+          >
+            {launcher === 'chat' ? (
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+              </svg>
+            ) : (
+              <span className="text-2xl">{launcher}</span>
+            )}
+          </button>
+        )
       )}
 
       {/* Chat window with sidebar */}
       {isOpen && !isMinimized && (
-        <div className="sathi-window w-[420px] h-[640px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] animate-slide-up flex">
+        <div ref={windowRef} className="sathi-window w-[420px] h-[640px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] animate-slide-up flex">
           {sidebarOpen && <ConversationSidebar />}
           <div className="flex-1 min-w-0">
             <ChatWidget
