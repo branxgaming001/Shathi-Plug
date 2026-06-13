@@ -1917,17 +1917,8 @@
   cursor: nwse-resize;
   z-index: 6;
 }
-.sathi-resize-handle::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 8px;
-  height: 8px;
-  border-top: 2px solid rgba(255, 255, 255, 0.75);
-  border-left: 2px solid rgba(255, 255, 255, 0.75);
-  border-top-left-radius: 3px;
-}
+/* No visible arrow/marker — the handle stays an invisible grab zone so
+   resizing still works, just without the corner glyph. */
 
 /* Header icons clearly visible, no background box (per request) */
 .sathi-header .sathi-header-btn {
