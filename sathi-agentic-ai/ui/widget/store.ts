@@ -71,6 +71,7 @@ declare global {
     sathiConfig: {
       restUrl: string;
       streamUrl: string;
+      wcAjaxUrl?: string;
       nonce: string;
       siteName: string;
       siteDescription: string;
@@ -95,13 +96,45 @@ declare global {
 
 const config = window.sathiConfig || {};
 
+/**
+ * Session persistence — chat memory survives page refreshes for as long as the
+ * browser tab stays open, but resets when the tab/browser is closed.
+ * sessionStorage is exactly this lifecycle (per-tab, cleared on tab close),
+ * so the conversation continues across any number of reloads of the same site.
+ */
+const PERSIST_KEY = 'sathi_chat_' + (config.guestId || 'guest');
+
+interface PersistedState {
+  isOpen: boolean;
+  conversationId: string | null;
+  messages: Message[];
+}
+
+function loadPersisted(): Partial<PersistedState> {
+  try {
+    const raw = sessionStorage.getItem(PERSIST_KEY);
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return {};
+    return {
+      isOpen: !!data.isOpen,
+      conversationId: typeof data.conversationId === 'string' ? data.conversationId : null,
+      messages: Array.isArray(data.messages) ? data.messages : [],
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
+const persisted = loadPersisted();
+
 export const useChatStore = create<ChatState>((set, get) => ({
-  isOpen: false,
+  isOpen: persisted.isOpen ?? false,
   isMinimized: false,
   isStreaming: false,
   sidebarOpen: false,
-  conversationId: null,
-  messages: [],
+  conversationId: persisted.conversationId ?? null,
+  messages: persisted.messages ?? [],
   input: '',
   persona: null,
 
@@ -218,6 +251,30 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 }));
+
+/**
+ * Persist the conversation to sessionStorage on every relevant change.
+ * Only the durable bits (open state, conversation id, messages) are saved —
+ * transient flags like isStreaming/input are intentionally left out so a
+ * refresh never restores a half-finished streaming state.
+ */
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+useChatStore.subscribe((state) => {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    try {
+      const payload: PersistedState = {
+        isOpen: state.isOpen,
+        conversationId: state.conversationId,
+        // Cap stored history so sessionStorage never overflows on long chats.
+        messages: state.messages.slice(-60),
+      };
+      sessionStorage.setItem(PERSIST_KEY, JSON.stringify(payload));
+    } catch (e) {
+      /* storage full / unavailable — ignore, chat still works in-memory */
+    }
+  }, 150);
+});
 
 export { config };
 export type { Message, ClientAction, Persona, Product };

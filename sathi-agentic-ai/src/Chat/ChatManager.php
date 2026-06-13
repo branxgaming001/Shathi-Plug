@@ -139,9 +139,20 @@ class ChatManager {
         $persona = $this->settings->get_persona();
         $accent  = $this->settings->get( Settings::KEY_ACCENT_COLOR, '#6D5DFB' );
 
+        // WooCommerce's native front-end add-to-cart endpoint. Running the
+        // request through this URL (with cookies) lands the product in the
+        // visitor's real cart far more reliably than the REST cart route.
+        $wc_ajax_url = '';
+        if ( class_exists( '\\WC_AJAX' ) ) {
+            $wc_ajax_url = \WC_AJAX::get_endpoint( 'add_to_cart' );
+        } elseif ( function_exists( 'WC' ) ) {
+            $wc_ajax_url = add_query_arg( 'wc-ajax', 'add_to_cart', home_url( '/' ) );
+        }
+
         return [
             'restUrl'           => rest_url( 'sathi/v1' ),
             'streamUrl'         => home_url( '/sathi-stream/' ),
+            'wcAjaxUrl'         => $wc_ajax_url,
             'nonce'             => wp_create_nonce( 'wp_rest' ),
             'siteName'          => get_bloginfo( 'name' ),
             'siteDescription'   => get_bloginfo( 'description' ),

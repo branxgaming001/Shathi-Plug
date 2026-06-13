@@ -110,8 +110,10 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
       if (res.ok && content) {
         if (data.conversation_id) setConversationId(data.conversation_id);
         // Typewriter reveal so the reply feels live (the host's SSE often
-        // falls back to this non-streaming path).
-        addMessage({ id: `sathi-msg-${Date.now()}-ai`, role: 'assistant', content: '', timestamp: new Date().toISOString() });
+        // falls back to this non-streaming path). We do NOT create an empty
+        // assistant bubble first — appendToken creates the bubble with the
+        // first chunk, so the "thinking…" indicator stays continuous until
+        // real text begins (no blank white gap between them).
         const parts = String(content).split(/(\s+)/);
         const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduce) {

@@ -512,16 +512,47 @@ const ProductCard: React.FC<{ product: any }> = ({ product }) => {
   const addToCart = async () => {
     if (!product.purchasable) { window.open(product.permalink, '_blank'); return; }
     setStatus('adding');
+    const wcAjax = (config as any).wcAjaxUrl as string | undefined;
     try {
-      const res = await fetch(`${config.restUrl}/cart/add`, {
+      // Preferred path: WooCommerce's own front-end AJAX endpoint
+      // (?wc-ajax=add_to_cart). It runs in the browser with the live Woo
+      // session cookie, so the product reliably lands in the visitor's real
+      // cart — the REST cart route frequently can't share that session cookie.
+      if (wcAjax) {
+        const body = new URLSearchParams();
+        body.set('product_id', String(product.id));
+        body.set('quantity', '1');
+        const res = await fetch(wcAjax, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'include',
+          body: body.toString(),
+        });
+        const d = await res.json().catch(() => ({} as any));
+        if (res.ok && d && !d.error && (d.fragments || d.cart_hash)) {
+          setStatus('added');
+          // Let the host theme refresh its cart count / mini-cart.
+          try {
+            const jq = (window as any).jQuery;
+            if (jq) jq(document.body).trigger('added_to_cart', [d.fragments, d.cart_hash]);
+            else document.body.dispatchEvent(new CustomEvent('added_to_cart', { detail: d }));
+          } catch { /* non-fatal */ }
+          setTimeout(() => setStatus(''), 2600);
+          return;
+        }
+        // Variable products etc. ask Woo to redirect to the product page.
+        if (d && d.error && d.product_url) { window.location.href = d.product_url; return; }
+      }
+      // Fallback: REST cart route (used when wcAjaxUrl is unavailable).
+      const res2 = await fetch(`${config.restUrl}/cart/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': config.nonce },
         credentials: 'include',
         body: JSON.stringify({ product_id: product.id, quantity: 1 }),
       });
-      const d = await res.json().catch(() => ({}));
-      setStatus(res.ok && d.success ? 'added' : 'error');
-      if (!(res.ok && d.success) && d.redirect) window.open(d.redirect, '_blank');
+      const d2 = await res2.json().catch(() => ({}));
+      setStatus(res2.ok && d2.success ? 'added' : 'error');
+      if (!(res2.ok && d2.success) && d2.redirect) window.open(d2.redirect, '_blank');
       setTimeout(() => setStatus(''), 2600);
     } catch { setStatus('error'); setTimeout(() => setStatus(''), 2600); }
   };
@@ -543,11 +574,11 @@ const ProductCard: React.FC<{ product: any }> = ({ product }) => {
         {!product.in_stock && <div style={{ fontSize: 11, color: '#A23B3B' }}>Out of stock</div>}
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
           <button onClick={addToCart} disabled={status === 'adding' || !product.in_stock}
-            style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 8px', borderRadius: 8, border: 'none', cursor: 'pointer', color: '#fff', background: accent, opacity: (status === 'adding' || !product.in_stock) ? 0.6 : 1 }}>
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', lineHeight: 1, fontSize: 12, fontWeight: 600, padding: '8px 8px', borderRadius: 8, border: 'none', cursor: 'pointer', color: '#fff', background: accent, opacity: (status === 'adding' || !product.in_stock) ? 0.6 : 1 }}>
             {status === 'adding' ? 'Adding…' : status === 'added' ? '✓ Added' : status === 'error' ? 'Try again' : 'Add to Cart'}
           </button>
           {product.in_stock && (
-            <button onClick={buyNow} style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 8px', borderRadius: 8, border: '1px solid ' + accent, cursor: 'pointer', color: accent, background: '#fff' }}>
+            <button onClick={buyNow} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', lineHeight: 1, fontSize: 12, fontWeight: 600, padding: '8px 8px', borderRadius: 8, border: '1px solid ' + accent, cursor: 'pointer', color: accent, background: '#fff' }}>
               Buy Now
             </button>
           )}

@@ -19,7 +19,18 @@ const POSITIONS = [
 ];
 const LAUNCHER_ICONS = ['chat', '💬', '🤖', '✨', '🎓', '🛟', '👋', '⚡'];
 // Ready-made brand palettes for the header/widget colour.
-const BRAND_PRESETS = ['#6D5DFB', '#5B6CF0', '#2DB4FF', '#19C37D', '#FF6B5E', '#F0567A', '#F59E0B', '#0E9F6E', '#7C3AED', '#111827'];
+const BRAND_PRESETS = [
+  // Violets / indigos (Saathi brand family)
+  '#6D5DFB', '#7C3AED', '#5B6CF0', '#4F46E5', '#8B5CF6', '#A855F7',
+  // Blues / cyans
+  '#2563EB', '#2DB4FF', '#0EA5E9', '#0891B2', '#06B6D4', '#3B82F6',
+  // Greens / teals
+  '#19C37D', '#10B981', '#0E9F6E', '#059669', '#14B8A6', '#84CC16',
+  // Warm: oranges / reds / pinks
+  '#F59E0B', '#F97316', '#FF6B5E', '#EF4444', '#E11D48', '#F0567A',
+  // Pinks / neutrals / deep
+  '#EC4899', '#DB2777', '#64748B', '#374151', '#1F2937', '#111827',
+];
 // Signature colour per mascot — picking a mascot tints the whole bot window.
 const MASCOT_COLORS: Record<string, string> = {
   'mascot-1': '#6D5DFB', 'mascot-2': '#5B6CF0', 'mascot-3': '#FF6B5E', 'mascot-4': '#7A5CFF',
@@ -370,21 +381,54 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
           <Field label="Position"><select className={inp} value={g('sathi_floating_position', 'bottom-right')} onChange={(e) => set('sathi_floating_position', e.target.value)}>{POSITIONS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}</select></Field>
           <Field label="Theme"><select className={inp} value={g('sathi_widget_theme', 'light')} onChange={(e) => set('sathi_widget_theme', e.target.value)}><option value="light">Light</option><option value="dark">Dark</option><option value="auto">Auto (system)</option></select></Field>
           <Field label="Header & widget colour">
-            <div className="flex items-center gap-2">
-              <input type="color" value={g('sathi_accent_color', accent || '#6D5DFB')} onChange={(e) => set('sathi_accent_color', e.target.value)} className="w-10 h-9 rounded-lg border border-gray-200" />
-              <input className={inp} value={g('sathi_accent_color', accent || '#6D5DFB')} onChange={(e) => set('sathi_accent_color', e.target.value)} />
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {BRAND_PRESETS.map((c) => {
-                const cur = String(g('sathi_accent_color', accent || '#6D5DFB') || '').toLowerCase() === c.toLowerCase();
-                return (
-                  <button key={c} type="button" title={c} aria-label={`Use ${c}`} onClick={() => set('sathi_accent_color', c)}
-                    className={`w-7 h-7 rounded-full border-2 transition ${cur ? 'border-gray-800 scale-110' : 'border-white shadow hover:scale-110'}`}
-                    style={{ background: c }} />
-                );
-              })}
-            </div>
-            <p className="text-[11px] text-gray-400 mt-1.5">Pick your brand colour — or it auto-matches the mascot you choose below.</p>
+            {(() => {
+              const current = String(g('sathi_accent_color', accent || '#6D5DFB') || '#6D5DFB');
+              // Normalise free-typed hex: add the leading #, expand 3-digit shorthand.
+              const normalizeHex = (v: string) => {
+                let h = v.trim().replace(/^#+/, '');
+                if (/^[0-9a-fA-F]{3}$/.test(h)) h = h.split('').map((x) => x + x).join('');
+                return '#' + h.toLowerCase();
+              };
+              const isHex = /^#[0-9a-fA-F]{6}$/.test(current);
+              const isPreset = BRAND_PRESETS.some((c) => c.toLowerCase() === current.toLowerCase());
+              return (
+                <>
+                  {/* Custom colour: native picker + live preview + hex entry */}
+                  <div className="flex items-center gap-2">
+                    <input type="color" aria-label="Pick a custom colour"
+                      value={isHex ? current : '#6D5DFB'}
+                      onChange={(e) => set('sathi_accent_color', e.target.value)}
+                      className="w-11 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+                    <div className="relative flex-1">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">#</span>
+                      <input className={inp + ' pl-6 uppercase tracking-wide'} spellCheck={false}
+                        value={current.replace(/^#/, '').toUpperCase()}
+                        placeholder="6D5DFB"
+                        onChange={(e) => set('sathi_accent_color', '#' + e.target.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6))}
+                        onBlur={(e) => { if (e.target.value) set('sathi_accent_color', normalizeHex(e.target.value)); }} />
+                    </div>
+                    <span className="w-9 h-9 rounded-lg border border-gray-200 shrink-0" style={{ background: isHex ? current : '#6D5DFB' }} title="Live preview" />
+                  </div>
+                  {/* Colour grid — click any swatch to select */}
+                  <div className="grid grid-cols-6 gap-1.5 mt-2.5">
+                    {BRAND_PRESETS.map((c) => {
+                      const cur = current.toLowerCase() === c.toLowerCase();
+                      return (
+                        <button key={c} type="button" title={c} aria-label={`Use ${c}`} aria-pressed={cur}
+                          onClick={() => set('sathi_accent_color', c)}
+                          className={`relative w-full aspect-square rounded-lg border-2 transition hover:scale-110 ${cur ? 'border-gray-900 scale-110 shadow-md' : 'border-white shadow'}`}
+                          style={{ background: c }}>
+                          {cur && <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold drop-shadow">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1.5">
+                    {isHex && !isPreset ? 'Using your custom colour.' : 'Pick a swatch, type a hex code, or open the picker for any custom colour.'} It also auto-matches the mascot you choose below.
+                  </p>
+                </>
+              );
+            })()}
           </Field>
           <Field label="Launcher icon (if no mascot)">
             <div className="flex flex-wrap gap-1.5">
