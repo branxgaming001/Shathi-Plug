@@ -106,12 +106,21 @@ class SiteCrawler {
             $text_parts[] = wp_strip_all_tags( $post->post_excerpt, true );
         }
 
-        // Process content: strip shortcodes but keep their output where possible
+        // Content extraction. post_content + the_content captures classic and
+        // most shortcode/Gutenberg content. But page-builders (Elementor, Divi,
+        // WPBakery, Beaver, SiteOrigin, Bricks, Oxygen) store the real content in
+        // postmeta, so the_content can be thin/stale ("reads the theme default,
+        // not the updated content"). In those cases we fetch the LIVE rendered
+        // page and extract the main content — exactly what visitors see.
         $content = apply_filters( 'the_content', $post->post_content );
-        $content = wp_strip_all_tags( $content, true );
-        $content = html_entity_decode( $content, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-        $content = preg_replace( '/\s+/', ' ', $content );
-        $content = trim( $content );
+        $content = $this->clean_html( $content );
+
+        if ( $this->is_builder_post( $post->ID ) || mb_strlen( $content ) < 160 ) {
+            $rendered = $this->fetch_rendered_content( $source_url );
+            if ( mb_strlen( $rendered ) > mb_strlen( $content ) ) {
+                $content = $rendered;
+            }
+        }
 
         if ( $content ) {
             $text_parts[] = $content;
@@ -149,6 +158,62 @@ class SiteCrawler {
                 'content'       => $text,
             ];
         }, $chunks, array_keys( $chunks ) );
+    }
+
+    /** Strip HTML to clean readable text. */
+    private function clean_html( string $html ): string {
+        $html = wp_strip_all_tags( $html, true );
+        $html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        $html = preg_replace( '/\s+/', ' ', $html );
+        return trim( (string) $html );
+    }
+
+    /** Does this post use a page builder (content lives in postmeta)? */
+    private function is_builder_post( int $post_id ): bool {
+        foreach ( [ '_elementor_data', '_et_pb_use_builder', 'panels_data', '_fl_builder_enabled', '_wpb_shortcodes_custom_css', '_themify_builder_settings_json', '_oxygen_data', '_brick_data', 'ct_builder_shortcodes' ] as $meta ) {
+            if ( get_post_meta( $post_id, $meta, true ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Fetch a page's LIVE rendered HTML (loopback) and extract the main content,
+     * stripping nav/header/footer/scripts so we keep the real, current content.
+     */
+    private function fetch_rendered_content( string $url ): string {
+        if ( ! $url ) {
+            return '';
+        }
+        $res = wp_remote_get( $url, [
+            'timeout'     => 15,
+            'redirection' => 2,
+            'sslverify'   => false,
+            'user-agent'  => 'SaathiBot/1.0 (+knowledge-scan)',
+            'headers'     => [ 'Accept' => 'text/html' ],
+        ] );
+        if ( is_wp_error( $res ) || (int) wp_remote_retrieve_response_code( $res ) >= 400 ) {
+            return '';
+        }
+        $html = (string) wp_remote_retrieve_body( $res );
+        if ( $html === '' ) {
+            return '';
+        }
+
+        // Drop non-content regions entirely.
+        $html = preg_replace( '#<(script|style|noscript|svg|nav|header|footer|aside|form|template)\b[^>]*>.*?</\1>#is', ' ', $html );
+
+        // Prefer the main content region if the theme marks one.
+        if ( preg_match( '#<main\b[^>]*>(.*?)</main>#is', $html, $m ) ) {
+            $html = $m[1];
+        } elseif ( preg_match( '#<article\b[^>]*>(.*?)</article>#is', $html, $m ) ) {
+            $html = $m[1];
+        } elseif ( preg_match( '#<body\b[^>]*>(.*?)</body>#is', $html, $m ) ) {
+            $html = $m[1];
+        }
+
+        return $this->clean_html( $html );
     }
 
     /**

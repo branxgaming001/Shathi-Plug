@@ -29,18 +29,30 @@ class ProductSearch {
             return [];
         }
         $query = trim( $query );
-        if ( $query === '' ) {
-            return [];
+
+        // Keyword search first.
+        $products = $query !== '' ? $this->query_products( $query, $limit ) : [];
+
+        // If nothing matched but the visitor is clearly asking about products
+        // (e.g. "what do you sell", "show me products", "kya milta hai"),
+        // fall back to featured/best-selling/recent products so the chat always
+        // surfaces the catalogue instead of coming up empty.
+        if ( empty( $products ) && $this->is_product_intent( $query ) ) {
+            $products = $this->fallback_products( $limit );
         }
 
-        $products = wc_get_products( [
-            'status'   => 'publish',
-            'limit'    => $limit,
-            's'        => $query,
-            'orderby'  => 'relevance',
-        ] );
+        $cards = [];
+        foreach ( $products as $product ) {
+            if ( $product ) {
+                $cards[] = $this->format_card( $product );
+            }
+        }
+        return $cards;
+    }
 
-        // Fallback to a core search if the Woo query came up empty.
+    /** Keyword product search: WooCommerce search, then a core search fallback. */
+    private function query_products( string $query, int $limit ): array {
+        $products = wc_get_products( [ 'status' => 'publish', 'limit' => $limit, 's' => $query, 'orderby' => 'relevance' ] );
         if ( empty( $products ) ) {
             $ids = get_posts( [
                 'post_type'      => 'product',
@@ -51,15 +63,30 @@ class ProductSearch {
             ] );
             $products = array_filter( array_map( 'wc_get_product', $ids ) );
         }
+        return $products ?: [];
+    }
 
-        $cards = [];
-        foreach ( $products as $product ) {
-            if ( ! $product ) {
-                continue;
-            }
-            $cards[] = $this->format_card( $product );
+    /** Heuristic: is the visitor asking about products / shopping? (multilingual) */
+    private function is_product_intent( string $q ): bool {
+        if ( $q === '' ) {
+            return true; // empty query in a product context → show the catalogue
         }
-        return $cards;
+        return (bool) preg_match(
+            '/\b(product|products|item|items|buy|purchase|order|price|pricing|cost|catalog|catalogue|shop|store|sell|sale|offer|machine|machines|part|parts|model|models|range|available|stock)\b|दिखा|उत्पाद|खरीद|कीमत|मूल्य|kya.*(milta|bechte|bante|hai)|kitne ka|kitna|dikhao|kharid|saman/iu',
+            $q
+        );
+    }
+
+    /** Featured → best-selling → recent products, so the chat is never empty. */
+    private function fallback_products( int $limit ): array {
+        $products = wc_get_products( [ 'status' => 'publish', 'limit' => $limit, 'featured' => true ] );
+        if ( empty( $products ) ) {
+            $products = wc_get_products( [ 'status' => 'publish', 'limit' => $limit, 'orderby' => 'popularity' ] );
+        }
+        if ( empty( $products ) ) {
+            $products = wc_get_products( [ 'status' => 'publish', 'limit' => $limit, 'orderby' => 'date', 'order' => 'DESC' ] );
+        }
+        return $products ?: [];
     }
 
     /**

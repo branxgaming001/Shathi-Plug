@@ -82,6 +82,13 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
     return () => { if (header) header.removeEventListener('pointerdown', headerDown); if (handle) handle.removeEventListener('pointerdown', handleDown); document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
   }, [isOpen, isMinimized, embedded, isSmall]);
 
+  // Auto-hide the speech bubble after a few seconds (no manual close button).
+  useEffect(() => {
+    if (isOpen || bubbleClosed) return;
+    const t = window.setTimeout(() => setBubbleClosed(true), 9000);
+    return () => window.clearTimeout(t);
+  }, [isOpen, bubbleClosed]);
+
   // Reliable non-streaming fallback. Used when the SSE stream endpoint is
   // unreachable or the host breaks streaming (LiteSpeed, proxies, temp-file
   // issues) so the visitor always gets a reply.
@@ -437,7 +444,6 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
         <div className="sathi-launch-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: isLeft ? 'flex-start' : 'flex-end', gap: 10 }}>
           {!bubbleClosed && (
             <div className={`sathi-tagline ${isLeft ? 'sathi-tagline-left' : 'sathi-tagline-right'}`} onClick={() => toggle()} role="button">
-              <button className="sathi-tagline-x" onClick={(e) => { e.stopPropagation(); setBubbleClosed(true); }} aria-label="Dismiss">×</button>
               <span>{tagline}</span>
             </div>
           )}

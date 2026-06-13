@@ -596,16 +596,9 @@ const EmptyState: React.FC = () => {
           {config.greeting || `Hi! I'm ${p.name} 👋 Ask me anything about ${config.siteName || 'us'} — or tap an option below.`}
         </p>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+      <div className="sathi-suggestions">
         {suggestions.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => pick(s)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 text-gray-600 bg-white hover:border-rai-blue-400 hover:text-rai-blue-700 hover:bg-rai-blue-50 transition-colors"
-          >
-            {s}
-          </button>
+          <button key={s} type="button" className="sathi-suggestion" onClick={() => pick(s)}>{s}</button>
         ))}
       </div>
     </div>
