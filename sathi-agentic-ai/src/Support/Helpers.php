@@ -49,6 +49,40 @@ class Helpers {
     }
 
     /**
+     * Strip a reasoning model's chain-of-thought from a reply so only the final
+     * answer is shown. Handles <think>…</think>, <thinking>…</thinking>, the
+     * ◁think▷…◁/think▷ delimiters some models use, and truncated/orphaned tags.
+     *
+     * @param  string $text
+     * @return string
+     */
+    public static function strip_reasoning( string $text ): string {
+        if ( $text === '' ) {
+            return $text;
+        }
+
+        // Normalise the unusual delimiters a few models emit.
+        $text = str_ireplace( [ '◁think▷', '◁/think▷', '<|thinking|>', '<|/thinking|>' ], [ '<think>', '</think>', '<think>', '</think>' ], $text );
+
+        // 1) Remove complete <think>…</think> / <thinking>…</thinking> blocks.
+        $text = preg_replace( '#<\s*think(?:ing)?\s*>.*?<\s*/\s*think(?:ing)?\s*>#is', '', (string) $text );
+
+        // 2) Orphaned closing tag (reasoning had no opening, or it was trimmed):
+        //    drop everything up to and including the first closing tag.
+        if ( preg_match( '#<\s*/\s*think(?:ing)?\s*>#i', (string) $text ) ) {
+            $text = preg_replace( '#^.*?<\s*/\s*think(?:ing)?\s*>#is', '', (string) $text );
+        }
+
+        // 3) Orphaned opening tag (stream cut mid-reasoning): drop from it to end.
+        $text = preg_replace( '#<\s*think(?:ing)?\s*>.*$#is', '', (string) $text );
+
+        // 4) Remove any stray tags and tidy whitespace.
+        $text = preg_replace( '#<\s*/?\s*think(?:ing)?\s*>#i', '', (string) $text );
+
+        return trim( (string) $text );
+    }
+
+    /**
      * Chunk a long string into token-sized pieces.
      *
      * Rough heuristic: 1 token ≈ 4 chars for English text.

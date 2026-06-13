@@ -48,6 +48,10 @@ class PromptComposer {
             );
         }
 
+        // ── Output style (always) ─────────────────────────────────────
+        $lines[] = 'Reply with the FINAL answer only — never reveal your reasoning and never include <think> or <thinking> tags. '
+            . 'Keep replies clean and well-structured: short friendly paragraphs, and use bullet points or short bold labels when listing features, steps, products, or options. Keep it concise.';
+
         // ── Site context ──────────────────────────────────────────────
         if ( ! empty( $context['site_description'] ) ) {
             $lines[] = 'About the site: ' . $context['site_description'];

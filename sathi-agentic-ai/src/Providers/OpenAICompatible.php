@@ -98,6 +98,7 @@ class OpenAICompatible implements ProviderInterface {
             return $message;
         }
 
+        $content = Helpers::strip_reasoning( $content );
         return new Message( 'assistant', $content, $tool_calls ? array_values( $tool_calls ) : null, null, Helpers::estimate_tokens( $content ) );
     }
 
@@ -262,14 +263,15 @@ class OpenAICompatible implements ProviderInterface {
     }
 
     protected function parse_response( array $response ): Message {
-        $choice = $response['choices'][0] ?? [];
-        $msg    = $choice['message'] ?? [];
+        $choice  = $response['choices'][0] ?? [];
+        $msg     = $choice['message'] ?? [];
+        $content = Helpers::strip_reasoning( (string) ( $msg['content'] ?? '' ) );
         return new Message(
             $msg['role'] ?? 'assistant',
-            $msg['content'] ?? '',
+            $content,
             $msg['tool_calls'] ?? null,
             null,
-            Helpers::estimate_tokens( $msg['content'] ?? '' )
+            Helpers::estimate_tokens( $content )
         );
     }
 }

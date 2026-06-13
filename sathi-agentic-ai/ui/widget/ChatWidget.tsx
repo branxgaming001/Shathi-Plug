@@ -4,6 +4,20 @@ import { useChatStore, config, Message, ClientAction } from './store';
 import ThemeCustomizer from './ThemeCustomizer';
 import AnimatedAvatar from './AnimatedAvatar';
 
+// Strip a reasoning model's chain-of-thought (<think>…</think> etc.) so only
+// the final answer is shown. Mirrors the server-side Helpers::strip_reasoning
+// as a display-time safety net (covers live-streamed tokens too).
+function stripThink(text: string): string {
+  if (!text) return text;
+  let t = text
+    .replace(/◁think▷/gi, '<think>').replace(/◁\/think▷/gi, '</think>')
+    .replace(/<\s*think(?:ing)?\s*>[\s\S]*?<\s*\/\s*think(?:ing)?\s*>/gi, '');
+  if (/<\s*\/\s*think(?:ing)?\s*>/i.test(t)) t = t.replace(/^[\s\S]*?<\s*\/\s*think(?:ing)?\s*>/i, '');
+  t = t.replace(/<\s*think(?:ing)?\s*>[\s\S]*$/i, '');
+  t = t.replace(/<\s*\/?\s*think(?:ing)?\s*>/gi, '');
+  return t.trim();
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // ChatWidget — Enhanced with full accessibility, dark mode, loading
 // skeleton, screen reader announcements, and keyboard navigation.
@@ -345,7 +359,7 @@ const MessageBubble: React.FC<BubbleProps> = ({
                   },
                 }}
               >
-                {message.content}
+                {stripThink(message.content)}
               </ReactMarkdown>
             </div>
           )}
@@ -534,26 +548,54 @@ const ProductCard: React.FC<{ product: any }> = ({ product }) => {
 
 // ── Empty State ────────────────────────────────────────────────────────
 
+const DEFAULT_SUGGESTIONS = [
+  'What do you offer?',
+  'How can I contact you?',
+  'Tell me about pricing',
+  'Help me get started',
+];
+
 const EmptyState: React.FC = () => {
+  const { setInput } = useChatStore();
   const p = config.persona || {
     name: 'Sathi',
     avatar: '🤖',
     role: 'Support Agent',
     color: '#6D5DFB',
   };
+  const suggestions = (Array.isArray((config as any).suggestions) && (config as any).suggestions.length)
+    ? (config as any).suggestions as string[]
+    : DEFAULT_SUGGESTIONS;
+
+  const pick = (t: string) => {
+    setInput(t);
+    setTimeout(() => document.dispatchEvent(new CustomEvent('sathi:send')), 60);
+  };
 
   return (
-    <div className="sathi-empty-state" role="status">
-      <div className="sathi-empty-icon" aria-hidden="true">
-        {p.avatar || '🤖'}
+    <div className="sathi-empty-state" role="status" style={{ alignItems: 'stretch', textAlign: 'left', justifyContent: 'flex-start', paddingTop: 18 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+        {config.avatar
+          ? <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={64} />
+          : <div className="sathi-empty-icon" aria-hidden="true">{p.avatar || '🤖'}</div>}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2 dark:text-white">
-        {config.i18n?.title || `Hello! I'm ${p.name}`}
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-        {config.greeting ||
-          `${p.role} for ${config.siteName}. How can I help you today?`}
-      </p>
+      <div className="sathi-bubble sathi-bubble-assistant" style={{ alignSelf: 'flex-start', maxWidth: '100%' }}>
+        <p className="text-sm leading-relaxed">
+          {config.greeting || `Hi! I'm ${p.name} 👋 Ask me anything about ${config.siteName || 'us'} — or tap an option below.`}
+        </p>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+        {suggestions.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => pick(s)}
+            className="px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 text-gray-600 bg-white hover:border-rai-blue-400 hover:text-rai-blue-700 hover:bg-rai-blue-50 transition-colors"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

@@ -1,0 +1,1778 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sathi Chat Widget — Complete Stylesheet (2026 Edition)
+   Mobile-first | Accessible | Dark mode | High contrast | Reduced motion
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Design Tokens (CSS Custom Properties) ──────────────────────────── */
+.sathi-floating-root {
+  /* Accent color system (overridable by ThemeCustomizer) */
+  --sathi-50: #f5f3ff;
+  --sathi-100: #ede9fe;
+  --sathi-200: #ddd6fe;
+  --sathi-300: #c4b5fd;
+  --sathi-400: #a78bfa;
+  --sathi-500: #8b5cf6;
+  --sathi-600: #6D5DFB;
+  --sathi-700: #6d28d9;
+  --sathi-800: #5b21b6;
+  --sathi-900: #4c1d95;
+  --sathi-950: #2e1065;
+
+  /* Neutral palette (adapts to dark mode) */
+  --sathi-bg: #ffffff;
+  --sathi-bg-secondary: #f9fafb;
+  --sathi-bg-tertiary: #f3f4f6;
+  --sathi-surface: #ffffff;
+  --sathi-border: #e5e7eb;
+  --sathi-border-light: #f3f4f6;
+  --sathi-text-primary: #111827;
+  --sathi-text-secondary: #4b5563;
+  --sathi-text-tertiary: #9ca3af;
+  --sathi-text-inverse: #ffffff;
+  --sathi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --sathi-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --sathi-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --sathi-shadow-float: 0 8px 32px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  /* Typography */
+  --sathi-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sathi-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  --sathi-font-size-xs: 0.6875rem;   /* 11px */
+  --sathi-font-size-sm: 0.8125rem;   /* 13px */
+  --sathi-font-size-base: 0.875rem;  /* 14px */
+  --sathi-font-size-md: 0.9375rem;   /* 15px */
+  --sathi-font-size-lg: 1.0625rem;   /* 17px */
+  --sathi-line-height: 1.6;
+
+  /* Spacing */
+  --sathi-space-1: 0.25rem;
+  --sathi-space-2: 0.5rem;
+  --sathi-space-3: 0.75rem;
+  --sathi-space-4: 1rem;
+  --sathi-space-5: 1.25rem;
+  --sathi-space-6: 1.5rem;
+
+  /* Radii */
+  --sathi-radius-sm: 0.375rem;
+  --sathi-radius-md: 0.625rem;
+  --sathi-radius-lg: 0.875rem;
+  --sathi-radius-xl: 1rem;
+  --sathi-radius-2xl: 1.25rem;
+  --sathi-radius-full: 9999px;
+  --sathi-radius-bubble: 1.25rem;      /* Overridden by ThemeCustomizer */
+  --sathi-radius-bubble-sm: 0.75rem;
+
+  /* Transitions */
+  --sathi-transition-fast: 150ms ease;
+  --sathi-transition-base: 200ms ease;
+  --sathi-transition-slow: 300ms ease;
+
+  /* Focus ring */
+  --sathi-focus-ring-color: var(--sathi-500);
+  --sathi-focus-ring-width: 3px;
+  --sathi-focus-ring-offset: 2px;
+
+  /* Z-index layers */
+  --sathi-z-widget: 9999;
+  --sathi-z-overlay: 10000;
+  --sathi-z-theme-panel: 10001;
+  --sathi-z-toast: 10002;
+}
+
+/* ── Smooth Scroll ──────────────────────────────────────────────────── */
+.sathi-floating-root {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-floating-root {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── Base Widget Styles ─────────────────────────────────────────────── */
+.sathi-chat-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--sathi-bg);
+  border-radius: var(--sathi-radius-2xl);
+  box-shadow: var(--sathi-shadow-float);
+  overflow: hidden;
+  transition: box-shadow var(--sathi-transition-slow);
+  font-family: var(--sathi-font-family);
+  font-size: var(--sathi-font-size-base);
+  line-height: var(--sathi-line-height);
+  color: var(--sathi-text-primary);
+}
+
+.sathi-embedded-root .sathi-chat-widget {
+  border-radius: var(--sathi-radius-xl);
+  box-shadow: var(--sathi-shadow-sm);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.sathi-header {
+  position: relative;
+  flex-shrink: 0;
+  padding: var(--sathi-space-3);
+  color: var(--sathi-text-inverse);
+  user-select: none;
+}
+
+.sathi-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.sathi-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  background: transparent; /* the mascot is transparent — show it directly on the header */
+  flex-shrink: 0;
+}
+
+/* Header buttons — min 44x44px touch target */
+.sathi-header-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sathi-radius-md);
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast);
+  position: relative;
+}
+
+.sathi-header-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sathi-header-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid #ffffff;
+  outline-offset: 0;
+  color: #ffffff;
+}
+
+.sathi-header-btn:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode toggle (sun/moon icon) */
+.sathi-dark-toggle .sathi-icon-sun,
+.sathi-dark-toggle .sathi-icon-moon {
+  transition: transform var(--sathi-transition-base),
+              opacity var(--sathi-transition-base);
+}
+
+.sathi-dark-toggle .sathi-icon-moon {
+  display: none;
+}
+
+.sathi-dark .sathi-dark-toggle .sathi-icon-sun {
+  display: none;
+}
+
+.sathi-dark .sathi-dark-toggle .sathi-icon-moon {
+  display: inline;
+}
+
+/* ── Messages Area ──────────────────────────────────────────────────── */
+.sathi-messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  padding: var(--sathi-space-3);
+  background:
+    radial-gradient(ellipse at 50% 0%, var(--sathi-50) 0%, transparent 70%),
+    var(--sathi-bg);
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-messages {
+    scroll-behavior: auto;
+  }
+}
+
+/* Custom scrollbar */
+.sathi-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sathi-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sathi-messages::-webkit-scrollbar-thumb {
+  background: var(--sathi-200);
+  border-radius: var(--sathi-radius-full);
+}
+
+.sathi-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--sathi-300);
+}
+
+/* ── Message Bubbles ────────────────────────────────────────────────── */
+.sathi-message {
+  display: flex;
+  gap: var(--sathi-space-2);
+  margin-bottom: var(--sathi-space-4);
+}
+
+/* Message entry animation */
+@keyframes sathiFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sathi-message {
+  animation: sathiFadeIn 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-message {
+    animation: none;
+  }
+}
+
+.sathi-msg-avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--sathi-radius-full);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  background-color: var(--sathi-100);
+  color: var(--sathi-600);
+}
+
+.sathi-bubble-group {
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sathi-bubble {
+  padding: 0.625rem 0.875rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Assistant bubble */
+.sathi-bubble-assistant {
+  background-color: var(--sathi-bg-secondary);
+  color: var(--sathi-text-primary);
+  border-top-left-radius: var(--sathi-radius-sm);
+  border-top-right-radius: var(--sathi-radius-bubble);
+  border-bottom-right-radius: var(--sathi-radius-bubble);
+  border-bottom-left-radius: var(--sathi-radius-bubble);
+}
+
+/* User bubble */
+.sathi-bubble-user {
+  background-color: var(--sathi-600);
+  color: var(--sathi-text-inverse);
+  border-top-left-radius: var(--sathi-radius-bubble);
+  border-top-right-radius: var(--sathi-radius-sm);
+  border-bottom-right-radius: var(--sathi-radius-bubble);
+  border-bottom-left-radius: var(--sathi-radius-bubble);
+}
+
+/* Square bubble variant */
+.sathi-bubble-square .sathi-bubble-assistant,
+.sathi-bubble-square .sathi-bubble-user {
+  border-radius: 4px;
+}
+
+.sathi-bubble-square .sathi-bubble-assistant {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.sathi-bubble-square .sathi-bubble-user {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+/* Bubble content text */
+.sathi-bubble p {
+  font-size: var(--sathi-font-size-base);
+  line-height: var(--sathi-line-height);
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* ── Message Action Buttons ─────────────────────────────────────────── */
+.sathi-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+  padding: 0 0.25rem;
+  opacity: 0;
+  transition: opacity var(--sathi-transition-fast);
+}
+
+.sathi-message:hover .sathi-msg-actions,
+.sathi-msg-actions:focus-within {
+  opacity: 1;
+}
+
+/* Keep actions visible on touch devices (no hover) */
+@media (hover: none) and (pointer: coarse) {
+  .sathi-msg-actions {
+    opacity: 1;
+  }
+}
+
+.sathi-msg-action-btn {
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sathi-radius-sm);
+  color: var(--sathi-text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast);
+  padding: 0;
+}
+
+.sathi-msg-action-btn:hover {
+  color: var(--sathi-text-secondary);
+  background-color: var(--sathi-bg-tertiary);
+}
+
+.sathi-msg-action-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+  color: var(--sathi-text-secondary);
+}
+
+.sathi-msg-action-btn:active {
+  transform: scale(0.95);
+}
+
+/* ── Client Action Buttons ──────────────────────────────────────────── */
+.sathi-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--sathi-radius-full);
+  font-size: var(--sathi-font-size-xs);
+  font-weight: 500;
+  background-color: var(--sathi-100);
+  color: var(--sathi-700);
+  border: 1px solid var(--sathi-200);
+  cursor: pointer;
+  transition: background-color var(--sathi-transition-fast),
+              border-color var(--sathi-transition-fast),
+              transform var(--sathi-transition-fast);
+  min-height: 32px;
+}
+
+.sathi-action-btn:hover {
+  background-color: var(--sathi-200);
+  border-color: var(--sathi-300);
+}
+
+.sathi-action-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-action-btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Markdown Content ───────────────────────────────────────────────── */
+.sathi-markdown {
+  font-size: var(--sathi-font-size-base);
+  line-height: var(--sathi-line-height);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.sathi-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.sathi-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.sathi-markdown pre {
+  margin: 0.5rem 0;
+  border-radius: var(--sathi-radius-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.sathi-markdown code {
+  font-size: 0.82em;
+  font-family: var(--sathi-font-mono);
+}
+
+.sathi-markdown p {
+  margin: 0.25rem 0;
+}
+
+.sathi-markdown ul,
+.sathi-markdown ol {
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.sathi-markdown li {
+  margin: 0.125rem 0;
+}
+
+.sathi-markdown a {
+  color: var(--sathi-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--sathi-transition-fast);
+}
+
+.sathi-markdown a:hover {
+  color: var(--sathi-700);
+}
+
+.sathi-markdown a:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+  border-radius: 2px;
+}
+
+.sathi-markdown blockquote {
+  border-left: 3px solid var(--sathi-300);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: var(--sathi-text-secondary);
+}
+
+.sathi-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+  font-size: var(--sathi-font-size-sm);
+}
+
+.sathi-markdown th,
+.sathi-markdown td {
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--sathi-border);
+  text-align: left;
+}
+
+.sathi-markdown th {
+  background: var(--sathi-bg-tertiary);
+  font-weight: 600;
+}
+
+/* ── Input Area ─────────────────────────────────────────────────────── */
+.sathi-input-area {
+  flex-shrink: 0;
+  padding: var(--sathi-space-3);
+  border-top: 1px solid var(--sathi-border);
+  background-color: var(--sathi-bg);
+}
+
+.sathi-input {
+  flex: 1;
+  resize: none;
+  border-radius: var(--sathi-radius-xl);
+  border: 1px solid var(--sathi-border);
+  padding: 0.625rem 0.875rem;
+  font-size: var(--sathi-font-size-base);
+  font-family: var(--sathi-font-family);
+  line-height: var(--sathi-line-height);
+  background-color: var(--sathi-bg-tertiary);
+  color: var(--sathi-text-primary);
+  transition: border-color var(--sathi-transition-fast),
+              box-shadow var(--sathi-transition-fast);
+  min-height: 44px;
+  max-height: 8rem;
+  outline: none;
+}
+
+.sathi-input::placeholder {
+  color: var(--sathi-text-tertiary);
+}
+
+.sathi-input:focus {
+  border-color: var(--sathi-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sathi-500) 20%, transparent);
+}
+
+.sathi-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Send / Stop buttons — min 44x44px */
+.sathi-send-btn,
+.sathi-stop-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%; /* circular, like the website bot */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--sathi-transition-fast),
+              opacity var(--sathi-transition-fast),
+              box-shadow var(--sathi-transition-fast);
+}
+
+.sathi-send-btn {
+  background-image: linear-gradient(135deg, var(--sathi-500, #6D5DFB), var(--sathi-700, #5646E0));
+  color: #ffffff;
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--sathi-600) 70%, transparent);
+}
+
+.sathi-send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--sathi-600) 40%, transparent);
+}
+
+.sathi-send-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-send-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.sathi-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sathi-stop-btn {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.sathi-stop-btn:hover {
+  background-color: #dc2626;
+  transform: scale(1.05);
+}
+
+.sathi-stop-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid #ef4444;
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-stop-btn:active {
+  transform: scale(0.95);
+}
+
+/* ── Streaming Cursor ───────────────────────────────────────────────── */
+@keyframes sathiBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.sathi-streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: var(--sathi-600);
+  animation: sathiBlink 0.8s infinite;
+  vertical-align: text-bottom;
+  margin-left: 0.125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-streaming-cursor {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ── Floating Trigger Button (FAB) ──────────────────────────────────── */
+.sathi-trigger {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--sathi-radius-full);
+  box-shadow: var(--sathi-shadow-float);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--sathi-transition-base),
+              box-shadow var(--sathi-transition-base);
+}
+
+.sathi-trigger:hover {
+  transform: scale(1.1);
+  box-shadow: var(--sathi-shadow-lg),
+              0 8px 32px color-mix(in srgb, var(--sathi-600) 25%, transparent);
+}
+
+.sathi-trigger:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-trigger:active {
+  transform: scale(0.95);
+}
+
+/* ── Minimized Bar ──────────────────────────────────────────────────── */
+.sathi-mini-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--sathi-radius-full);
+  box-shadow: var(--sathi-shadow-float);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--sathi-transition-base),
+              box-shadow var(--sathi-transition-base);
+  min-height: 44px;
+}
+
+.sathi-mini-bar:hover {
+  transform: scale(1.03);
+  box-shadow: var(--sathi-shadow-lg);
+}
+
+.sathi-mini-bar:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-mini-bar:active {
+  transform: scale(0.97);
+}
+
+/* ── Chat Window ────────────────────────────────────────────────────── */
+.sathi-window {
+  display: flex;
+  border-radius: var(--sathi-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--sathi-shadow-float);
+  animation: sathiSlideUp 0.3s ease-out both;
+}
+
+@keyframes sathiSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-window {
+    animation: none;
+  }
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────── */
+.sathi-sidebar {
+  border-top-left-radius: var(--sathi-radius-xl);
+  border-bottom-left-radius: var(--sathi-radius-xl);
+  background-color: var(--sathi-bg);
+  border-right: 1px solid var(--sathi-border);
+}
+
+.sathi-sidebar-item {
+  transition: background-color var(--sathi-transition-fast);
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--sathi-radius-sm);
+  cursor: pointer;
+}
+
+.sathi-sidebar-item:hover {
+  background-color: var(--sathi-bg-tertiary);
+}
+
+.sathi-sidebar-item:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: calc(var(--sathi-focus-ring-offset) * -1);
+}
+
+/* ── Highlight Animation (for client actions) ──────────────────────── */
+@keyframes sathiHighlight {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sathi-500) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--sathi-500) 30%, transparent);
+  }
+}
+
+.sathi-highlight {
+  animation: sathiHighlight 1.5s ease-in-out 2;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-highlight {
+    animation: none;
+    outline: 2px solid var(--sathi-500);
+  }
+}
+
+/* ── Empty State ────────────────────────────────────────────────────── */
+.sathi-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.sathi-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: sathiBounceGentle 2s ease-in-out infinite;
+}
+
+@keyframes sathiBounceGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-empty-icon {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOADING SKELETON
+   ═══════════════════════════════════════════════════════════════════ */
+.sathi-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--sathi-bg-tertiary) 25%,
+    var(--sathi-bg-secondary) 50%,
+    var(--sathi-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: sathiShimmer 1.5s infinite;
+  border-radius: var(--sathi-radius-sm);
+}
+
+@keyframes sathiShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-skeleton {
+    animation: none;
+    background: var(--sathi-bg-tertiary);
+  }
+}
+
+.sathi-skeleton-message {
+  display: flex;
+  gap: var(--sathi-space-2);
+  margin-bottom: var(--sathi-space-4);
+  padding: 0 var(--sathi-space-1);
+}
+
+.sathi-skeleton-avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--sathi-radius-full);
+  flex-shrink: 0;
+  background: var(--sathi-bg-tertiary);
+}
+
+.sathi-skeleton-bubble {
+  max-width: 75%;
+}
+
+.sathi-skeleton-line {
+  height: 0.75rem;
+  border-radius: var(--sathi-radius-sm);
+  margin-bottom: 0.375rem;
+}
+
+.sathi-skeleton-line:last-child {
+  width: 60%;
+}
+
+.sathi-skeleton-line-short {
+  width: 45%;
+}
+
+/* ── Loading dots animation ─────────────────────────────────────────── */
+.sathi-loading-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+}
+
+.sathi-loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--sathi-400);
+  animation: sathiDotPulse 1.4s infinite ease-in-out both;
+}
+
+.sathi-loading-dot:nth-child(1) { animation-delay: 0s; }
+.sathi-loading-dot:nth-child(2) { animation-delay: 0.16s; }
+.sathi-loading-dot:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes sathiDotPulse {
+  0%, 80%, 100% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-loading-dot {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THEME CUSTOMIZER PANEL
+   ═══════════════════════════════════════════════════════════════════ */
+.sathi-theme-toggle-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sathi-radius-md);
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast),
+              transform var(--sathi-transition-base);
+  font-size: 1rem;
+}
+
+.sathi-theme-toggle-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sathi-theme-toggle-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid #ffffff;
+  outline-offset: 0;
+}
+
+.sathi-theme-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+/* Theme panel backdrop */
+.sathi-theme-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: var(--sathi-z-overlay);
+  animation: sathiFadeIn 0.15s ease-out both;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-theme-backdrop {
+    animation: none;
+  }
+}
+
+/* Theme panel */
+.sathi-theme-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  max-width: 90vw;
+  background: var(--sathi-surface);
+  border-left: 1px solid var(--sathi-border);
+  z-index: var(--sathi-z-theme-panel);
+  overflow-y: auto;
+  animation: sathiSlideInRight 0.25s ease-out both;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes sathiSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-theme-panel {
+    animation: none;
+  }
+}
+
+.sathi-theme-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sathi-space-3) var(--sathi-space-4);
+  border-bottom: 1px solid var(--sathi-border);
+  position: sticky;
+  top: 0;
+  background: var(--sathi-surface);
+  z-index: 1;
+}
+
+.sathi-theme-panel-title {
+  font-size: var(--sathi-font-size-md);
+  font-weight: 600;
+  color: var(--sathi-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sathi-theme-close-btn {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sathi-radius-sm);
+  color: var(--sathi-text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast);
+}
+
+.sathi-theme-close-btn:hover {
+  color: var(--sathi-text-primary);
+  background-color: var(--sathi-bg-tertiary);
+}
+
+.sathi-theme-close-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-theme-panel-body {
+  padding: var(--sathi-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sathi-space-5);
+}
+
+.sathi-theme-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sathi-space-2);
+}
+
+.sathi-theme-section-label {
+  font-size: var(--sathi-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sathi-text-tertiary);
+}
+
+/* Color preset grid */
+.sathi-color-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.sathi-color-preset {
+  aspect-ratio: 1;
+  border-radius: var(--sathi-radius-md);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--sathi-transition-fast),
+              transform var(--sathi-transition-fast);
+  position: relative;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.sathi-color-preset:hover {
+  transform: scale(1.05);
+}
+
+.sathi-color-preset:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-color-preset--active {
+  border-color: var(--sathi-text-primary);
+  box-shadow: 0 0 0 2px var(--sathi-surface), 0 0 0 4px var(--sathi-text-primary);
+}
+
+.sathi-color-preset-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.25rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom color input */
+.sathi-color-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sathi-color-input {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sathi-radius-md);
+  border: 1px solid var(--sathi-border);
+  cursor: pointer;
+  padding: 2px;
+  background: transparent;
+}
+
+.sathi-color-input:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-color-hex {
+  flex: 1;
+  height: 36px;
+  border-radius: var(--sathi-radius-sm);
+  border: 1px solid var(--sathi-border);
+  padding: 0 0.5rem;
+  font-family: var(--sathi-font-mono);
+  font-size: var(--sathi-font-size-sm);
+  color: var(--sathi-text-primary);
+  background: var(--sathi-bg-tertiary);
+}
+
+.sathi-color-hex:focus {
+  outline: none;
+  border-color: var(--sathi-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sathi-500) 20%, transparent);
+}
+
+/* Font size slider */
+.sathi-font-size-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sathi-font-size-slider input[type="range"] {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--sathi-bg-tertiary);
+  border-radius: var(--sathi-radius-full);
+  outline: none;
+}
+
+.sathi-font-size-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sathi-600);
+  cursor: pointer;
+  border: 2px solid var(--sathi-surface);
+  box-shadow: var(--sathi-shadow-sm);
+  transition: transform var(--sathi-transition-fast);
+}
+
+.sathi-font-size-slider input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.sathi-font-size-slider input[type="range"]:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-font-size-label {
+  font-size: var(--sathi-font-size-xs);
+  font-weight: 600;
+  color: var(--sathi-text-secondary);
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+/* Bubble style toggle */
+.sathi-style-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.sathi-style-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border-radius: var(--sathi-radius-md);
+  border: 2px solid var(--sathi-border);
+  background: var(--sathi-bg);
+  cursor: pointer;
+  transition: border-color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast);
+  font-size: var(--sathi-font-size-sm);
+  color: var(--sathi-text-secondary);
+  min-height: 44px;
+}
+
+.sathi-style-option:hover {
+  border-color: var(--sathi-300);
+}
+
+.sathi-style-option:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-style-option--active {
+  border-color: var(--sathi-600);
+  background-color: var(--sathi-50);
+  color: var(--sathi-700);
+  font-weight: 600;
+}
+
+/* Position picker */
+.sathi-position-grid {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 12;
+  border-radius: var(--sathi-radius-md);
+  border: 1px solid var(--sathi-border);
+  background: var(--sathi-bg-tertiary);
+  overflow: hidden;
+}
+
+.sathi-position-dot {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sathi-radius-full);
+  background: var(--sathi-surface);
+  border: 2px solid var(--sathi-border);
+  cursor: pointer;
+  transition: border-color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast),
+              box-shadow var(--sathi-transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+}
+
+.sathi-position-dot:hover {
+  border-color: var(--sathi-400);
+}
+
+.sathi-position-dot:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-position-dot--active {
+  border-color: var(--sathi-600);
+  background-color: var(--sathi-100);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sathi-600) 25%, transparent);
+}
+
+.sathi-position-dot--tl { top: 20%; left: 20%; }
+.sathi-position-dot--tr { top: 20%; left: 80%; }
+.sathi-position-dot--bl { top: 80%; left: 20%; }
+.sathi-position-dot--br { top: 80%; left: 80%; }
+
+/* Reset button */
+.sathi-theme-reset-btn {
+  width: 100%;
+  padding: 0.625rem;
+  border-radius: var(--sathi-radius-md);
+  border: 1px solid var(--sathi-border);
+  background: var(--sathi-bg);
+  color: var(--sathi-text-secondary);
+  font-size: var(--sathi-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--sathi-transition-fast),
+              color var(--sathi-transition-fast),
+              background-color var(--sathi-transition-fast);
+  min-height: 44px;
+}
+
+.sathi-theme-reset-btn:hover {
+  border-color: var(--sathi-300);
+  color: var(--sathi-600);
+  background-color: var(--sathi-50);
+}
+
+.sathi-theme-reset-btn:focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+.sathi-theme-reset-btn:active {
+  background-color: var(--sathi-100);
+}
+
+/* Toast notification */
+.sathi-toast {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sathi-text-primary);
+  color: var(--sathi-text-inverse);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--sathi-radius-full);
+  font-size: var(--sathi-font-size-sm);
+  font-weight: 500;
+  z-index: var(--sathi-z-toast);
+  animation: sathiFadeIn 0.2s ease-out both;
+  box-shadow: var(--sathi-shadow-lg);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCREEN READER UTILITIES
+   ═══════════════════════════════════════════════════════════════════ */
+.sathi-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KEYBOARD FOCUS INDICATORS (Global)
+   ═══════════════════════════════════════════════════════════════════ */
+/* Visible focus ring on all interactive elements */
+.sathi-floating-root :focus-visible {
+  outline: var(--sathi-focus-ring-width) solid var(--sathi-focus-ring-color);
+  outline-offset: var(--sathi-focus-ring-offset);
+}
+
+/* Remove default focus for mouse users */
+.sathi-floating-root :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* System preference */
+@media (prefers-color-scheme: dark) {
+  .sathi-floating-root:not(.sathi-light) {
+    --sathi-bg: #111827;
+    --sathi-bg-secondary: #1f2937;
+    --sathi-bg-tertiary: #374151;
+    --sathi-surface: #1f2937;
+    --sathi-border: #374151;
+    --sathi-border-light: #4b5563;
+    --sathi-text-primary: #f9fafb;
+    --sathi-text-secondary: #d1d5db;
+    --sathi-text-tertiary: #9ca3af;
+    --sathi-text-inverse: #111827;
+    --sathi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sathi-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --sathi-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --sathi-shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Explicit dark class (takes precedence) */
+.sathi-dark {
+  --sathi-bg: #111827;
+  --sathi-bg-secondary: #1f2937;
+  --sathi-bg-tertiary: #374151;
+  --sathi-surface: #1f2937;
+  --sathi-border: #374151;
+  --sathi-border-light: #4b5563;
+  --sathi-text-primary: #f9fafb;
+  --sathi-text-secondary: #d1d5db;
+  --sathi-text-tertiary: #9ca3af;
+  --sathi-text-inverse: #111827;
+  --sathi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sathi-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --sathi-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --sathi-shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode specific overrides */
+.sathi-dark .sathi-messages {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.06), transparent 70%),
+    var(--sathi-bg);
+}
+
+.sathi-dark .sathi-input-area {
+  border-top-color: var(--sathi-border);
+}
+
+.sathi-dark .sathi-markdown a {
+  color: var(--sathi-400);
+}
+
+.sathi-dark .sathi-markdown a:hover {
+  color: var(--sathi-300);
+}
+
+.sathi-dark .sathi-markdown blockquote {
+  border-left-color: var(--sathi-700);
+}
+
+.sathi-dark .sathi-messages::-webkit-scrollbar-thumb {
+  background: var(--sathi-bg-tertiary);
+}
+
+.sathi-dark .sathi-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--sathi-border-light);
+}
+
+/* Explicit light mode override (when OS prefers dark) */
+@media (prefers-color-scheme: dark) {
+  .sathi-light {
+    --sathi-bg: #ffffff;
+    --sathi-bg-secondary: #f9fafb;
+    --sathi-bg-tertiary: #f3f4f6;
+    --sathi-surface: #ffffff;
+    --sathi-border: #e5e7eb;
+    --sathi-border-light: #f3f4f6;
+    --sathi-text-primary: #111827;
+    --sathi-text-secondary: #4b5563;
+    --sathi-text-tertiary: #9ca3af;
+    --sathi-text-inverse: #ffffff;
+    --sathi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --sathi-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --sathi-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --sathi-shadow-float: 0 8px 32px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .sathi-light .sathi-messages {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.03), transparent 70%),
+      #ffffff;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HIGH CONTRAST MODE (Windows High Contrast / forced-colors)
+   ═══════════════════════════════════════════════════════════════════ */
+@media (forced-colors: active) {
+  .sathi-floating-root {
+    --sathi-bg: ButtonFace;
+    --sathi-bg-secondary: ButtonFace;
+    --sathi-bg-tertiary: ButtonFace;
+    --sathi-surface: ButtonFace;
+    --sathi-border: ButtonText;
+    --sathi-border-light: ButtonText;
+    --sathi-text-primary: ButtonText;
+    --sathi-text-secondary: ButtonText;
+    --sathi-text-tertiary: GrayText;
+    --sathi-text-inverse: ButtonFace;
+    --sathi-50: ButtonFace;
+    --sathi-100: ButtonFace;
+    --sathi-200: ButtonFace;
+    --sathi-300: Highlight;
+    --sathi-400: Highlight;
+    --sathi-500: Highlight;
+    --sathi-600: Highlight;
+    --sathi-700: Highlight;
+    --sathi-800: Highlight;
+    --sathi-900: Highlight;
+    --sathi-950: Highlight;
+    --sathi-focus-ring-color: Highlight;
+    --sathi-focus-ring-width: 2px;
+    --sathi-focus-ring-offset: 1px;
+  }
+
+  .sathi-chat-widget {
+    border: 2px solid ButtonText;
+  }
+
+  .sathi-header {
+    background: Highlight !important;
+    color: HighlightText;
+  }
+
+  .sathi-header-btn {
+    color: HighlightText;
+    border: 1px solid HighlightText;
+  }
+
+  .sathi-bubble-user {
+    background: Highlight;
+    color: HighlightText;
+    border: 1px solid HighlightText;
+  }
+
+  .sathi-bubble-assistant {
+    border: 1px solid ButtonText;
+  }
+
+  .sathi-send-btn {
+    background: Highlight;
+    color: HighlightText;
+    border: 2px solid ButtonText;
+  }
+
+  .sathi-input {
+    border: 2px solid ButtonText;
+  }
+
+  .sathi-input:focus {
+    border-color: Highlight;
+  }
+
+  /* Force visible borders for all interactive elements */
+  .sathi-action-btn,
+  .sathi-msg-action-btn,
+  .sathi-style-option,
+  .sathi-color-preset {
+    border: 2px solid ButtonText;
+  }
+
+  .sathi-style-option--active {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .sathi-color-preset--active {
+    border-color: Highlight;
+  }
+
+  /* Disable animations */
+  .sathi-message,
+  .sathi-window,
+  .sathi-theme-panel,
+  .sathi-theme-backdrop,
+  .sathi-streaming-cursor {
+    animation: none !important;
+  }
+
+  .sathi-skeleton {
+    animation: none;
+    background: GrayText;
+  }
+
+  .sathi-highlight {
+    animation: none;
+    outline: 3px solid Highlight;
+  }
+
+  /* Ensure contrast for scrollbar */
+  .sathi-messages::-webkit-scrollbar-thumb {
+    background: ButtonText;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .sathi-floating-root,
+  .sathi-floating-root *,
+  .sathi-floating-root *::before,
+  .sathi-floating-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+@media print {
+  .sathi-floating-root {
+    display: none !important;
+  }
+
+  .sathi-embedded-root {
+    display: none !important;
+  }
+
+  /* Also hide any theme panel or backdrop */
+  .sathi-theme-backdrop,
+  .sathi-theme-panel {
+    display: none !important;
+  }
+
+  .sathi-toast {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE-FIRST RESPONSIVE BREAKPOINTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── ≥ 320px (small phones) ─────────────────────────────────────────── */
+@media (min-width: 320px) {
+  .sathi-floating-root {
+    font-size: var(--sathi-font-size-base);
+  }
+
+  .sathi-bubble {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ── ≤ 480px (phones) — Full-screen mode ────────────────────────────── */
+@media (max-width: 480px) {
+  .sathi-window {
+    position: fixed;
+    inset: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important; /* dynamic viewport height */
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    border-radius: 0;
+    z-index: var(--sathi-z-widget);
+  }
+
+  .sathi-chat-widget {
+    border-radius: 0;
+  }
+
+  .sathi-floating-root {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    left: auto !important;
+    top: auto !important;
+  }
+
+  /* Increase tap target sizes further */
+  .sathi-header-btn,
+  .sathi-send-btn,
+  .sathi-stop-btn {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .sathi-trigger {
+    width: 52px;
+    height: 52px;
+  }
+
+  /* Make message bubbles wider */
+  .sathi-bubble-group {
+    max-width: 88%;
+  }
+
+  /* Hide action buttons by default, show with tap-hold or focus (prevents accidental taps) */
+  .sathi-msg-actions {
+    padding: 0.25rem 0;
+  }
+
+  /* Full-width theme panel on mobile */
+  .sathi-theme-panel {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* ── ≥ 480px and ≤ 768px (large phones / small tablets) ─────────────── */
+@media (min-width: 480px) and (max-width: 768px) {
+  .sathi-window {
+    width: calc(100vw - 2rem) !important;
+    height: calc(100vh - 2rem) !important;
+    height: calc(100dvh - 2rem) !important;
+    max-width: 480px;
+    max-height: 700px;
+  }
+}
+
+/* ── ≥ 768px (tablets and small laptops) ────────────────────────────── */
+@media (min-width: 768px) {
+  .sathi-window {
+    width: 420px;
+    height: 640px;
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+    max-width: calc(100vw - 2rem);
+  }
+
+  .sathi-bubble {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .sathi-theme-panel {
+    width: 320px;
+    max-width: 90vw;
+  }
+}
+
+/* ── ≥ 1024px (desktop) ─────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .sathi-window {
+    width: 440px;
+    height: 680px;
+  }
+
+  .sathi-messages {
+    padding: var(--sathi-space-4);
+  }
+
+  .sathi-input-area {
+    padding: var(--sathi-space-4);
+  }
+
+  .sathi-bubble {
+    padding: 0.75rem 1rem;
+  }
+
+  /* More spacing for desktop */
+  .sathi-msg-actions {
+    gap: 0.25rem;
+  }
+
+  .sathi-theme-panel {
+    width: 340px;
+  }
+}
+
+/* ── ≥ 1440px (large desktop) ───────────────────────────────────────── */
+@media (min-width: 1440px) {
+  .sathi-window {
+    width: 460px;
+    height: 720px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TOUCH-FRIENDLY ENHANCEMENTS
+   ═══════════════════════════════════════════════════════════════════ */
+@media (hover: none) and (pointer: coarse) {
+  /* Always show action buttons on touch devices */
+  .sathi-msg-actions {
+    opacity: 1;
+    gap: 0.375rem;
+  }
+
+  .sathi-msg-action-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  /* Increase spacing */
+  .sathi-message {
+    margin-bottom: var(--sathi-space-5);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SELECTION & USER INTERACTION
+   ═══════════════════════════════════════════════════════════════════ */
+.sathi-bubble {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.sathi-header {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Ensure buttons don't get text selection cursor */
+.sathi-floating-root button {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS zoom on input focus */
+@media (max-width: 768px) {
+  .sathi-input {
+    font-size: 16px; /* Prevents iOS Safari zoom */
+  }
+}
