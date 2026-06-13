@@ -1942,3 +1942,42 @@
   transform: scale(1.12);
   background: transparent !important;
 }
+
+/* ── v1.7.4: match the marketing-site bot's chat display exactly ───────── */
+.sathi-messages {
+  background: #f7f7fc !important;
+  padding: 16px !important;
+}
+.sathi-bubble {
+  padding: 10px 13px !important;
+  font-size: 13.5px !important;
+  line-height: 1.5 !important;
+}
+.sathi-bubble-assistant {
+  background: #ffffff !important;
+  border: 1px solid #ececf4 !important;
+  color: #2c2942 !important;
+  border-radius: 16px !important;
+  border-bottom-left-radius: 5px !important;
+}
+.sathi-bubble-user {
+  background: var(--sathi-600) !important;
+  color: #ffffff !important;
+  border-radius: 16px !important;
+  border-bottom-right-radius: 5px !important;
+}
+/* Subtle translucent avatar square, like the website bot header */
+.sathi-header .sathi-avatar {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-radius: 12px !important;
+}
+/* Rounded pill input + clean white field */
+.sathi-input-area { background: #ffffff !important; }
+.sathi-input {
+  border-radius: 22px !important;
+  background: #ffffff !important;
+  border: 1px solid #e6e4f0 !important;
+}
+.sathi-input:focus { border-color: var(--sathi-300) !important; box-shadow: none !important; }
+/* Messages gap to match website spacing */
+.sathi-messages .sathi-message { margin-bottom: 10px !important; }
