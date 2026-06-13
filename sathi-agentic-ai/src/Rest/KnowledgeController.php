@@ -165,12 +165,17 @@ class KnowledgeController {
      */
     public function trigger_index( WP_REST_Request $request ): WP_REST_Response {
         $manager = new KnowledgeManager();
-        $manager->crawl_batch();
 
-        return new WP_REST_Response( [
-            'success' => true,
-            'message' => __( 'Indexing batch started. Chunks crawled in this batch have been stored. Run again to continue.', 'sathi-agentic-ai' ),
-        ] );
+        // Client-driven deep scan: the admin calls this repeatedly with an
+        // increasing offset and shows a live progress %. Each call does a small
+        // slice so the request stays fast and never times out.
+        $offset = (int) ( $request->get_param( 'offset' ) ?? 0 );
+        $batch  = (int) ( $request->get_param( 'batch' ) ?? 8 );
+        $batch  = max( 1, min( 25, $batch ) );
+
+        $result = $manager->scan_slice( $offset, $batch );
+
+        return new WP_REST_Response( array_merge( [ 'success' => true ], $result ) );
     }
 
     /**

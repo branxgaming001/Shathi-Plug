@@ -122,6 +122,42 @@ class KnowledgeManager {
     }
 
     /**
+     * Total indexable items (for scan progress).
+     */
+    public function count_all(): int {
+        return $this->crawler->count_all();
+    }
+
+    /**
+     * Crawl + index one slice of the site. Client-driven so a full deep scan
+     * runs as a series of short requests with a live progress percentage.
+     *
+     * @param  int $offset
+     * @param  int $limit
+     * @return array{processed:int,total:int,next:int,done:bool,chunks:int}
+     */
+    public function scan_slice( int $offset, int $limit = 8 ): array {
+        $offset = max( 0, $offset );
+        $total  = $this->crawler->count_all();
+        $chunks = $this->crawler->crawl_all( $limit, $offset );
+        if ( ! empty( $chunks ) ) {
+            $this->store_chunks( $chunks );
+        }
+        $next = $offset + $limit;
+        $done = $next >= $total;
+        if ( $done ) {
+            update_option( 'sathi_knowledge_last_crawl', current_time( 'mysql' ) );
+        }
+        return [
+            'processed' => min( $next, $total ),
+            'total'     => $total,
+            'next'      => $next,
+            'done'      => $done,
+            'chunks'    => count( $chunks ),
+        ];
+    }
+
+    /**
      * Index a single post immediately.
      *
      * @param  int   $post_id

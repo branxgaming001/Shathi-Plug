@@ -165,10 +165,10 @@ class Settings {
      * @return array{name:string,text:string}
      */
     public function get_persona(): array {
-        $name = trim( (string) $this->get( self::KEY_PERSONA_NAME, 'Sathi' ) );
+        $name = trim( (string) $this->get( self::KEY_PERSONA_NAME, 'Saathi' ) );
         $text = trim( (string) $this->get( self::KEY_PERSONA_TEXT, '' ) );
         return [
-            'name' => $name !== '' ? $name : 'Sathi',
+            'name' => $name !== '' ? $name : 'Saathi',
             'text' => $text,
         ];
     }
@@ -299,7 +299,7 @@ class Settings {
             ],
             self::KEY_PERSONA_NAME => [
                 'type'    => 'string',
-                'default' => 'Sathi',
+                'default' => 'Saathi',
                 'sanitize'=> 'sanitize_text_field',
             ],
             self::KEY_PERSONA_TEXT => [

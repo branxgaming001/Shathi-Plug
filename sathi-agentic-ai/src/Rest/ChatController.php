@@ -112,7 +112,7 @@ class ChatController {
             return new WP_REST_Response( [
                 'success' => true,
                 'conversation_id' => '',
-                'message' => [ 'role' => 'assistant', 'content' => __( 'Sathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ],
+                'message' => [ 'role' => 'assistant', 'content' => __( 'Saathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ],
             ] );
         }
 
@@ -153,7 +153,7 @@ class ChatController {
             );
             $content = trim( (string) ( $full_response ?: $response->content ) );
             if ( $content === '' ) {
-                $content = __( "I didn't get a reply from the AI model just now — it may be busy or unavailable. Please try again, or pick a different model in Sathi AI → AI Providers.", 'sathi-agentic-ai' );
+                $content = __( "I didn't get a reply from the AI model just now — it may be busy or unavailable. Please try again, or pick a different model in Saathi AI → AI Providers.", 'sathi-agentic-ai' );
             }
 
             return new WP_REST_Response( [
@@ -186,10 +186,10 @@ class ChatController {
         $has  = static function ( array $n ) use ( $msg ) { foreach ( $n as $x ) { if ( strpos( $msg, $x ) !== false ) { return true; } } return false; };
 
         if ( $code === 401 || $has( [ 'invalid api key', 'unauthorized', 'authentication', 'no auth' ] ) ) {
-            return __( "⚠️ The AI provider rejected the API key. Please re-enter a valid key in Sathi AI → AI Providers and save again.", 'sathi-agentic-ai' );
+            return __( "⚠️ The AI provider rejected the API key. Please re-enter a valid key in Saathi AI → AI Providers and save again.", 'sathi-agentic-ai' );
         }
         if ( $code === 404 || $has( [ 'model not found', 'no such model', 'does not exist', 'not a valid model', 'invalid model' ] ) ) {
-            return __( "⚠️ The selected AI model isn't available. Open Sathi AI → AI Providers, click the ⟳ button to load models, and pick a valid one.", 'sathi-agentic-ai' );
+            return __( "⚠️ The selected AI model isn't available. Open Saathi AI → AI Providers, click the ⟳ button to load models, and pick a valid one.", 'sathi-agentic-ai' );
         }
         if ( $code === 429 || $has( [ 'rate limit', 'too many requests', 'quota', 'insufficient' ] ) ) {
             return __( "⚠️ The AI provider is rate-limited or out of quota right now. Please wait a moment and try again, or switch to another provider/model.", 'sathi-agentic-ai' );
@@ -199,7 +199,7 @@ class ChatController {
         }
         // Include the provider's own message — it usually says exactly what's wrong.
         $detail = trim( $e->getMessage() );
-        return sprintf( __( "⚠️ I hit an error reaching the AI model: %s. Please try again, or check Sathi AI → AI Providers.", 'sathi-agentic-ai' ), $detail !== '' ? $detail : 'unknown error' );
+        return sprintf( __( "⚠️ I hit an error reaching the AI model: %s. Please try again, or check Saathi AI → AI Providers.", 'sathi-agentic-ai' ), $detail !== '' ? $detail : 'unknown error' );
     }
 
     /**

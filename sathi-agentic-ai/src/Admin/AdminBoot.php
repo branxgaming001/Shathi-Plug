@@ -43,14 +43,19 @@ class AdminBoot {
      * Add menu pages to the WordPress admin sidebar.
      */
     public function add_menu_pages(): void {
+        // Saathi mark — a friendly chat bubble with a spark. Monochrome so the
+        // WordPress admin menu can tint it like the other icons.
         $icon_svg = 'data:image/svg+xml;base64,' . base64_encode(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%237c3aed" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>'
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#a7aaad">'
+            . '<path d="M12 3.6C6.6 3.6 2.5 7.1 2.5 11.4c0 2.4 1.3 4.6 3.4 6-.2 1.2-.8 2.4-1.7 3.3 1.6-.2 3.1-.8 4.3-1.7 1.1.3 2.2.4 3.5.4 5.4 0 9.5-3.5 9.5-7.9S17.4 3.6 12 3.6z"/>'
+            . '<path d="M12 6.7l1.05 2.32 2.55.26-1.9 1.72.53 2.5L12 12.96 9.77 14.5l.53-2.5-1.9-1.72 2.55-.26z" fill="#1e1e2e"/>'
+            . '</svg>'
         );
 
         // Main dashboard
         add_menu_page(
-            __( 'Sathi Agentic AI', 'sathi-agentic-ai' ),
-            __( 'Sathi AI', 'sathi-agentic-ai' ),
+            __( 'Saathi Agentic AI', 'sathi-agentic-ai' ),
+            __( 'Saathi AI', 'sathi-agentic-ai' ),
             'manage_options',
             'sathi-dashboard',
             [ $this, 'render_dashboard' ],
@@ -623,7 +628,7 @@ class AdminBoot {
      */
     private function render_admin_footer(): void {
         echo '<div class="sathi-admin-footer" style="margin-top:40px;padding:16px 0;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;">';
-        echo esc_html__( 'Sathi Agentic AI', 'sathi-agentic-ai' ) . ' v' . esc_html( SATHI_VERSION );
+        echo esc_html__( 'Saathi Agentic AI', 'sathi-agentic-ai' ) . ' v' . esc_html( SATHI_VERSION );
         echo ' — <a href="https://railabs.in" target="_blank" rel="noopener noreferrer">RAI Labs P. Ltd.</a>';
         echo '</div>';
     }

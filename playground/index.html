@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sathi Playground — chat with your bot & explore</title>
-<meta name="description" content="Try the Sathi AI support companion live: set its persona, pick a mascot, theme it, and chat. Demo mode works instantly; add your own API key for real AI." />
+<title>Saathi Playground — chat with your bot & explore</title>
+<meta name="description" content="Try the Saathi AI support companion live: set its persona, pick a mascot, theme it, and chat. Demo mode works instantly; add your own API key for real AI." />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -104,7 +104,7 @@
 <div class="wrap">
   <header class="top">
     <div class="logo"><span>✦</span></div>
-    <div class="brand">Sathi Playground<small>Chat with your bot · explore every setting · a product by RAI</small></div>
+    <div class="brand">Saathi Playground<small>Chat with your bot · explore every setting · a product by RAI</small></div>
     <div class="modepill"><span class="dot" id="modeDot"></span><span id="modeText">Demo mode</span></div>
   </header>
 
@@ -115,7 +115,7 @@
       <div class="bd">
         <div class="fld">
           <label class="fl">Assistant name</label>
-          <input type="text" id="pName" value="Sathi" />
+          <input type="text" id="pName" value="Saathi" />
         </div>
         <div class="fld">
           <label class="fl">Persona &amp; instructions (optional)</label>
@@ -188,7 +188,7 @@
           <div class="whead" id="wHead">
             <div class="av" id="wAv"></div>
             <div>
-              <div class="nm" id="wName">Sathi</div>
+              <div class="nm" id="wName">Saathi</div>
               <div class="st"><i></i> <span id="wStatus">Online · Demo</span></div>
             </div>
           </div>
@@ -206,13 +206,13 @@
 
   <div style="margin-top:16px" class="card">
     <div class="bd">
-      <div style="font-family:'Baloo 2';font-weight:700;font-size:15px;margin-bottom:6px">Try these — see how Sathi behaves</div>
+      <div style="font-family:'Baloo 2';font-weight:700;font-size:15px;margin-bottom:6px">Try these — see how Saathi behaves</div>
       <div class="pquick" id="quickRow"></div>
     </div>
   </div>
 
   <div class="footer">
-    <b>Sathi</b> · a product by RAI &nbsp;·&nbsp; This is a try-it sandbox. The real plugin runs inside your WordPress admin with knowledge-base, WooCommerce cards, memory &amp; streaming.
+    <b>Saathi</b> · a product by RAI &nbsp;·&nbsp; This is a try-it sandbox. The real plugin runs inside your WordPress admin with knowledge-base, WooCommerce cards, memory &amp; streaming.
   </div>
 </div>
 
@@ -236,7 +236,7 @@ const QUICK = [
 ];
 
 const state = {
-  name:'Sathi', text:'', color:'#6D5DFB', greet:'Hi! 👋 How can I help you today?',
+  name:'Saathi', text:'', color:'#6D5DFB', greet:'Hi! 👋 How can I help you today?',
   mascot:'mascot-1', custom:'',
   live:false, base:'https://openrouter.ai/api/v1', key:'', model:'', providerName:'OpenRouter',
   history:[],
@@ -283,7 +283,7 @@ QUICK.forEach(q=>{ const b=document.createElement('button'); b.className='qbtn';
 /* ---------- live render of the widget ---------- */
 function render(){
   document.documentElement.style.setProperty('--accent', state.color);
-  $('wName').textContent = state.name || 'Sathi';
+  $('wName').textContent = state.name || 'Saathi';
   _fi=0; paintAvatar();
   $('wStatus').textContent = state.live ? ('Online · '+state.providerName) : 'Online · Demo';
   $('wNote').style.display = state.live ? 'none' : 'block';
@@ -305,7 +305,7 @@ function addErr(stage, error, hint){
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function systemPrompt(){
-  const name=state.name||'Sathi';
+  const name=state.name||'Saathi';
   let p = state.text && state.text.trim()
     ? 'Your name is '+name+'. Follow this persona above all else except the safety rules: '+state.text.trim()
     : 'You are '+name+', a friendly, professional support assistant. Be warm, clear and concise.';
@@ -316,7 +316,7 @@ function systemPrompt(){
 const SENSITIVE=/(password|passwd|pwd|otp|one[- ]?time|cvv|card\s*number|credit\s*card|debit\s*card|\bpin\b|aadhaar|aadhar|ssn|passport|api\s*key|secret\s*key|bank\s*account)/i;
 
 function demoReply(msg){
-  const name=state.name||'Sathi';
+  const name=state.name||'Saathi';
   if(SENSITIVE.test(msg)){
     return "For your security, please don't share passwords, OTPs or payment details here 🙏 You can do that safely on the official checkout or account page — or I can connect you with our team. How else can I help?";
   }
@@ -345,7 +345,7 @@ async function liveReply(msg){
     res = await fetch(url,{
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+state.key,
-        'HTTP-Referer':location.origin, 'X-Title':'Sathi Playground' },
+        'HTTP-Referer':location.origin, 'X-Title':'Saathi Playground' },
       body: JSON.stringify({ model: state.model, messages: msgs, max_tokens:512, temperature:0.7, stream:false })
     });
   }catch(e){
@@ -383,7 +383,7 @@ let busy=false;
 async function sendMsg(){
   const inp=$('wInput'); const q=inp.value.trim(); if(!q||busy) return;
   addMsg('me',q); inp.value=''; busy=true;
-  const t=document.createElement('div'); t.className='typing'; t.textContent=(state.name||'Sathi')+' is typing…'; $('wBody').appendChild(t); $('wBody').scrollTop=$('wBody').scrollHeight;
+  const t=document.createElement('div'); t.className='typing'; t.textContent=(state.name||'Saathi')+' is typing…'; $('wBody').appendChild(t); $('wBody').scrollTop=$('wBody').scrollHeight;
   try{
     let reply;
     if(state.live && state.key && state.model){

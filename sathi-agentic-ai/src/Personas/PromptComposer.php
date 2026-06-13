@@ -31,6 +31,12 @@ class PromptComposer {
         $name     = $persona['name'];
         $site     = $context['site_name'] ?? get_bloginfo( 'name' ) ?: 'this website';
 
+        // Does this site actually sell products? Drives whether the bot is
+        // allowed to talk about products / cart / checkout at all.
+        $has_products = array_key_exists( 'has_products', $context )
+            ? (bool) $context['has_products']
+            : ( class_exists( 'WooCommerce' ) && (bool) $settings->get( Settings::KEY_PRODUCT_CARDS, true ) );
+
         $lines = [];
 
         // ── Persona FIRST: the user's instructions are the primary directive ──
@@ -48,9 +54,25 @@ class PromptComposer {
             );
         }
 
+        // ── Language (always) ─────────────────────────────────────────
+        $lines[] = 'LANGUAGE: Always reply in the SAME language and script the visitor used in their latest message — '
+            . 'Hindi, English, Hinglish (Roman Hindi), Gujarati, Marathi, Tamil, or any other. Match their tone and style. '
+            . 'If they switch languages mid-chat, switch with them. Keep brand names, product names and technical terms as they are.';
+
         // ── Output style (always) ─────────────────────────────────────
-        $lines[] = 'Reply with the FINAL answer only — never reveal your reasoning and never include <think> or <thinking> tags. '
-            . 'Keep replies clean and well-structured: short friendly paragraphs, and use bullet points or short bold labels when listing features, steps, products, or options. Keep it concise.';
+        $lines[] = "FORMAT every reply so it is easy to read and never a wall of text:\n"
+            . "- Start with one short, friendly sentence.\n"
+            . "- When listing features, steps, options or products, use bullet points, each beginning with a short **bold label** followed by a brief description.\n"
+            . "- Keep paragraphs to 1–2 sentences and leave a blank line between sections so it stays skimmable.\n"
+            . "- Use markdown links when pointing to a page. End with a short helpful next step or question.\n"
+            . 'Give ONLY the final answer — never show your reasoning or any <think>/<thinking> tags.';
+
+        // ── Commerce awareness (content-aware) ────────────────────────
+        if ( $has_products ) {
+            $lines[] = 'This site sells products. When the visitor asks about buying or a specific product, recommend the most relevant items from the content above, and you may offer to show product cards or guide them toward checkout.';
+        } else {
+            $lines[] = 'IMPORTANT: This site is not necessarily a shop. Do NOT mention products, "add to cart", carts, prices or checkout unless the site content above clearly contains products. Talk about the site\'s actual content, services and pages instead.';
+        }
 
         // ── Site context ──────────────────────────────────────────────
         if ( ! empty( $context['site_description'] ) ) {

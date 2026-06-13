@@ -137,20 +137,32 @@ const LoadingSkeleton: React.FC = () => {
 
 // ── Loading Dots (while streaming) ──────────────────────────────────────
 
-const LoadingDots: React.FC = () => (
-  <div className="sathi-message flex gap-2 mb-4" role="status" aria-label="Assistant is typing">
-    <div className="sathi-msg-avatar">
-      {config.avatar ? <img src={config.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : (config.persona?.avatar || '🤖')}
-    </div>
-    <div className="sathi-bubble sathi-bubble-assistant">
-      <div className="sathi-loading-dots">
-        <div className="sathi-loading-dot" />
-        <div className="sathi-loading-dot" />
-        <div className="sathi-loading-dot" />
+const THINKING_WORDS = ['Thinking…', 'Looking that up…', 'Checking the site…', 'Putting it together…', 'Almost there…'];
+const LoadingDots: React.FC = () => {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    const t = setInterval(() => setI((p) => (p + 1) % THINKING_WORDS.length), 1600);
+    return () => clearInterval(t);
+  }, []);
+  const name = (config.persona && config.persona.name) || 'Saathi';
+  return (
+    <div className="sathi-message flex gap-2 mb-4" role="status" aria-label="Assistant is typing">
+      <div className="sathi-msg-avatar">
+        {config.avatar ? <AnimatedAvatar frames={config.avatarFrames} fallback={config.avatar} size={28} style={{ width: '100%', height: '100%' }} /> : (config.persona?.avatar || '🤖')}
+      </div>
+      <div className="sathi-bubble sathi-bubble-assistant" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="sathi-loading-dots">
+          <div className="sathi-loading-dot" />
+          <div className="sathi-loading-dot" />
+          <div className="sathi-loading-dot" />
+        </div>
+        <span style={{ fontSize: 12.5, color: '#8a86a3' }}>{i === 0 ? `${name} is thinking…` : THINKING_WORDS[i]}</span>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ── Header ──────────────────────────────────────────────────────────────
 
@@ -192,7 +204,7 @@ const ChatHeader: React.FC<HeaderProps> = ({ onSidebarToggle }) => {
   const { persona, clearMessages, toggle } = useChatStore();
   const [darkState, setDarkState] = useState<'auto' | 'dark' | 'light'>(getDarkModeState);
   const p = persona || (config.persona as any) || {
-    name: 'Sathi',
+    name: 'Saathi',
     avatar: '🤖',
     color: '#6D5DFB',
   };
@@ -231,7 +243,7 @@ const ChatHeader: React.FC<HeaderProps> = ({ onSidebarToggle }) => {
       {/* Title + status */}
       <div className="flex-1 min-w-0">
         <div className="text-white font-semibold text-sm leading-tight truncate" id="sathi-header-title">
-          {config.title || p.name || 'Sathi'}
+          {config.title || p.name || 'Saathi'}
         </div>
         <div className="text-white/85 text-[11px] flex items-center gap-1.5">
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#7CF0BD', display: 'inline-block' }} />
@@ -558,7 +570,7 @@ const DEFAULT_SUGGESTIONS = [
 const EmptyState: React.FC = () => {
   const { setInput } = useChatStore();
   const p = config.persona || {
-    name: 'Sathi',
+    name: 'Saathi',
     avatar: '🤖',
     role: 'Support Agent',
     color: '#6D5DFB',
@@ -689,7 +701,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onStop }) => {
 
       {/* Brand credit */}
       <div className="sathi-credit" style={{ textAlign: 'center', fontSize: '10px', letterSpacing: '0.02em', color: '#9ca3af', marginTop: '6px' }}>
-        <strong style={{ color: '#6D5DFB', fontWeight: 700 }}>Sathi</strong> · a product by RAI
+        <strong style={{ color: '#6D5DFB', fontWeight: 700 }}>Saathi</strong> · a product by RAI
       </div>
     </div>
   );
@@ -734,7 +746,7 @@ const ChatWidget: React.FC<WidgetProps> = ({
 
       if (lastNewMsg?.role === 'assistant') {
         setSrAnnouncement(
-          `New reply from ${config.persona?.name || 'Sathi'}.`
+          `New reply from ${config.persona?.name || 'Saathi'}.`
         );
       } else if (lastNewMsg?.role === 'user') {
         setSrAnnouncement(`You sent a message.`);
@@ -794,7 +806,7 @@ const ChatWidget: React.FC<WidgetProps> = ({
   );
 
   // ── Determine assistant name for ARIA label ─────────────────────────
-  const assistantName = config.persona?.name || 'Sathi';
+  const assistantName = config.persona?.name || 'Saathi';
 
   return (
     <div

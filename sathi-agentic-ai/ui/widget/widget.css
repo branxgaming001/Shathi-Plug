@@ -698,11 +698,14 @@
 /* ── Chat Window ────────────────────────────────────────────────────── */
 .sathi-window {
   display: flex;
+  position: relative;
   border-radius: var(--sathi-radius-xl);
   overflow: hidden;
   box-shadow: var(--sathi-shadow-float);
-  animation: sathiSlideUp 0.3s ease-out both;
+  /* Opacity-only entrance so an inline drag transform is never overridden. */
+  animation: sathiWinFade 0.25s ease-out both;
 }
+@keyframes sathiWinFade { from { opacity: 0; } to { opacity: 1; } }
 
 @keyframes sathiSlideUp {
   from {
@@ -1607,21 +1610,24 @@
 
 /* ── ≤ 480px (phones) — Full-screen mode ────────────────────────────── */
 @media (max-width: 480px) {
+  /* Proportional bottom panel — never full-screen, page stays visible above. */
   .sathi-window {
     position: fixed;
-    inset: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important; /* dynamic viewport height */
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
-    border-radius: 0;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    bottom: 0.5rem !important;
+    top: auto !important;
+    transform: none !important;
+    width: auto !important;
+    height: 78dvh !important;
+    max-width: none !important;
+    max-height: 80dvh !important;
+    border-radius: 20px;
     z-index: var(--sathi-z-widget);
   }
 
   .sathi-chat-widget {
-    border-radius: 0;
+    border-radius: 20px;
   }
 
   .sathi-floating-root {
@@ -1663,12 +1669,14 @@
 
 /* ── ≥ 480px and ≤ 768px (large phones / small tablets) ─────────────── */
 @media (min-width: 480px) and (max-width: 768px) {
+  /* Compact side panel anchored bottom-right, not full screen. */
   .sathi-window {
-    width: calc(100vw - 2rem) !important;
-    height: calc(100vh - 2rem) !important;
-    height: calc(100dvh - 2rem) !important;
-    max-width: 480px;
-    max-height: 700px;
+    width: min(400px, calc(100vw - 1.5rem)) !important;
+    height: min(620px, 80dvh) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    max-height: 80dvh !important;
+    transform: none !important;
+    border-radius: 20px;
   }
 }
 
@@ -1775,4 +1783,81 @@
   .sathi-input {
     font-size: 16px; /* Prevents iOS Safari zoom */
   }
+}
+
+/* ── v1.7.0: speech-bubble tagline, resize handle, visible header icons ── */
+.sathi-launch-wrap { max-width: 270px; }
+.sathi-tagline {
+  position: relative;
+  background: #ffffff;
+  color: #2c2942;
+  font-size: 13.5px;
+  line-height: 1.45;
+  font-weight: 500;
+  padding: 11px 30px 11px 14px;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(30, 27, 58, 0.20);
+  max-width: 250px;
+  cursor: pointer;
+  animation: sathiFadeIn 0.35s ease both;
+}
+.sathi-tagline::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  width: 13px;
+  height: 13px;
+  background: #ffffff;
+  transform: rotate(45deg);
+}
+.sathi-tagline-right::after { right: 24px; }
+.sathi-tagline-left::after { left: 24px; }
+.sathi-tagline-x {
+  position: absolute;
+  top: 3px;
+  right: 7px;
+  border: 0;
+  background: transparent;
+  color: #b7b3c8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px;
+}
+.sathi-tagline-x:hover { color: #6b6880; }
+
+/* Resize handle — top-left corner (window anchors bottom-right) */
+.sathi-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 6;
+}
+.sathi-resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid rgba(255, 255, 255, 0.75);
+  border-left: 2px solid rgba(255, 255, 255, 0.75);
+  border-top-left-radius: 3px;
+}
+
+/* Header icons clearly visible, no background box (per request) */
+.sathi-header .sathi-header-btn {
+  background: transparent !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  opacity: 0.95;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.sathi-header .sathi-header-btn:hover {
+  opacity: 1;
+  transform: scale(1.12);
+  background: transparent !important;
 }

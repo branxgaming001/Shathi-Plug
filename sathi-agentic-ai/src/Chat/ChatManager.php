@@ -160,11 +160,11 @@ class ChatManager {
             'memoryEnabled'     => $this->settings->get( Settings::KEY_MEMORY_ENABLED, true ),
             'guestId'           => Helpers::guest_id(),
             'i18n'              => [
-                'title'         => __( 'Sathi Support', 'sathi-agentic-ai' ),
+                'title'         => __( 'Saathi Support', 'sathi-agentic-ai' ),
                 'placeholder'   => __( 'Type your message…', 'sathi-agentic-ai' ),
                 'send'          => __( 'Send', 'sathi-agentic-ai' ),
                 'clear'         => __( 'Clear chat', 'sathi-agentic-ai' ),
-                'thinking'      => __( 'Sathi is thinking…', 'sathi-agentic-ai' ),
+                'thinking'      => __( 'Saathi is thinking…', 'sathi-agentic-ai' ),
                 'error'         => __( 'Something went wrong. Please try again.', 'sathi-agentic-ai' ),
                 'newChat'       => __( 'New Chat', 'sathi-agentic-ai' ),
                 'copy'          => __( 'Copy', 'sathi-agentic-ai' ),
@@ -209,7 +209,7 @@ class ChatManager {
      * Render the floating widget mount point in the footer.
      */
     public function render_widget_mount(): void {
-        echo '<div id="sathi-chat-root" aria-label="' . esc_attr__( 'Sathi AI Chat', 'sathi-agentic-ai' ) . '"></div>';
+        echo '<div id="sathi-chat-root" aria-label="' . esc_attr__( 'Saathi AI Chat', 'sathi-agentic-ai' ) . '"></div>';
     }
 
     /**

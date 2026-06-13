@@ -21,11 +21,30 @@ class SiteCrawler {
     private int $overlap_tokens;
 
     public function __construct() {
-        $this->content_types = apply_filters( 'sathi_knowledge_post_types', [
-            'post', 'page', 'product',
-        ] );
+        // Index ALL public content (posts, pages, products AND any public custom
+        // post types used by themes/page-builders) so Saathi reads the owner's
+        // real content, not just the default post/page set.
+        $public = get_post_types( [ 'public' => true, 'exclude_from_search' => false ], 'names' );
+        unset( $public['attachment'] );
+        $defaults = ! empty( $public ) ? array_values( $public ) : [ 'post', 'page', 'product' ];
+        $this->content_types = apply_filters( 'sathi_knowledge_post_types', $defaults );
         $this->chunk_tokens  = apply_filters( 'sathi_chunk_size', 512 );
         $this->overlap_tokens = apply_filters( 'sathi_chunk_overlap', 50 );
+    }
+
+    /**
+     * Total number of indexable items (for scan progress).
+     */
+    public function count_all(): int {
+        $q = new \WP_Query( [
+            'post_type'      => $this->content_types,
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'has_password'   => false,
+            'meta_query'     => [ [ 'key' => '_sathi_exclude', 'compare' => 'NOT EXISTS' ] ],
+        ] );
+        return (int) $q->found_posts;
     }
 
     /**
@@ -98,13 +117,21 @@ class SiteCrawler {
             $text_parts[] = $content;
         }
 
-        // Add meta fields for products
+        // Add rich fields for WooCommerce products so the bot can answer about
+        // and sell them accurately.
         if ( $source_type === 'product' && function_exists( 'wc_get_product' ) ) {
             $product = wc_get_product( $post_id );
             if ( $product ) {
-                $text_parts[] = 'Price: ' . $product->get_price();
-                $text_parts[] = 'SKU: ' . $product->get_sku();
-                $text_parts[] = 'Categories: ' . wp_strip_all_tags( wc_get_product_category_list( $post_id ) );
+                $desc  = wp_strip_all_tags( $product->get_description(), true );
+                $sdesc = wp_strip_all_tags( $product->get_short_description(), true );
+                if ( $sdesc ) { $text_parts[] = $sdesc; }
+                if ( $desc )  { $text_parts[] = $desc; }
+                $text_parts[] = 'Price: ' . wp_strip_all_tags( $product->get_price_html() ?: (string) $product->get_price() );
+                if ( $product->get_sku() ) { $text_parts[] = 'SKU: ' . $product->get_sku(); }
+                $text_parts[] = 'Availability: ' . ( $product->is_in_stock() ? 'In stock' : 'Out of stock' );
+                $cats = wp_strip_all_tags( wc_get_product_category_list( $post_id ) );
+                if ( $cats ) { $text_parts[] = 'Categories: ' . $cats; }
+                $text_parts[] = 'Product link: ' . get_permalink( $post_id );
             }
         }
 

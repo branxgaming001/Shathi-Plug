@@ -116,7 +116,7 @@ class StreamEndpoint {
 
         // ── License gating (no-op unless enforcement is enabled) ───
         if ( ! ( new \RaiLabs\Sathi\License\LicenseManager() )->is_active() ) {
-            $this->emit( 'token', [ 'token' => __( 'Sathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ] );
+            $this->emit( 'token', [ 'token' => __( 'Saathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ] );
             $this->done();
             return;
         }

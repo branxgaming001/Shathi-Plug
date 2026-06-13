@@ -141,11 +141,30 @@ class ProductSearch {
             return [ 'success' => false, 'message' => __( 'Could not add to cart.', 'sathi-agentic-ai' ) ];
         }
 
+        // CRITICAL: persist the cart to the visitor's BROWSER session so the item
+        // is still there when they open the cart/checkout. Without forcing the
+        // session cookie on this REST response, the add happens server-side but
+        // the browser's checkout shows an empty cart.
+        if ( WC()->session ) {
+            WC()->session->set_customer_session_cookie( true );
+            if ( method_exists( WC()->session, 'save_data' ) ) {
+                WC()->session->save_data();
+            }
+        }
+        WC()->cart->set_session();
+        WC()->cart->maybe_set_cart_cookies();
+
+        // A reliable one-click link: WooCommerce adds the item in the BROWSER
+        // (proper session) and lands on checkout.
+        $checkout    = wc_get_checkout_url();
+        $buy_now_url = $product->is_type( 'simple' ) ? add_query_arg( 'add-to-cart', $product_id, $checkout ) : get_permalink( $product_id );
+
         return [
             'success'      => true,
             'count'        => WC()->cart->get_cart_contents_count(),
             'cart_url'     => wc_get_cart_url(),
-            'checkout_url' => wc_get_checkout_url(),
+            'checkout_url' => $checkout,
+            'buy_now_url'  => $buy_now_url,
             'message'      => sprintf( __( '%s added to cart.', 'sathi-agentic-ai' ), $product->get_name() ),
         ];
     }

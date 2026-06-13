@@ -29,6 +29,94 @@ class PlaygroundController {
             'callback'            => [ $this, 'chat' ],
             'permission_callback' => [ $this, 'check_admin_permission' ],
         ] );
+
+        register_rest_route( self::NAMESPACE, '/persona/generate', [
+            'methods'             => 'POST',
+            'callback'            => [ $this, 'generate_persona' ],
+            'permission_callback' => [ $this, 'check_admin_permission' ],
+        ] );
+    }
+
+    /**
+     * Generate a ready-to-use persona (name + instructions) from the owner's
+     * plain-language description and optional guided answers, using the
+     * configured AI. Returns { success, name, persona } or a friendly error.
+     */
+    public function generate_persona( WP_REST_Request $request ): WP_REST_Response {
+        $body        = (array) $request->get_json_params();
+        $description = sanitize_textarea_field( (string) ( $body['description'] ?? '' ) );
+        $answers     = is_array( $body['answers'] ?? null ) ? $body['answers'] : [];
+
+        $clean = [];
+        foreach ( $answers as $q => $a ) {
+            $a = trim( sanitize_textarea_field( (string) $a ) );
+            if ( $a !== '' ) {
+                $clean[] = '- ' . sanitize_text_field( (string) $q ) . ' ' . $a;
+            }
+        }
+
+        if ( $description === '' && empty( $clean ) ) {
+            return $this->fail( 'input', __( 'Tell me a little about your assistant first.', 'sathi-agentic-ai' ), __( 'Describe how you want it to behave, or answer a couple of the questions.', 'sathi-agentic-ai' ), 400 );
+        }
+
+        $settings = new Settings();
+        $provider = (string) $settings->get( Settings::KEY_DEFAULT_PROVIDER, '' );
+        if ( $provider === '' ) {
+            return $this->fail( 'config', __( 'No AI provider connected.', 'sathi-agentic-ai' ), __( 'Add an API key under AI Providers first, then generate.', 'sathi-agentic-ai' ), 400 );
+        }
+
+        $site = get_bloginfo( 'name' );
+        $sys  = "You are an expert at writing system-prompt personas for a website's AI support assistant. "
+            . "Given the owner's wishes, write a persona the assistant will follow. Output STRICT JSON only, no markdown, no preamble, exactly: "
+            . '{"name":"<short assistant name>","persona":"<persona instructions, 4-8 sentences>"}. '
+            . "The persona must: define the assistant's role for the site \"{$site}\", its tone and style, what it should help with, how to greet, and to stay on-topic and hand off to humans when unsure. "
+            . 'Write it in clear, simple English. Do not include any sensitive-data handling (that is added automatically). Do not include <think> tags.';
+
+        $user = "Owner's description: " . ( $description !== '' ? $description : '(none)' );
+        if ( $clean ) {
+            $user .= "\n\nOwner's answers:\n" . implode( "\n", $clean );
+        }
+        $user .= "\n\nReturn ONLY the JSON object.";
+
+        $factory = new Factory( $settings );
+        try {
+            $adapter = $factory->make( $provider );
+            if ( ! $adapter->is_configured() ) {
+                return $this->fail( 'auth', __( 'The default provider has no API key.', 'sathi-agentic-ai' ), __( 'Add a valid key under AI Providers and save.', 'sathi-agentic-ai' ), 400, $provider );
+            }
+            $resp = $adapter->chat(
+                [ Message::system( $sys ), Message::user( $user ) ],
+                [ 'max_tokens' => 700, 'temperature' => 0.7 ]
+            );
+            $text = \RaiLabs\Sathi\Support\Helpers::strip_reasoning( (string) $resp->content );
+
+            // Pull the JSON object out of the reply.
+            $name = '';
+            $persona = '';
+            if ( preg_match( '/\{.*\}/s', $text, $m ) ) {
+                $json = json_decode( $m[0], true );
+                if ( is_array( $json ) ) {
+                    $name    = trim( (string) ( $json['name'] ?? '' ) );
+                    $persona = trim( (string) ( $json['persona'] ?? '' ) );
+                }
+            }
+            if ( $persona === '' ) {
+                // Model didn't return JSON — use the whole cleaned reply as the persona.
+                $persona = $text;
+            }
+            if ( $persona === '' ) {
+                return $this->fail( 'empty', __( 'The model returned nothing usable.', 'sathi-agentic-ai' ), __( 'Try again, or pick a more capable model under AI Providers.', 'sathi-agentic-ai' ), 200, $provider );
+            }
+
+            return new WP_REST_Response( [
+                'success' => true,
+                'name'    => $name !== '' ? $name : 'Saathi',
+                'persona' => $persona,
+            ] );
+        } catch ( \Throwable $e ) {
+            [ $stage, $hint ] = $this->classify( $e );
+            return $this->fail( $stage, $e->getMessage(), $hint, 200, $provider );
+        }
     }
 
     /**

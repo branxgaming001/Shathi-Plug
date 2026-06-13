@@ -60,7 +60,7 @@ const AdminPanel: React.FC = () => {
         setEmbed({ provider: d.embed_provider || '', model: d.embed_model || 'text-embedding-3-small' });
       }
       if (st.ok) setStats(await st.json());
-    } catch (e) { console.error('[Sathi]', e); } finally { setLoading(false); }
+    } catch (e) { console.error('[Saathi]', e); } finally { setLoading(false); }
   }, []);
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -75,7 +75,7 @@ const AdminPanel: React.FC = () => {
       <div className="sathi-admin-panel" style={{ maxWidth: 1080, margin: '0 auto', padding: 34 }}>
         <div className="flex flex-col items-center justify-center py-24 text-gray-400">
           <div className="animate-spin w-9 h-9 border-[3px] border-rai-blue-600 border-t-transparent rounded-full mb-4" />
-          <p className="text-sm">Loading Sathi…</p>
+          <p className="text-sm">Loading Saathi…</p>
         </div>
       </div>
     );
@@ -95,7 +95,7 @@ const AdminPanel: React.FC = () => {
           <span style={{ color: '#FFC542' }}>✦</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-rai-black leading-tight tracking-tight">Sathi AI</h1>
+          <h1 className="text-2xl font-bold text-rai-black leading-tight tracking-tight">Saathi AI</h1>
           <p className="text-xs text-gray-500">v{admin.version} · {admin.siteName} · a product by RAI</p>
         </div>
         {configuredCount === 0 && (
@@ -115,7 +115,7 @@ const AdminPanel: React.FC = () => {
         ))}
       </div>
 
-      {tab === 'overview' && <Overview stats={stats} personaName={(settings.sathi_persona_name as string) || 'Sathi'} configuredCount={configuredCount} defaultProvider={defaultProvider} goto={setTab} />}
+      {tab === 'overview' && <Overview stats={stats} personaName={(settings.sathi_persona_name as string) || 'Saathi'} configuredCount={configuredCount} defaultProvider={defaultProvider} goto={setTab} />}
       {tab === 'providers' && (
         <ProvidersTab catalog={catalog} providers={providers} embeddingKeys={embeddingKeys} embed={embed} defaultProvider={defaultProvider}
           onChangeDefault={(k: string) => { setDefaultProvider(k); saveSettings({ sathi_default_provider: k }); }}
@@ -131,7 +131,7 @@ const AdminPanel: React.FC = () => {
 
       {/* RAI brand credit */}
       <div className="mt-10 pt-5 border-t border-gray-100 text-center">
-        <span className="text-xs text-gray-400"><strong className="text-rai-blue-700 font-semibold">Sathi</strong> · a product by RAI</span>
+        <span className="text-xs text-gray-400"><strong className="text-rai-blue-700 font-semibold">Saathi</strong> · a product by RAI</span>
       </div>
 
       {toast && (
@@ -158,7 +158,7 @@ const Overview: React.FC<any> = ({ stats, personaName, configuredCount, defaultP
         <Stat label="Knowledge Chunks" value={(stats?.total_chunks ?? 0).toLocaleString()} icon="🧠" />
         <Stat label="Default Provider" value={defaultProvider || '—'} icon="◎" />
       </div>
-      <Card title="Setup checklist" subtitle="A few quiet steps to bring Sathi to life.">
+      <Card title="Setup checklist" subtitle="A few quiet steps to bring Saathi to life.">
         <div className="space-y-2">
           {steps.map((s: any, i: number) => (
             <button key={i} onClick={() => goto(s.tab)} className="sathi-card w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-rai-blue-200 hover:shadow-sm text-left bg-white">
@@ -277,8 +277,7 @@ const ProviderCard: React.FC<any> = ({ pkey, meta, cfg, isDefault, onMakeDefault
             <div>
               <label className="block text-[11px] font-medium text-gray-500 mb-1">Model</label>
               <div className="flex gap-1">
-                <input list={`models-${pkey}`} value={model} onChange={(e) => setModel(e.target.value)} placeholder={meta.default_model} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-rai-blue-400" />
-                <datalist id={`models-${pkey}`}>{modelOpts.map((m) => <option key={m} value={m} />)}</datalist>
+                <ModelSelect value={model} onChange={setModel} options={modelOpts} placeholder={meta.default_model} />
                 {meta.has_model_list && (
                   <button onClick={fetchModels} disabled={!!busy} title="Fetch available models" className="px-2 border border-gray-200 rounded-lg text-gray-500 text-xs hover:bg-gray-50">{busy === 'models' ? '…' : '⟳'}</button>
                 )}
@@ -357,7 +356,7 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
         <div className="grid md:grid-cols-2 gap-4">
           <Toggle label="Enable floating chat widget" checked={!!g('sathi_floating_widget', true)} onChange={(v: boolean) => set('sathi_floating_widget', v)} />
           <Toggle label="Auto-open after a delay" checked={!!g('sathi_widget_auto_open', false)} onChange={(v: boolean) => set('sathi_widget_auto_open', v)} />
-          <Field label="Widget title"><input className={inp} value={g('sathi_widget_title', '')} placeholder="e.g. Nilesh Engineers Support" onChange={(e) => set('sathi_widget_title', e.target.value)} /></Field>
+          <Field label="Widget title"><input className={inp} value={g('sathi_widget_title', '')} placeholder="e.g. Your Company Support" onChange={(e) => set('sathi_widget_title', e.target.value)} /></Field>
           <Field label="Greeting message"><input className={inp} value={g('sathi_chat_greeting', '')} placeholder="How can I help you today?" onChange={(e) => set('sathi_chat_greeting', e.target.value)} /></Field>
           <Field label="Position"><select className={inp} value={g('sathi_floating_position', 'bottom-right')} onChange={(e) => set('sathi_floating_position', e.target.value)}>{POSITIONS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}</select></Field>
           <Field label="Theme"><select className={inp} value={g('sathi_widget_theme', 'light')} onChange={(e) => set('sathi_widget_theme', e.target.value)}><option value="light">Light</option><option value="dark">Dark</option><option value="auto">Auto (system)</option></select></Field>
@@ -439,7 +438,7 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
           <Toggle label="Show only to logged-in users" checked={!!g('sathi_widget_logged_in_only', false)} onChange={(v: boolean) => set('sathi_widget_logged_in_only', v)} />
         </div>
       </Card>
-      <Card title="Knowledge & Commerce" subtitle="Control what Sathi is allowed to talk about and whether it shows products.">
+      <Card title="Knowledge & Commerce" subtitle="Control what Saathi is allowed to talk about and whether it shows products.">
         <div className="space-y-1">
           <Toggle label="Strict scope — answer only from this website's content & products" checked={g('sathi_strict_scope', true) !== false} onChange={(v: boolean) => set('sathi_strict_scope', v)} />
           <Toggle label="Show WooCommerce product cards in chat (Add to Cart / Buy Now)" checked={g('sathi_product_cards', true) !== false} onChange={(v: boolean) => set('sathi_product_cards', v)} />
@@ -458,25 +457,67 @@ const PERSONA_EXAMPLES = [
   { label: 'Technical helper', text: 'You are a calm technical support agent. Ask one clarifying question if needed, then give precise troubleshooting steps in a numbered list. Link to the right docs.' },
 ];
 
-const PersonasTab: React.FC<any> = ({ settings, onSave }) => {
-  const [name, setName] = useState<string>((settings.sathi_persona_name as string) || 'Sathi');
+const GUIDED_QS = [
+  { k: 'What does your business do?', ph: 'e.g. We sell industrial pumps & spares' },
+  { k: 'What tone should it use?', ph: 'e.g. Warm and simple, no jargon' },
+  { k: 'What should it mainly help with?', ph: 'e.g. Find the right product & request a quote' },
+  { k: 'Anything to always do or avoid?', ph: 'e.g. Always offer to connect with our team' },
+];
+
+const PersonasTab: React.FC<any> = ({ settings, onSave, flash }) => {
+  const [name, setName] = useState<string>((settings.sathi_persona_name as string) || 'Saathi');
   const [text, setText] = useState<string>((settings.sathi_persona_text as string) || '');
   useEffect(() => {
-    setName((settings.sathi_persona_name as string) || 'Sathi');
+    setName((settings.sathi_persona_name as string) || 'Saathi');
     setText((settings.sathi_persona_text as string) || '');
   }, [settings.sathi_persona_name, settings.sathi_persona_text]);
-  const save = () => onSave({ sathi_persona_name: (name.trim() || 'Sathi'), sathi_persona_text: text });
+  const save = () => onSave({ sathi_persona_name: (name.trim() || 'Saathi'), sathi_persona_text: text });
+
+  // AI generator
+  const [desc, setDesc] = useState('');
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [gen, setGen] = useState(false);
+  const generate = async () => {
+    setGen(true);
+    try {
+      const res = await api.post('/persona/generate', { description: desc, answers });
+      const d = await res.json().catch(() => ({}));
+      if (d.success) { setName(d.name || name); setText(d.persona || ''); flash && flash('Persona generated — review and Save'); }
+      else flash && flash(d.hint || d.error || 'Could not generate', false);
+    } catch { flash && flash('Could not reach the AI', false); }
+    finally { setGen(false); }
+  };
 
   return (
     <div className="space-y-4">
-      <Card title="Persona" subtitle="Define who your assistant is and how it speaks. Sathi reads this first, then answers on top of it. Leave the instructions empty to use a friendly, professional default.">
+      <Card title="✨ Generate a persona with AI" subtitle="Describe your assistant in plain words and let your AI write it for you. Answer what you like — skip the rest.">
+        <div className="space-y-3">
+          <Field label="Describe your assistant (plain language)">
+            <textarea className={inp + ' min-h-[80px]'} value={desc} onChange={(e) => setDesc(e.target.value)}
+              placeholder="e.g. A friendly helper for my online store that answers product questions and helps people buy." />
+          </Field>
+          <div className="grid md:grid-cols-2 gap-3">
+            {GUIDED_QS.map((q) => (
+              <Field key={q.k} label={`${q.k}  ·  optional`}>
+                <input className={inp} value={answers[q.k] || ''} placeholder={q.ph}
+                  onChange={(e) => setAnswers((a) => ({ ...a, [q.k]: e.target.value }))} />
+              </Field>
+            ))}
+          </div>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-[11px] text-gray-400 max-w-md">Uses your default AI provider. On a weak/free model, answer more questions above for a better persona.</p>
+            <button onClick={generate} disabled={gen} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-rai-blue-600 hover:bg-rai-blue-700 disabled:opacity-50">{gen ? 'Generating…' : '✨ Generate persona'}</button>
+          </div>
+        </div>
+      </Card>
+      <Card title="Persona" subtitle="Define who your assistant is and how it speaks. Saathi reads this first, then answers on top of it. Leave the instructions empty to use a friendly, professional default.">
         <div className="space-y-4">
           <Field label="Assistant name">
-            <input className={inp} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sathi, Maya, Nilesh Helper" />
+            <input className={inp} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Saathi, Maya, Acme Helper" />
           </Field>
           <Field label="Persona & instructions (optional)">
             <textarea className={inp + ' min-h-[170px] leading-relaxed font-normal'} value={text} onChange={(e) => setText(e.target.value)}
-              placeholder={'Describe the tone, role and any rules. For example:\n\nYou are the friendly assistant for Nilesh Engineers. Help visitors find the right industrial pump, explain specs simply, and guide them to request a quote. Be warm and concise.'} />
+              placeholder={'Describe the tone, role and any rules. For example:\n\nYou are the friendly assistant for our store. Help visitors find the right product, explain it simply, and guide them to buy or request a quote. Be warm and concise.'} />
           </Field>
           <div>
             <div className="text-[11px] font-medium text-gray-500 mb-1.5">Start from an example</div>
@@ -507,20 +548,54 @@ const PersonasTab: React.FC<any> = ({ settings, onSave }) => {
 // ── Knowledge ─────────────────────────────────────────────────────────
 const KnowledgeTab: React.FC<any> = ({ stats, flash, refresh }) => {
   const [busy, setBusy] = useState(false);
-  const index = async () => { setBusy(true); await api.post('/knowledge/index', {}); flash('Scan started — refresh in a moment'); setTimeout(() => { refresh(); setBusy(false); }, 2500); };
-  const clear = async () => { setBusy(true); await api.del('/knowledge/clear'); await refresh(); setBusy(false); flash('Index cleared'); };
+  const [prog, setProg] = useState(0);
+  const [status, setStatus] = useState('');
+
+  // Deep, full-site scan driven from the browser: many short batches with a
+  // live progress %, so even large sites finish without timing out.
+  const index = async () => {
+    setBusy(true); setProg(0); setStatus('Starting deep scan…');
+    let offset = 0, total = 0, guard = 0;
+    try {
+      while (guard++ < 1000) {
+        const res = await api.post('/knowledge/index', { offset, batch: 8 });
+        const d = await res.json().catch(() => ({ done: true }));
+        if (!res.ok) throw new Error('scan failed');
+        total = d.total || total;
+        offset = d.next ?? (offset + 8);
+        const pct = total ? Math.min(100, Math.round((Math.min(offset, total) / total) * 100)) : 100;
+        setProg(pct);
+        setStatus(`Analysing your site… ${Math.min(offset, total)} / ${total || '?'} items`);
+        if (d.done || !total) break;
+      }
+      setProg(100); setStatus('Done — Saathi has read your whole site ✓');
+      flash('Deep scan complete');
+    } catch { setStatus('Scan interrupted — please try again.'); flash('Scan interrupted', false); }
+    finally { await refresh(); setBusy(false); }
+  };
+  const clear = async () => { setBusy(true); await api.del('/knowledge/clear'); await refresh(); setBusy(false); setProg(0); setStatus(''); flash('Index cleared'); };
+
   return (
-    <Card title="Site knowledge base" subtitle="Scan your pages and products so Sathi answers only from your content.">
+    <Card title="Site knowledge base" subtitle="Deep-scan your pages, posts, products and custom content so Saathi answers only from YOUR content — not the theme's default text.">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <Stat label="Chunks" value={(stats?.total_chunks ?? 0).toLocaleString()} icon="📄" />
         <Stat label="Sources" value={(stats?.total_sources ?? 0).toLocaleString()} icon="📚" />
         <Stat label="Tokens" value={(stats?.total_tokens ?? 0).toLocaleString()} icon="🔤" />
         <Stat label="Last scan" value={stats?.last_crawl || 'Never'} icon="🕐" />
       </div>
+      {(busy || prog > 0) && (
+        <div className="mb-4">
+          <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div className="h-full rounded-full transition-all" style={{ width: `${prog}%`, background: 'linear-gradient(90deg,#6D5DFB,#19C37D)' }} />
+          </div>
+          <div className="text-xs text-gray-500 mt-1.5">{status} {busy && prog < 100 ? `· ${prog}%` : ''}</div>
+        </div>
+      )}
       <div className="flex gap-2">
-        <button onClick={index} disabled={busy} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rai-blue-600 hover:bg-rai-blue-700 disabled:opacity-50">Scan website & train Sathi</button>
+        <button onClick={index} disabled={busy} className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rai-blue-600 hover:bg-rai-blue-700 disabled:opacity-50">{busy ? `Scanning… ${prog}%` : 'Deep-scan website & train Saathi'}</button>
         <button onClick={clear} disabled={busy} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50">Clear index</button>
       </div>
+      <p className="text-[11px] text-gray-400 mt-3">A full scan can take a minute or two on large sites — keep this tab open. Tip: if answers seem off, your AI model may be too small — pick a stronger model under AI Providers, or write a detailed persona.</p>
     </Card>
   );
 };
@@ -563,7 +638,7 @@ const LicenseTab: React.FC<any> = ({ settings, onSave, flash }) => {
 
   return (
     <div className="space-y-4">
-      <Card title="License" subtitle="Activate your Sathi AI license. Your key is stored encrypted and never shown to visitors.">
+      <Card title="License" subtitle="Activate your Saathi AI license. Your key is stored encrypted and never shown to visitors.">
         <div className={`flex items-center gap-2 mb-4 px-3 py-2 rounded-xl ${tone.bg}`}>
           <span className={`w-2.5 h-2.5 rounded-full ${tone.dot}`} />
           <span className={`text-sm font-semibold capitalize ${tone.tx}`}>{st}</span>
@@ -668,7 +743,7 @@ const PlaygroundDrawer: React.FC<any> = ({ cfg, onClose }) => {
               </div>
             )
           ))}
-          {busy && <div className="flex justify-start"><div className="px-3 py-2 rounded-2xl bg-white border border-gray-200 text-gray-400 text-sm">Sathi is thinking…</div></div>}
+          {busy && <div className="flex justify-start"><div className="px-3 py-2 rounded-2xl bg-white border border-gray-200 text-gray-400 text-sm">Saathi is thinking…</div></div>}
         </div>
 
         <div className="p-3 border-t border-gray-100 flex gap-2">
@@ -677,6 +752,41 @@ const PlaygroundDrawer: React.FC<any> = ({ cfg, onClose }) => {
           <button onClick={send} disabled={busy || !input.trim()} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-rai-blue-600 hover:bg-rai-blue-700 disabled:opacity-50">Send</button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// ── Compact searchable model dropdown (replaces the full-screen native datalist) ──
+const ModelSelect: React.FC<any> = ({ value, onChange, options, placeholder }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  const list: string[] = Array.isArray(options) ? options : [];
+  const filtered = list.filter((m) => m.toLowerCase().includes(String(value || '').toLowerCase())).slice(0, 300);
+  return (
+    <div ref={ref} className="relative flex-1 min-w-0">
+      <input
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-rai-blue-400"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-[60] left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+          {filtered.map((m) => (
+            <button key={m} type="button"
+              onMouseDown={(e) => { e.preventDefault(); onChange(m); setOpen(false); }}
+              className={`block w-full text-left px-3 py-1.5 text-[13px] hover:bg-rai-blue-50 truncate ${m === value ? 'text-rai-blue-700 font-medium' : 'text-gray-700'}`}>
+              {m}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

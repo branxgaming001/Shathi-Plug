@@ -1,6 +1,6 @@
 <?php
 /**
- * Sathi Agentic AI — WordPress Support Agent Framework
+ * Saathi Agentic AI — WordPress Support Agent Framework
  *
  * @package           SathiAgenticAI
  * @author            RAI Labs P. Ltd.
@@ -8,10 +8,10 @@
  * @license           GPL-2.0-or-later
  *
  * @wordpress-plugin
- * Plugin Name:       Sathi Agentic AI
+ * Plugin Name:       Saathi Agentic AI
  * Plugin URI:        https://railabs.in/sathi
  * Description:       Intelligent support agent for WordPress — chat, knowledge base, persistent memory, and real-time site navigation. Powered by multiple AI providers with a highly customizable 2026 UI.
- * Version:           1.6.4
+ * Version:           1.7.0
  * Author:            RAI Labs P. Ltd.
  * Author URI:        https://railabs.in
  * Text Domain:       sathi-agentic-ai
@@ -22,12 +22,12 @@
  * Requires PHP:      8.1
  * Tested up to:      6.8
  *
- * Sathi Agentic AI is free software: you can redistribute it and/or modify
+ * Saathi Agentic AI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * any later version.
  *
- * Sathi Agentic AI is distributed in the hope that it will be useful,
+ * Saathi Agentic AI is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin constants ───────────────────────────────────────────────────
-define( 'SATHI_VERSION', '1.6.4' );
+define( 'SATHI_VERSION', '1.7.0' );
 define( 'SATHI_PREFIX', 'sathi' );
 define( 'SATHI_DOMAIN', 'sathi-agentic-ai' );
 define( 'SATHI_ENTRY', __FILE__ );
