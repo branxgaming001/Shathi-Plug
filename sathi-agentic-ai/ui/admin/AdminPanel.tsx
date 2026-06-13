@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 declare global {
   interface Window {
-    sathiAdmin: { restUrl: string; nonce: string; siteName: string; accentColor: string; version: string };
+    sathiAdmin: { restUrl: string; nonce: string; siteName: string; accentColor: string; version: string; logo?: string };
   }
 }
 const admin = window.sathiAdmin || ({} as Window['sathiAdmin']);
@@ -91,12 +91,10 @@ const AdminPanel: React.FC = () => {
     <div className="sathi-admin-panel" style={{ maxWidth: 1080, margin: '0 auto', padding: '21px 34px 55px' }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md" style={{ background: 'linear-gradient(135deg,#6D5DFB,#5646E0)' }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M2.5 5.6c0-1.16.94-2.1 2.1-2.1h7.8c1.16 0 2.1.94 2.1 2.1v4.3c0 1.16-.94 2.1-2.1 2.1H7.2l-3.1 2.5v-2.5h-.5c-.66 0-1.1-.5-1.1-1.1z" fill="#ffffff" />
-            <path d="M9.4 11.1c0-1.16.94-2.1 2.1-2.1h7.9c1.16 0 2.1.94 2.1 2.1v4.3c0 1.16-.94 2.1-2.1 2.1h-1.4v2.5l-3.1-2.5h-3.4c-1.16 0-2.1-.94-2.1-2.1z" fill="#FFC542" />
-            <circle cx="20.6" cy="6.6" r="1.7" fill="#7CF0BD" />
-          </svg>
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md bg-white border border-gray-100 p-1.5">
+          {admin.logo
+            ? <img src={admin.logo} alt="Saathi" className="w-full h-full object-contain" />
+            : <span className="text-2xl" style={{ color: '#6D5DFB' }}>✦</span>}
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-rai-black leading-tight tracking-tight">Saathi AI</h1>

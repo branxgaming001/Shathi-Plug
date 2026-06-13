@@ -476,23 +476,22 @@ const MessageBubble: React.FC<BubbleProps> = ({
 
 const ActionButton: React.FC<{ action: ClientAction }> = ({ action }) => {
   const executeActions = useChatStore((s) => s.executeActions);
-  const icons: Record<string, string> = {
-    navigate: '↗',
-    scroll_to: '↓',
-    highlight: '✨',
-    focus_input: '✏️',
-    open_contact: '💬',
+  const labels: Record<string, string> = {
+    navigate: 'Open page',
+    scroll_to: 'Show me',
+    highlight: 'Highlight',
+    focus_input: 'Start typing',
+    open_contact: 'Contact us',
   };
-
-  const label = action.type.replace(/_/g, ' ');
+  // No arrow/glyph icon — just a clean, human label.
+  const label = (action.params && action.params.label) || labels[action.type] || action.type.replace(/_/g, ' ');
 
   return (
     <button
       className="sathi-action-btn"
       onClick={() => executeActions([action])}
-      aria-label={`${label}: ${action.params?.label || ''}`}
+      aria-label={label}
     >
-      <span aria-hidden="true">{icons[action.type] || '▶'}</span>
       <span>{label}</span>
     </button>
   );
