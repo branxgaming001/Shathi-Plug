@@ -506,6 +506,7 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
         <div className="space-y-1">
           <Toggle label="Strict scope — answer only from this website's content & products" checked={g('sathi_strict_scope', true) !== false} onChange={(v: boolean) => set('sathi_strict_scope', v)} />
           <Toggle label="Show WooCommerce product cards in chat (Add to Cart / Buy Now)" checked={g('sathi_product_cards', true) !== false} onChange={(v: boolean) => set('sathi_product_cards', v)} />
+          <Toggle label="Suggest follow-up questions — show tappable next-step options after replies" checked={g('sathi_followups', true) !== false} onChange={(v: boolean) => set('sathi_followups', v)} />
         </div>
       </Card>
       <div className="flex justify-end"><button onClick={() => onSave(draft)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-rai-blue-600 hover:bg-rai-blue-700 shadow-sm">Save chatbot settings</button></div>

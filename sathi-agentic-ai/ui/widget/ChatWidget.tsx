@@ -18,6 +18,39 @@ function stripThink(text: string): string {
   return t.trim();
 }
 
+// Parse an optional <followups> block the model appends at the very end of a
+// reply: a short question + a few tappable options. Returns the cleaned text
+// (block removed, so it never shows as raw markup — even mid-stream) and, when
+// available, the parsed { question, options }. While the block is still
+// streaming we already hide it from the text but don't render chips until it
+// closes, so options never flicker in half-typed.
+interface Followups { question: string; options: string[]; }
+function parseFollowups(text: string): { clean: string; followups: Followups | null } {
+  if (!text) return { clean: text, followups: null };
+  const open = text.search(/<\s*followups\s*>/i);
+  if (open === -1) return { clean: text, followups: null };
+
+  const clean = text.slice(0, open).trim();
+  const rest = text.slice(open);
+  const m = rest.match(/<\s*followups\s*>([\s\S]*?)<\s*\/\s*followups\s*>/i);
+  if (!m) {
+    // Block opened but not closed yet (still streaming) — hide it, no chips yet.
+    return { clean, followups: null };
+  }
+  const lines = m[1].split('\n').map((l) => l.trim()).filter(Boolean);
+  let question = '';
+  const options: string[] = [];
+  for (const l of lines) {
+    if (/^[-•*]\s+/.test(l)) options.push(l.replace(/^[-•*]\s+/, '').trim());
+    else if (/^\d+[.)]\s+/.test(l)) options.push(l.replace(/^\d+[.)]\s+/, '').trim());
+    else if (!question) question = l.replace(/[:：]\s*$/, '');
+    else options.push(l);
+  }
+  const cleaned = options.filter(Boolean).slice(0, 5);
+  if (cleaned.length === 0) return { clean, followups: null };
+  return { clean, followups: { question, options: cleaned } };
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // ChatWidget — Enhanced with full accessibility, dark mode, loading
 // skeleton, screen reader announcements, and keyboard navigation.
@@ -299,6 +332,12 @@ const MessageBubble: React.FC<BubbleProps> = ({
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
+  // Assistant replies may carry a trailing <followups> block — strip it from
+  // the visible text and render it as tappable options instead.
+  const parsed = !isUser
+    ? parseFollowups(stripThink(message.content))
+    : { clean: message.content, followups: null as Followups | null };
+
   const submitFeedback = useCallback(
     async (rating: 'up' | 'down') => {
       setFeedback(rating);
@@ -371,7 +410,7 @@ const MessageBubble: React.FC<BubbleProps> = ({
                   },
                 }}
               >
-                {stripThink(message.content)}
+                {parsed.clean}
               </ReactMarkdown>
             </div>
           )}
@@ -396,7 +435,7 @@ const MessageBubble: React.FC<BubbleProps> = ({
             {/* Copy */}
             <button
               className="sathi-msg-action-btn"
-              onClick={() => onCopy(message.content)}
+              onClick={() => onCopy(parsed.clean || message.content)}
               title={config.i18n?.copy || 'Copy'}
               aria-label={
                 copiedId === message.id
@@ -467,6 +506,50 @@ const MessageBubble: React.FC<BubbleProps> = ({
         {!isUser && message.products && message.products.length > 0 && (
           <ProductCards products={message.products} />
         )}
+
+        {/* Follow-up question options — only on the most recent reply, so the
+            chat always offers the latest next steps without piling up. */}
+        {!isUser && isLastAssistant && parsed.followups && (
+          <FollowUpQuestions data={parsed.followups} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Follow-up question options ──────────────────────────────────────────
+// Renders the bot's suggested next steps. Short option sets show as wrapping
+// pills; longer ones show as full-width selectable rows with a radio dot.
+
+const FollowUpQuestions: React.FC<{ data: Followups }> = ({ data }) => {
+  const { setInput, isStreaming } = useChatStore();
+  const accent = (config.persona?.color) || (config as any).accentColor || '#6D5DFB';
+
+  const pick = (t: string) => {
+    if (isStreaming) return;
+    setInput(t);
+    setTimeout(() => document.dispatchEvent(new CustomEvent('sathi:send')), 50);
+  };
+
+  const maxLen = data.options.reduce((m, o) => Math.max(m, o.length), 0);
+  const compact = data.options.length >= 3 && maxLen <= 18;
+
+  return (
+    <div className="sathi-followups" style={{ ['--sathi-accent' as any]: accent }}>
+      {data.question && <div className="sathi-followups-q">{data.question}</div>}
+      <div className={compact ? 'sathi-followups-pills' : 'sathi-followups-rows'}>
+        {data.options.map((o, i) => (
+          <button
+            key={i}
+            type="button"
+            className={compact ? 'sathi-followup-pill' : 'sathi-followup-row'}
+            onClick={() => pick(o)}
+            disabled={isStreaming}
+          >
+            {!compact && <span className="sathi-followup-dot" aria-hidden="true" />}
+            <span className="sathi-followup-label">{o}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -499,15 +582,52 @@ const ActionButton: React.FC<{ action: ClientAction }> = ({ action }) => {
 
 // ── Product Cards (WooCommerce) ─────────────────────────────────────────
 
-const ProductCards: React.FC<{ products: any[] }> = ({ products }) => (
-  <div className="sathi-products mt-2 space-y-2" role="list" aria-label="Matching products">
-    {products.map((p) => <ProductCard key={p.id} product={p} />)}
-  </div>
-);
+// Compact star rating (accurate fractional fill via an overlaid clipped layer).
+const Stars: React.FC<{ rating: number }> = ({ rating }) => {
+  const pct = Math.max(0, Math.min(100, (rating / 5) * 100));
+  return (
+    <span className="sathi-stars" role="img" aria-label={`${rating.toFixed(1)} out of 5`}>
+      <span className="sathi-stars-empty">★★★★★</span>
+      <span className="sathi-stars-full" style={{ width: pct + '%' }}>★★★★★</span>
+    </span>
+  );
+};
 
-const ProductCard: React.FC<{ product: any }> = ({ product }) => {
+const fmtCount = (n: number): string =>
+  n >= 1000 ? (n / 1000).toFixed(n % 1000 >= 100 ? 1 : 0).replace(/\.0$/, '') + 'k' : String(n);
+
+const ProductCards: React.FC<{ products: any[] }> = ({ products }) => {
+  const single = products.length === 1;
+  return (
+    <div
+      className={`sathi-products ${single ? 'sathi-products-single' : 'sathi-products-scroll'}`}
+      role="list"
+      aria-label="Matching products"
+    >
+      {products.map((p) => <ProductCard key={p.id} product={p} single={single} />)}
+    </div>
+  );
+};
+
+const ProductCard: React.FC<{ product: any; single?: boolean }> = ({ product, single }) => {
   const [status, setStatus] = useState<'' | 'adding' | 'added' | 'error'>('');
-  const accent = (config.persona?.color) || config.accentColor || '#6D5DFB';
+  const [fav, setFav] = useState<boolean>(() => {
+    try { return JSON.parse(localStorage.getItem('sathi_wishlist') || '[]').includes(product.id); }
+    catch { return false; }
+  });
+
+  const toggleFav = () => {
+    setFav((prev) => {
+      const next = !prev;
+      try {
+        const arr: number[] = JSON.parse(localStorage.getItem('sathi_wishlist') || '[]');
+        const set = new Set(arr);
+        if (next) set.add(product.id); else set.delete(product.id);
+        localStorage.setItem('sathi_wishlist', JSON.stringify([...set]));
+      } catch { /* storage unavailable */ }
+      return next;
+    });
+  };
 
   const addToCart = async () => {
     if (!product.purchasable) { window.open(product.permalink, '_blank'); return; }
@@ -559,30 +679,71 @@ const ProductCard: React.FC<{ product: any }> = ({ product }) => {
 
   const buyNow = () => { window.location.href = product.buy_now_url || product.permalink; };
 
+  const ratingCount = Number(product.rating_count) || 0;
+  const avg = Number(product.average_rating) || 0;
+  const addLabel = status === 'adding' ? '…' : status === 'added' ? '✓' : status === 'error' ? '!' : '+';
+
   return (
-    <div className="sathi-product-card" role="listitem" style={{ display: 'flex', gap: 10, padding: 10, border: '1px solid #e5e7eb', borderRadius: 12, background: '#fff' }}>
-      {product.image && (
-        <a href={product.permalink} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
-          <img src={product.image} alt={product.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
+    <div className={`sathi-product-card ${single ? 'is-single' : ''}`} role="listitem">
+      <div className="sathi-product-media">
+        <a href={product.permalink} target="_blank" rel="noopener noreferrer" aria-label={product.name}>
+          {product.image
+            ? <img src={product.image} alt={product.name} loading="lazy" />
+            : <div className="sathi-product-noimg" aria-hidden="true">🛍️</div>}
         </a>
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <a href={product.permalink} target="_blank" rel="noopener noreferrer" className="sathi-product-name" style={{ fontWeight: 600, fontSize: 13, color: '#141414', textDecoration: 'none', display: 'block', lineHeight: 1.3 }}>
+        {product.on_sale && <span className="sathi-product-badge">Sale</span>}
+        <button
+          type="button"
+          className={`sathi-wishlist ${fav ? 'is-fav' : ''}`}
+          onClick={toggleFav}
+          aria-pressed={fav}
+          aria-label={fav ? 'Remove from wishlist' : 'Save to wishlist'}
+          title={fav ? 'Saved' : 'Save'}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill={fav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="sathi-product-body">
+        {ratingCount > 0 && (
+          <div className="sathi-product-rating">
+            <Stars rating={avg} />
+            <span className="sathi-product-rcount">({fmtCount(ratingCount)})</span>
+          </div>
+        )}
+        <a href={product.permalink} target="_blank" rel="noopener noreferrer" className="sathi-product-name">
           {product.name}
         </a>
-        <div style={{ fontSize: 13, color: accent, fontWeight: 600, margin: '2px 0' }} dangerouslySetInnerHTML={{ __html: product.price_html || '' }} />
-        {!product.in_stock && <div style={{ fontSize: 11, color: '#A23B3B' }}>Out of stock</div>}
-        <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-          <button onClick={addToCart} disabled={status === 'adding' || !product.in_stock}
-            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', lineHeight: 1, fontSize: 12, fontWeight: 600, padding: '8px 8px', borderRadius: 8, border: 'none', cursor: 'pointer', color: '#fff', background: accent, opacity: (status === 'adding' || !product.in_stock) ? 0.6 : 1 }}>
-            {status === 'adding' ? 'Adding…' : status === 'added' ? '✓ Added' : status === 'error' ? 'Try again' : 'Add to Cart'}
-          </button>
-          {product.in_stock && (
-            <button onClick={buyNow} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', lineHeight: 1, fontSize: 12, fontWeight: 600, padding: '8px 8px', borderRadius: 8, border: '1px solid ' + accent, cursor: 'pointer', color: accent, background: '#fff' }}>
-              Buy Now
+        {product.subtitle && <div className="sathi-product-sub">{product.subtitle}</div>}
+
+        <div className="sathi-product-foot">
+          <span className="sathi-product-price">
+            {product.regular_display && <del>{product.regular_display}</del>}
+            <span>{product.price_display || product.price_html || ''}</span>
+          </span>
+          {product.in_stock ? (
+            <button
+              type="button"
+              className={`sathi-add-btn ${status ? 'is-' + status : ''}`}
+              onClick={addToCart}
+              disabled={status === 'adding'}
+              aria-label={`Add ${product.name} to cart`}
+              title="Add to cart"
+            >
+              {addLabel}
             </button>
+          ) : (
+            <span className="sathi-product-oos">Out of stock</span>
           )}
         </div>
+
+        {product.in_stock && (
+          <button type="button" className="sathi-buy-btn" onClick={buyNow}>
+            Buy now
+          </button>
+        )}
       </div>
     </div>
   );

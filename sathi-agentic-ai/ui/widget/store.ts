@@ -4,9 +4,14 @@ interface Product {
   id: number;
   name: string;
   price_html: string;
+  price_display?: string;
+  regular_display?: string;
   image: string;
   permalink: string;
   excerpt: string;
+  subtitle?: string;
+  average_rating?: number;
+  rating_count?: number;
   in_stock: boolean;
   purchasable: boolean;
   on_sale?: boolean;

@@ -114,22 +114,47 @@ class ProductSearch {
 
         $checkout = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' );
 
+        // Primary category → used as the small "for women" style subtitle in the card.
+        $subtitle = '';
+        $terms    = get_the_terms( $id, 'product_cat' );
+        if ( is_array( $terms ) && ! empty( $terms ) ) {
+            $subtitle = $terms[0]->name;
+        }
+
+        // Clean, currency-formatted price strings for the card (the raw
+        // price_html includes screen-reader text that looks messy once tags
+        // are stripped). Decode entities so the currency symbol renders as text.
+        $price_display   = (string) $product->get_price();
+        $regular_display = '';
+        if ( function_exists( 'wc_price' ) ) {
+            $price_display = html_entity_decode( wp_strip_all_tags( wc_price( $product->get_price() ) ), ENT_QUOTES, 'UTF-8' );
+            if ( $product->is_on_sale() && $product->get_regular_price() ) {
+                $regular_display = html_entity_decode( wp_strip_all_tags( wc_price( $product->get_regular_price() ) ), ENT_QUOTES, 'UTF-8' );
+            }
+        }
+
         return [
-            'id'          => $id,
-            'name'        => $product->get_name(),
-            'price_html'  => wp_strip_all_tags( $product->get_price_html() ),
-            'price'       => $product->get_price(),
-            'regular'     => $product->get_regular_price(),
-            'sale'        => $product->get_sale_price(),
-            'on_sale'     => $product->is_on_sale(),
-            'image'       => $img,
-            'permalink'   => get_permalink( $id ),
-            'excerpt'     => $excerpt,
-            'in_stock'    => $product->is_in_stock(),
-            'purchasable' => $product->is_purchasable() && $product->is_in_stock(),
-            'type'        => $product->get_type(),
+            'id'             => $id,
+            'name'           => $product->get_name(),
+            'price_html'     => wp_strip_all_tags( $product->get_price_html() ),
+            'price_display'  => $price_display,
+            'regular_display'=> $regular_display,
+            'price'          => $product->get_price(),
+            'regular'        => $product->get_regular_price(),
+            'sale'           => $product->get_sale_price(),
+            'on_sale'        => $product->is_on_sale(),
+            'image'          => $img,
+            'permalink'      => get_permalink( $id ),
+            'excerpt'        => $excerpt,
+            'subtitle'       => $subtitle,
+            // Rating — powers the stars + review count in the card.
+            'average_rating' => (float) $product->get_average_rating(),
+            'rating_count'   => (int) $product->get_rating_count(),
+            'in_stock'       => $product->is_in_stock(),
+            'purchasable'    => $product->is_purchasable() && $product->is_in_stock(),
+            'type'           => $product->get_type(),
             // Variable products can't be added by ID alone — send shoppers to the page.
-            'buy_now_url' => $product->is_type( 'simple' )
+            'buy_now_url'    => $product->is_type( 'simple' )
                 ? add_query_arg( 'add-to-cart', $id, $checkout )
                 : get_permalink( $id ),
         ];

@@ -74,6 +74,23 @@ class PromptComposer {
             $lines[] = 'IMPORTANT: This site is not necessarily a shop. Do NOT mention products, "add to cart", carts, prices or checkout unless the site content above clearly contains products. Talk about the site\'s actual content, services and pages instead.';
         }
 
+        // ── Follow-up questions (clickable next-step options) ─────────
+        $followups = $settings->get( Settings::KEY_FOLLOWUPS, true );
+        if ( $followups === '' || $followups === null ) { $followups = true; }
+        if ( (bool) $followups ) {
+            $lines[] = "FOLLOW-UP OPTIONS: After your answer, when it would genuinely help the visitor decide what to do next, "
+                . "offer 2–4 short, tappable follow-up choices. Put them in a block at the very END of your reply using EXACTLY this format:\n"
+                . "<followups>\n"
+                . "A short question to the visitor?\n"
+                . "- First option\n"
+                . "- Second option\n"
+                . "- Third option\n"
+                . "</followups>\n"
+                . "Rules: keep each option under ~6 words and phrase it from the VISITOR's point of view (what they'd tap, e.g. \"See pricing\", \"Talk to a human\", \"Show more products\"). "
+                . "Use the same language as the rest of your reply. Put NOTHING after the closing </followups> tag. "
+                . "Only include the block when there is a clear, useful next step — skip it for simple confirmations or goodbyes.";
+        }
+
         // ── Site context ──────────────────────────────────────────────
         if ( ! empty( $context['site_description'] ) ) {
             $lines[] = 'About the site: ' . $context['site_description'];

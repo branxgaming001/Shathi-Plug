@@ -66,6 +66,7 @@ class Settings {
     // ── Knowledge scope + commerce ────────────────────────────────────
     public const KEY_STRICT_SCOPE  = 'sathi_strict_scope';   // answer only from site content
     public const KEY_PRODUCT_CARDS = 'sathi_product_cards';  // show WooCommerce product cards in chat
+    public const KEY_FOLLOWUPS     = 'sathi_followups';      // suggest clickable follow-up questions after replies
 
     // ── Licensing ─────────────────────────────────────────────────────
     public const KEY_LICENSE_KEY        = 'sathi_license_key';        // encrypted; NOT registered (kept out of generic settings)
@@ -353,6 +354,11 @@ class Settings {
                 'sanitize'=> 'rest_sanitize_boolean',
             ],
             self::KEY_PRODUCT_CARDS => [
+                'type'    => 'boolean',
+                'default' => true,
+                'sanitize'=> 'rest_sanitize_boolean',
+            ],
+            self::KEY_FOLLOWUPS => [
                 'type'    => 'boolean',
                 'default' => true,
                 'sanitize'=> 'rest_sanitize_boolean',
