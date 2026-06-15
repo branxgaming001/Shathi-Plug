@@ -1,4 +1,9 @@
-<?php $YEAR = date('Y'); $IMG = require __DIR__ . '/assets/images.php'; ?>
+<?php
+$YEAR = date('Y');
+$IMG = require __DIR__ . '/assets/images.php';
+$FR = @include __DIR__ . '/assets/mascot_frames.php';
+if (!is_array($FR)) $FR = [$IMG['mascot-1']];
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -42,7 +47,7 @@
       <div><b>24/7</b><span>support & sales</span></div>
     </div>
   </div>
-  <div class="hero-art"><img src="<?=$IMG['hero']?>" alt="Saathi chat widget on a website"></div>
+  <div class="hero-art"><img src="<?=$IMG['hero']?>" alt="Saathi chat widget on a website"><img class="hero-mascot" id="heroMascot" src="<?=$FR[0]?>" alt="Saathi mascot"></div>
 </div></section>
 
 <!-- TRUST -->
@@ -109,7 +114,15 @@
         <li><?=$check?> Beautiful on mobile & desktop</li>
       </ul>
     </div>
-    <div class="feat-img"><img src="<?=$IMG['feature-customize']?>" alt="Customization"></div>
+    <div class="cust-card" id="custCard">
+      <div class="cust-prev" id="custPrev" style="--pv:#6D5DFB">
+        <img id="custPrevImg" src="<?=$IMG['mascot-1']?>" alt="">
+        <div><div class="h">Saathi</div><div class="s">Online · your brand, your bot</div></div>
+      </div>
+      <div class="cust-row"><span class="lab">Colour</span><span id="custColors" style="display:flex;gap:8px;flex-wrap:wrap"></span></div>
+      <div class="cust-row"><span class="lab">Mascot</span><span id="custMascots" style="display:flex;gap:8px;flex-wrap:wrap"></span></div>
+      <button class="btn btn-primary" style="margin-top:6px" id="custOpen">See it in the live bot →</button>
+    </div>
   </div>
 </div></section>
 
@@ -148,7 +161,7 @@
 
 <!-- PRICING -->
 <section class="section" id="pricing"><div class="wrap">
-  <span class="eyebrow" style="display:block;text-align:center;margin:0 auto">Pricing</span>
+  <span class="eyebrow alt" style="display:block;text-align:center;margin:0 auto">Pricing</span>
   <h2>Simple, honest pricing</h2>
   <p class="sub">Start free. Upgrade when you're ready. Lifetime means pay once — forever.</p>
   <div class="prices">
@@ -223,7 +236,34 @@ window.SAATHI_IMG = <?php
   for ($i = 1; $i <= 8; $i++) { $m['mascot-' . $i] = $IMG['mascot-' . $i]; }
   echo json_encode($m);
 ?>;
+window.SAATHI_FRAMES = <?php echo json_encode(array_values($FR)); ?>;
 </script>
 <script src="assets/widget/saathi-embed.js" defer></script>
+<script>
+(function () {
+  // Hero signature mascot — cycle emotion frames every second.
+  var fr = window.SAATHI_FRAMES || [], i = 0, hm = document.getElementById('heroMascot');
+  if (hm && fr.length > 1) { setInterval(function () { i = (i + 1) % fr.length; hm.src = fr[i]; }, 1000); }
+
+  // On-page customizer (colour + mascot) that drives the live bot too.
+  var COLORS = ['#6D5DFB', '#2DB4FF', '#19C37D', '#FF6B5E', '#F0567A', '#7C3AED'];
+  var MASC = [1, 3, 5, 6, 7, 8];
+  var sel = { color: '#6D5DFB', mascot: 1 };
+  var cc = document.getElementById('custColors'), cm = document.getElementById('custMascots'),
+      prev = document.getElementById('custPrev'), prevImg = document.getElementById('custPrevImg');
+  function apply() {
+    if (prev) prev.style.setProperty('--pv', sel.color);
+    if (prevImg && window.SAATHI_IMG) prevImg.src = window.SAATHI_IMG['mascot-' + sel.mascot];
+    if (window.SaathiBot) { window.SaathiBot.setColor(sel.color); window.SaathiBot.setMascot(sel.mascot); }
+  }
+  function refresh() {
+    if (cc) [].forEach.call(cc.children, function (d, k) { d.className = 'cust-dot' + (COLORS[k] === sel.color ? ' on' : ''); });
+    if (cm) [].forEach.call(cm.children, function (d, k) { d.className = 'cust-mini' + (MASC[k] === sel.mascot ? ' on' : ''); });
+  }
+  if (cc) COLORS.forEach(function (c) { var d = document.createElement('span'); d.className = 'cust-dot' + (c === sel.color ? ' on' : ''); d.style.background = c; d.onclick = function () { sel.color = c; refresh(); apply(); }; cc.appendChild(d); });
+  if (cm && window.SAATHI_IMG) MASC.forEach(function (n) { var im = document.createElement('img'); im.className = 'cust-mini' + (n === sel.mascot ? ' on' : ''); im.src = window.SAATHI_IMG['mascot-' + n]; im.onclick = function () { sel.mascot = n; refresh(); apply(); }; cm.appendChild(im); });
+  var ob = document.getElementById('custOpen'); if (ob) ob.onclick = function () { apply(); if (window.SaathiBot) window.SaathiBot.open(); };
+})();
+</script>
 </body>
 </html>

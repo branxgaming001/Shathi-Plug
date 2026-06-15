@@ -46,10 +46,8 @@
       '</div>' +
       '<div class="sbot-msgs" id="sbMsgs"></div>' +
       '<div class="sbot-cust">' +
-      '<span class="lbl">Customize this bot — try it live:</span>' +
-      '<span id="sbColors" style="display:flex;gap:6px"></span>' +
-      '<span style="width:1px;height:18px;background:#e2def5"></span>' +
-      '<span id="sbMascots" style="display:flex;gap:6px"></span>' +
+      '<span class="lbl">🎨 Customize this bot — try it live</span>' +
+      '<div class="sbot-cust-row"><span id="sbColors" class="sbot-grp"></span><span class="sbot-div"></span><span id="sbMascots" class="sbot-grp"></span></div>' +
       '</div>' +
       '<div class="sbot-input"><input id="sbInput" placeholder="Type your message…" autocomplete="off"><button class="sbot-send" id="sbSend" aria-label="Send">➤</button></div>' +
       '<div class="sbot-foot"><b>Saathi</b> · a product by RAI</div>' +
@@ -67,19 +65,24 @@
   }
   function close() { state.open = false; launcher(); }
 
+  function setColor(c) { state.color = c; root.style.setProperty('--bot', c); if (state.open) buildCustomizer(); }
+  function setMascot(n) {
+    state.mascot = n;
+    if (state.open) { var h = document.getElementById('sbHeadAv'); if (h) h.src = MASCOT(n); buildCustomizer(); }
+    else { launcher(); }
+  }
   function buildCustomizer() {
-    var cw = document.getElementById('sbColors');
+    var cw = document.getElementById('sbColors'), mw = document.getElementById('sbMascots');
+    if (!cw || !mw) return;
+    cw.innerHTML = ''; mw.innerHTML = '';
     COLORS.forEach(function (c) {
       var b = document.createElement('span'); b.className = 'sbot-sw' + (c === state.color ? ' on' : '');
-      b.style.background = c; b.title = c;
-      b.onclick = function () { state.color = c; root.style.setProperty('--bot', c); buildCustomizer(); };
+      b.style.background = c; b.title = c; b.onclick = function () { setColor(c); };
       cw.appendChild(b);
     });
-    var mw = document.getElementById('sbMascots');
     MASCOTS.forEach(function (n) {
       var b = document.createElement('img'); b.className = 'sbot-mini' + (n === state.mascot ? ' on' : '');
-      b.src = MASCOT(n); b.title = 'Mascot ' + n;
-      b.onclick = function () { state.mascot = n; var h = document.getElementById('sbHeadAv'); if (h) h.src = MASCOT(n); buildCustomizer(); };
+      b.src = MASCOT(n); b.title = 'Mascot ' + n; b.onclick = function () { setMascot(n); };
       mw.appendChild(b);
     });
   }
@@ -150,6 +153,15 @@
       })
       .catch(function () { typing(false); addBot('<p>Connection issue — please try again.</p>'); state.busy = false; });
   }
+
+  // Public API so the landing page can drive the same bot (colour + mascot + open).
+  window.SaathiBot = {
+    open: function () { if (!state.open) open(); },
+    setColor: setColor,
+    setMascot: setMascot,
+    colors: COLORS,
+    mascots: MASCOTS
+  };
 
   launcher();
 })();

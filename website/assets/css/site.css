@@ -4,6 +4,7 @@
    ============================================================ */
 :root{
   --v:#6D5DFB; --v2:#5646E0; --v-700:#4b39d6;
+  --c2:#FF6B5E; --c2bg:#ffe9e4;
   --ink:#1c1340; --ink2:#4b5563; --muted:#8a86a3;
   --line:#ece9fb; --card:#ffffff;
   --bg1:#efeaff; --bg2:#fdeee9;
@@ -202,3 +203,39 @@ footer a:hover{color:#fff}
   #sbot{right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0))}
   .sbot-win{width:calc(100vw - 24px);height:72dvh}
 }
+
+/* ===== Brand: use BOTH colours (violet + coral) ===== */
+.hero h1 .grad{background:linear-gradient(120deg,var(--v),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta-band{background:linear-gradient(135deg,var(--v),var(--c2))}
+.price.pop{border-color:var(--c2)}
+.price.pop:before{background:var(--c2)}
+.eyebrow.alt{color:var(--c2);background:var(--c2bg)}
+.cards .card:nth-child(3n+2) .ico{background:var(--c2bg);color:var(--c2)}
+.feat:nth-of-type(2) h3 span,.demo h2{color:inherit}
+.hero .ministats b{color:var(--v)} .hero .ministats div:nth-child(even) b{color:var(--c2)}
+
+/* ===== Hero animated signature mascot ===== */
+.hero-mascot{position:absolute;left:-10px;bottom:-20px;width:106px;height:106px;filter:drop-shadow(0 14px 24px rgba(109,93,251,.45));animation:floaty 3.6s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(2deg)}}
+@media(max-width:860px){.hero-mascot{width:78px;height:78px;left:8px;bottom:-10px}}
+
+/* ===== Landing customizer card ===== */
+.cust-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
+.cust-prev{display:flex;align-items:center;gap:12px;border-radius:14px;padding:16px;margin-bottom:16px;background:linear-gradient(135deg,var(--pv,#6D5DFB),#fff)}
+.cust-prev img{width:56px;height:56px;flex:0 0 auto}
+.cust-prev .h{font-family:var(--display);font-weight:800;color:#fff;font-size:18px;line-height:1.1}
+.cust-prev .s{color:rgba(255,255,255,.9);font-size:12px}
+.cust-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0}
+.cust-row .lab{font-size:12.5px;font-weight:700;color:var(--ink2);width:78px}
+.cust-dot{width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;transition:transform .12s}
+.cust-dot:hover{transform:scale(1.12)} .cust-dot.on{box-shadow:0 0 0 2px var(--ink)}
+.cust-mini{width:40px;height:40px;border-radius:50%;background:#f1edff;border:2px solid transparent;cursor:pointer;padding:2px}
+.cust-mini.on{border-color:var(--ink)}
+
+/* ===== Bot customizer alignment fix ===== */
+.sbot-cust{display:block}
+.sbot-cust .lbl{display:block;width:100%;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px}
+.sbot-cust-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sbot-grp{display:inline-flex;align-items:center;gap:6px}
+.sbot-div{width:1px;height:18px;background:#e2def5;display:inline-block}
+.sbot-sw,.sbot-mini{vertical-align:middle}
