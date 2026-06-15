@@ -74,7 +74,7 @@ class Factory {
         if ( $key === 'openrouter' ) {
             $merged['extra_headers'] = [
                 'HTTP-Referer' => home_url(),
-                'X-Title'      => 'Sathi Agentic AI',
+                'X-Title'      => 'Saathi Agentic AI',
             ];
         }
 
@@ -112,9 +112,31 @@ class Factory {
 
     /**
      * The model to use for embeddings (separate from chat).
+     *
+     * Provider-aware: picks a sensible default for the resolved embeddings
+     * provider, and auto-corrects the common misconfiguration where the embed
+     * provider is non-OpenAI but the model still holds the OpenAI default
+     * (which would fail). This lets FREE embeddings — notably Google Gemini's
+     * `text-embedding-004` — work out of the box with zero extra setup.
      */
     public function embedding_model(): string {
-        return (string) $this->settings->get( 'sathi_embed_model', 'text-embedding-3-small' );
+        $model = (string) $this->settings->get( 'sathi_embed_model', '' );
+        $key   = $this->settings->get( 'sathi_embed_provider', '' )
+            ?: $this->settings->get( Settings::KEY_DEFAULT_PROVIDER, 'openai' );
+
+        $is_openai_default = ( $model === '' || $model === 'text-embedding-3-small' || $model === 'text-embedding-3-large' );
+
+        switch ( $key ) {
+            case 'google':
+            case 'gemini':
+                return $is_openai_default ? 'text-embedding-004' : $model;   // FREE tier
+            case 'cohere':
+                return $is_openai_default ? 'embed-multilingual-v3.0' : $model;
+            case 'local':
+                return $model !== '' ? $model : 'nomic-embed-text';
+            default: // openai / openai-compatible
+                return $model !== '' ? $model : 'text-embedding-3-small';
+        }
     }
 
     /**

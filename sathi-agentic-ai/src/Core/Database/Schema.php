@@ -10,7 +10,7 @@ namespace RaiLabs\Sathi\Core\Database;
 class Schema {
 
     /** @var string Current schema version */
-    private const VERSION = '1.0.0';
+    private const VERSION = '1.1.0';
 
     /**
      * Create (or update) all custom tables.
@@ -94,7 +94,7 @@ class Schema {
         $sql = "CREATE TABLE {$prefix}sathi_knowledge_chunks (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             source_url VARCHAR(2048) NOT NULL COMMENT 'Origin URL of the chunk',
-            source_type ENUM('post','page','product','custom') NOT NULL DEFAULT 'post',
+            source_type ENUM('post','page','product','custom','site_part') NOT NULL DEFAULT 'post',
             source_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'WordPress post ID',
             chunk_index INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Position within source',
             content LONGTEXT NOT NULL,
@@ -111,6 +111,12 @@ class Schema {
         ) {$charset};";
 
         dbDelta( $sql );
+
+        // FULLTEXT index powers relevance-ranked keyword search (BM25-style),
+        // so the knowledge base stays accurate even with NO embeddings provider
+        // (free models). dbDelta can't reliably manage FULLTEXT keys, so add it
+        // explicitly and idempotently.
+        self::ensure_chunks_fulltext();
 
         // ── Personas (custom user-created personas) ─────────────
         $sql = "CREATE TABLE {$prefix}sathi_personas (
@@ -145,5 +151,45 @@ class Schema {
     public static function needs_update(): bool {
         $installed = get_option( 'sathi_db_version', '0' );
         return version_compare( $installed, self::VERSION, '<' );
+    }
+
+    /**
+     * Ensure the knowledge-chunks table has a FULLTEXT index on `content`.
+     * Idempotent and safe to call on any request (checks information_schema
+     * first). InnoDB supports FULLTEXT on MySQL 5.6+ / MariaDB 10.0.5+; on the
+     * rare engine that doesn't, the ALTER simply fails and search falls back to
+     * LIKE — so this never breaks the plugin.
+     */
+    public static function ensure_chunks_fulltext(): void {
+        global $wpdb;
+        $table = $wpdb->prefix . 'sathi_knowledge_chunks';
+
+        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {
+            return;
+        }
+
+        // Make sure 'site_part' is a valid source_type (header/footer sources).
+        // Older installs had an ENUM without it, which silently coerced those
+        // rows to '' and broke contact-info boosting.
+        $col = $wpdb->get_row( "SHOW COLUMNS FROM {$table} LIKE 'source_type'" );
+        if ( $col && isset( $col->Type ) && strpos( (string) $col->Type, 'site_part' ) === false ) {
+            $prev = $wpdb->suppress_errors( true );
+            $wpdb->query( "ALTER TABLE {$table} MODIFY source_type ENUM('post','page','product','custom','site_part') NOT NULL DEFAULT 'post'" );
+            $wpdb->suppress_errors( $prev );
+        }
+
+        $exists = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(1) FROM information_schema.STATISTICS
+             WHERE table_schema = %s AND table_name = %s AND index_name = 'ft_content'",
+            DB_NAME, $table
+        ) );
+        if ( $exists > 0 ) {
+            return;
+        }
+
+        // Suppress errors: a failed ALTER (unsupported engine) is non-fatal.
+        $prev = $wpdb->suppress_errors( true );
+        $wpdb->query( "ALTER TABLE {$table} ADD FULLTEXT KEY ft_content (content)" );
+        $wpdb->suppress_errors( $prev );
     }
 }

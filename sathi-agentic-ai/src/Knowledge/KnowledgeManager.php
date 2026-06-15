@@ -16,6 +16,7 @@ namespace RaiLabs\Sathi\Knowledge;
 
 use RaiLabs\Sathi\Providers\Factory;
 use RaiLabs\Sathi\Support\Helpers;
+use RaiLabs\Sathi\Core\Database\Schema;
 use WP_Post;
 
 class KnowledgeManager {
@@ -139,6 +140,12 @@ class KnowledgeManager {
     public function scan_slice( int $offset, int $limit = 8 ): array {
         $offset = max( 0, $offset );
         $total  = $this->crawler->count_all();
+
+        // Make sure relevance-ranked keyword search is available (self-heals on
+        // upgrade without needing reactivation). Safe + idempotent.
+        if ( $offset === 0 ) {
+            Schema::ensure_chunks_fulltext();
+        }
 
         // At the start of a full scan, (re)index the sitewide header + footer
         // once so the bot has the real business/contact info that themes keep
@@ -519,38 +526,149 @@ class KnowledgeManager {
     public function search( string $query, int $limit = 5 ): array {
         global $wpdb;
 
-        $search_terms = array_filter( explode( ' ', trim( $query ) ) );
-        if ( empty( $search_terms ) ) {
+        $query = trim( $query );
+        if ( $query === '' ) {
             return [];
         }
 
-        $conditions = [];
-        $params     = [ 'active' ];
+        $recall = max( $limit * 3, 12 );
+        $scored = []; // id => row + _score
 
-        foreach ( $search_terms as $term ) {
-            $conditions[] = 'content LIKE %s';
-            $params[]     = '%' . $wpdb->esc_like( $term ) . '%';
+        // ── 1) FULLTEXT relevance (BM25-style). This is the key accuracy
+        //        upgrade: rank by how well a chunk MATCHES the query — not by
+        //        chunk length. Works with ANY provider / no embeddings. ──────
+        $prev_err = $wpdb->suppress_errors( true );
+        $ft = $wpdb->get_results( $wpdb->prepare(
+            "SELECT id, source_url, source_type, source_id, chunk_index, content, token_count,
+                    MATCH(content) AGAINST(%s IN NATURAL LANGUAGE MODE) AS relevance
+             FROM {$this->chunks_table}
+             WHERE status = 'active'
+               AND MATCH(content) AGAINST(%s IN NATURAL LANGUAGE MODE)
+             ORDER BY relevance DESC
+             LIMIT %d",
+            $query, $query, $recall
+        ), ARRAY_A );
+        $wpdb->suppress_errors( $prev_err );
+
+        if ( is_array( $ft ) ) {
+            // Normalise FULLTEXT relevance to ~0..1 against the top hit.
+            $max_rel = 0.0;
+            foreach ( $ft as $r ) { $max_rel = max( $max_rel, (float) $r['relevance'] ); }
+            $max_rel = $max_rel ?: 1.0;
+            foreach ( $ft as $r ) {
+                $r['_score'] = (float) $r['relevance'] / $max_rel;
+                $scored[ (int) $r['id'] ] = $r;
+            }
         }
 
-        $where = implode( ' OR ', $conditions );
+        // ── 2) LIKE recall — covers short tokens, exact phrases, and
+        //        non-Latin scripts (Hindi/Gujarati/etc.) that FULLTEXT may not
+        //        tokenise. Scored by how many query terms a chunk contains. ──
+        $terms = array_values( array_filter(
+            preg_split( '/\s+/u', $query ) ?: [],
+            static fn( $t ) => mb_strlen( $t ) >= 2
+        ) );
+        if ( ! empty( $terms ) && count( $scored ) < $recall ) {
+            $conds = [];
+            $params = [];
+            foreach ( $terms as $t ) {
+                $conds[]  = 'content LIKE %s';
+                $params[] = '%' . $wpdb->esc_like( $t ) . '%';
+            }
+            $like = $wpdb->get_results( $wpdb->prepare(
+                "SELECT id, source_url, source_type, source_id, chunk_index, content, token_count
+                 FROM {$this->chunks_table}
+                 WHERE status = 'active' AND ( " . implode( ' OR ', $conds ) . " )
+                 LIMIT %d",
+                array_merge( $params, [ $recall ] )
+            ), ARRAY_A );
+            foreach ( (array) $like as $r ) {
+                $id = (int) $r['id'];
+                if ( isset( $scored[ $id ] ) ) {
+                    continue;
+                }
+                $hits = 0;
+                $lc   = function_exists( 'mb_strtolower' ) ? mb_strtolower( $r['content'] ) : strtolower( $r['content'] );
+                foreach ( $terms as $t ) {
+                    if ( mb_strpos( $lc, mb_strtolower( $t ) ) !== false ) { $hits++; }
+                }
+                $r['_score'] = 0.35 * ( $hits / max( 1, count( $terms ) ) ); // below FULLTEXT band
+                $scored[ $id ] = $r;
+            }
+        }
 
-        $results = $wpdb->get_results( $wpdb->prepare(
-            "SELECT id, source_url, source_type, source_id, chunk_index, content, token_count
-             FROM {$this->chunks_table}
-             WHERE status = %s AND ({$where})
-             ORDER BY token_count DESC
-             LIMIT %d",
-            array_merge( $params, [ $limit ] )
-        ), ARRAY_A );
+        if ( empty( $scored ) ) {
+            return [];
+        }
 
-        return array_map( function ( $row ) {
-            $row['id']         = (int) $row['id'];
-            $row['source_id']  = $row['source_id'] ? (int) $row['source_id'] : null;
-            $row['chunk_index'] = (int) $row['chunk_index'];
-            $row['token_count'] = (int) $row['token_count'];
-            $row['excerpt']     = Helpers::clean_text( $row['content'], 300 );
-            return $row;
-        }, $results ?: [] );
+        // ── 3) Intent-aware boosting — make the RIGHT kind of chunk win so the
+        //        bot pulls the correct context regardless of provider. ───────
+        $intent     = $this->detect_intent( $query );
+        $site_parts = [ SiteCrawler::SOURCE_HEADER, SiteCrawler::SOURCE_FOOTER ];
+        foreach ( $scored as $id => $r ) {
+            $boost = 0.0;
+            $type  = $r['source_type'] ?? '';
+            $url   = $r['source_url'] ?? '';
+            $body  = $r['content'] ?? '';
+            $sid   = (int) ( $r['source_id'] ?? 0 );
+            // Header/footer detection is by source_id (reliable even if the
+            // source_type ENUM coerced the value on older installs).
+            $is_site_part = in_array( $sid, $site_parts, true ) || $type === 'site_part';
+            $is_policy    = (bool) preg_match( '#(shipping|refund|return|exchange|terms|privacy|policy|disclaimer)#i', $url );
+            $has_contact_info = (bool) preg_match( '/[\w.+-]+@[\w.-]+\.\w{2,}|\+?\d[\d\s().-]{7,}\d/', $body );
+
+            if ( $intent === 'contact' ) {
+                if ( $is_site_part )                       { $boost += 1.5; } // footer/header = canonical contact
+                if ( stripos( $url, 'contact' ) !== false ) { $boost += 1.2; }
+                if ( $has_contact_info )                    { $boost += 0.4; }
+                if ( $is_policy )                           { $boost -= 0.6; } // legal pages aren't "contact"
+            } elseif ( $intent === 'price' ) {
+                if ( $type === 'product' )                  { $boost += 1.2; }
+                if ( strpos( $body, '₹' ) !== false || stripos( $body, 'price' ) !== false ) { $boost += 0.3; }
+                if ( $is_policy )                           { $boost -= 0.4; }
+            } elseif ( $intent === 'about' ) {
+                if ( stripos( $url, 'about' ) !== false )   { $boost += 1.0; }
+                if ( $is_site_part )                        { $boost += 0.4; }
+            }
+            $scored[ $id ]['_score'] = ( $scored[ $id ]['_score'] ?? 0 ) + $boost;
+        }
+
+        // ── 4) Sort by final score, return top N ──────────────────────────
+        $rows = array_values( $scored );
+        usort( $rows, static fn( $a, $b ) => ( $b['_score'] ?? 0 ) <=> ( $a['_score'] ?? 0 ) );
+        $rows = array_slice( $rows, 0, $limit );
+
+        return array_map( static function ( $row ) {
+            return [
+                'id'          => (int) $row['id'],
+                'source_url'  => $row['source_url'],
+                'source_type' => $row['source_type'],
+                'source_id'   => $row['source_id'] ? (int) $row['source_id'] : null,
+                'chunk_index' => (int) $row['chunk_index'],
+                'content'     => $row['content'],
+                'token_count' => (int) $row['token_count'],
+                'excerpt'     => Helpers::clean_text( $row['content'], 300 ),
+            ];
+        }, $rows );
+    }
+
+    /**
+     * Lightweight, multilingual query-intent detection used to boost the right
+     * kind of chunk (contact details, product/price, about). Heuristic only —
+     * no API — so it works on every install.
+     */
+    private function detect_intent( string $query ): string {
+        $q = function_exists( 'mb_strtolower' ) ? mb_strtolower( $query ) : strtolower( $query );
+        if ( preg_match( '/contact|phone|call|email|e-mail|address|reach|whats ?app|mobile|number|located|location|office|enquir|inquir|support|संपर्क|फ़?ोन|पता|नंबर|ईमेल|સંપર્ક|ફોન|સરનામ/u', $q ) ) {
+            return 'contact';
+        }
+        if ( preg_match( '/price|cost|rate|charge|buy|purchase|order|quote|kitne|kitna|daam|keemat|दाम|क़?ीमत|मूल्य|भाव|ख़?रीद|કિંમત|ભાવ|ખરીદ|₹|rs\.?|rupee/u', $q ) ) {
+            return 'price';
+        }
+        if ( preg_match( '/about|who are|company|history|mission|बारे|कंपनी|વિશે|કંપની/u', $q ) ) {
+            return 'about';
+        }
+        return 'general';
     }
 
     /**
