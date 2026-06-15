@@ -139,6 +139,17 @@ class KnowledgeManager {
     public function scan_slice( int $offset, int $limit = 8 ): array {
         $offset = max( 0, $offset );
         $total  = $this->crawler->count_all();
+
+        // At the start of a full scan, (re)index the sitewide header + footer
+        // once so the bot has the real business/contact info that themes keep
+        // there (and not only inside individual pages).
+        if ( $offset === 0 ) {
+            $parts = $this->crawler->crawl_site_parts();
+            if ( ! empty( $parts ) ) {
+                $this->store_chunks( $parts );
+            }
+        }
+
         $chunks = $this->crawler->crawl_all( $limit, $offset );
         if ( ! empty( $chunks ) ) {
             $this->store_chunks( $chunks );
@@ -146,6 +157,10 @@ class KnowledgeManager {
         $next = $offset + $limit;
         $done = $next >= $total;
         if ( $done ) {
+            // Drop anything that is no longer published (trashed, set to draft,
+            // made private, deleted, or excluded) so the KB reflects ONLY
+            // current published content.
+            $this->prune_orphans();
             update_option( 'sathi_knowledge_last_crawl', current_time( 'mysql' ) );
         }
         return [
@@ -155,6 +170,41 @@ class KnowledgeManager {
             'done'      => $done,
             'chunks'    => count( $chunks ),
         ];
+    }
+
+    /**
+     * Soft-delete active chunks whose source is no longer a published,
+     * indexable post — i.e. trashed, drafted, made private, deleted, or
+     * excluded via _sathi_exclude. The dedicated header/footer site-parts are
+     * always kept. Runs at the end of a full deep scan so the knowledge base
+     * never serves stale content from pages that have since been removed.
+     */
+    private function prune_orphans(): void {
+        global $wpdb;
+
+        $published = get_posts( [
+            'post_type'        => $this->crawler->get_content_types(),
+            'post_status'      => 'publish',
+            'posts_per_page'   => -1,
+            'fields'           => 'ids',
+            'has_password'     => false,
+            'suppress_filters' => true,
+            'no_found_rows'    => true,
+            'meta_query'       => [ [ 'key' => '_sathi_exclude', 'compare' => 'NOT EXISTS' ] ],
+        ] );
+
+        $keep = array_map( 'intval', (array) $published );
+        // Always keep the sitewide header/footer sources.
+        $keep[] = SiteCrawler::SOURCE_HEADER;
+        $keep[] = SiteCrawler::SOURCE_FOOTER;
+
+        $placeholders = implode( ',', array_fill( 0, count( $keep ), '%d' ) );
+        $wpdb->query( $wpdb->prepare(
+            "UPDATE {$this->chunks_table}
+             SET status = 'deleted', updated_at = %s
+             WHERE status = 'active' AND ( source_id IS NULL OR source_id NOT IN ( {$placeholders} ) )",
+            array_merge( [ current_time( 'mysql' ) ], $keep )
+        ) );
     }
 
     /**
@@ -205,6 +255,25 @@ class KnowledgeManager {
      */
     private function store_chunks( array $chunks ): void {
         global $wpdb;
+
+        if ( empty( $chunks ) ) {
+            return;
+        }
+
+        // Per-source replace: before inserting a source's fresh chunks, retire
+        // its previous active chunks. This keeps re-scans idempotent (no
+        // duplicates) and guarantees stale text for a source is dropped.
+        $source_ids = array_unique( array_filter(
+            array_map( static fn( $c ) => $c['source_id'] ?? null, $chunks ),
+            static fn( $v ) => $v !== null
+        ) );
+        foreach ( $source_ids as $sid ) {
+            $wpdb->update(
+                $this->chunks_table,
+                [ 'status' => 'deleted', 'updated_at' => current_time( 'mysql' ) ],
+                [ 'source_id' => (int) $sid, 'status' => 'active' ]
+            );
+        }
 
         foreach ( $chunks as $chunk ) {
             $wpdb->insert( $this->chunks_table, [

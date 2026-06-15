@@ -11,6 +11,10 @@ use RaiLabs\Sathi\Support\Helpers;
 
 class SiteCrawler {
 
+    /** Synthetic source IDs for the site-wide header & footer (not real posts). */
+    public const SOURCE_HEADER = 999000001;
+    public const SOURCE_FOOTER = 999000002;
+
     /** @var string[] Post types to crawl */
     private array $content_types;
 
@@ -160,12 +164,35 @@ class SiteCrawler {
         }, $chunks, array_keys( $chunks ) );
     }
 
-    /** Strip HTML to clean readable text. */
+    /** Strip HTML to clean readable text (no leaked CSS/JS). */
     private function clean_html( string $html ): string {
+        $html = (string) $html;
+        // Safe preg_replace: if PCRE bails on very large input (backtrack
+        // limit), keep the previous string instead of nulling everything out.
+        $rep = static function ( string $pattern, string $subject ): string {
+            $out = preg_replace( $pattern, ' ', $subject );
+            return is_string( $out ) ? $out : $subject;
+        };
+        // 1) Remove code/markup blocks ENTIRELY — content included. Critical:
+        //    wp_strip_all_tags() removes <style>/<script> TAGS but keeps the
+        //    CSS/JS text between them, which otherwise pollutes the KB
+        //    (e.g. Elementor's inline ".elementor-widget{…}" rules).
+        $html = $rep( '#<(script|style|noscript|svg|template|iframe|select|option)\b[^>]*>.*?</\1>#is', $html );
+        // 2) Drop HTML comments (page-builders leave large comment blocks).
+        $html = $rep( '#<!--.*?-->#s', $html );
+        // 2b) Separate adjacent elements so text nodes don't fuse
+        //     ("Nilesh Engineers" + "Call us" → "Nilesh EngineersCall us").
+        $html = str_replace( '<', ' <', $html );
+        // 3) Strip remaining tags.
         $html = wp_strip_all_tags( $html, true );
+        // 4) Scrub any residual CSS that builders embed as plain text: block
+        //    comments and flat "selector { … }" rule blocks.
+        $html = $rep( '~/\*.*?\*/~s', $html );
+        $html = $rep( '~[.#]?[A-Za-z0-9_\-]+\s*\{[^{}]*\}~', $html );
+        // 5) Decode entities + collapse whitespace.
         $html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-        $html = preg_replace( '/\s+/', ' ', $html );
-        return trim( (string) $html );
+        $html = $rep( '/\s+/', $html );
+        return trim( $html );
     }
 
     /** Does this post use a page builder (content lives in postmeta)? */
@@ -214,6 +241,91 @@ class SiteCrawler {
         }
 
         return $this->clean_html( $html );
+    }
+
+    /**
+     * Index the site-wide HEADER and FOOTER once. Themes put the real,
+     * sitewide info there — business name, navigation, and especially the
+     * genuine contact details (phone, email, address, hours, social links).
+     * Stored as two dedicated sources so the bot has them without repeating
+     * them on every page.
+     *
+     * @return array[] chunks (0–2 entries)
+     */
+    public function crawl_site_parts(): array {
+        $home = home_url( '/' );
+        $res  = wp_remote_get( $home, [
+            'timeout'     => 15,
+            'redirection' => 2,
+            'sslverify'   => false,
+            'user-agent'  => 'SaathiBot/1.0 (+knowledge-scan)',
+            'headers'     => [ 'Accept' => 'text/html' ],
+        ] );
+        if ( is_wp_error( $res ) || (int) wp_remote_retrieve_response_code( $res ) >= 400 ) {
+            return [];
+        }
+        $html = (string) wp_remote_retrieve_body( $res );
+        if ( $html === '' ) {
+            return [];
+        }
+
+        $chunks = [];
+
+        $header = $this->extract_region( $html, 'header', [ 'site-header', 'masthead', 'main-header', 'topbar', 'top-bar', 'navbar' ] );
+        if ( $header !== '' ) {
+            $chunks[] = [
+                'source_url'  => $home,
+                'source_type' => 'site_part',
+                'source_id'   => self::SOURCE_HEADER,
+                'chunk_index' => 0,
+                'content'     => "# Site header & navigation\n\n" . $header,
+            ];
+        }
+
+        $footer = $this->extract_region( $html, 'footer', [ 'site-footer', 'colophon', 'main-footer', 'footer-widgets', 'footer' ] );
+        if ( $footer !== '' ) {
+            $chunks[] = [
+                'source_url'  => $home,
+                'source_type' => 'site_part',
+                'source_id'   => self::SOURCE_FOOTER,
+                'chunk_index' => 0,
+                'content'     => "# Site footer — contact details, address & links\n\n" . $footer,
+            ];
+        }
+
+        return $chunks;
+    }
+
+    /**
+     * Extract a sitewide region (header/footer) from raw homepage HTML.
+     * Prefers the semantic <header>/<footer> tag, then falls back to common
+     * id/class hints. Returns cleaned, length-capped text.
+     *
+     * @param string   $html        Raw homepage HTML.
+     * @param string   $tag         'header' or 'footer'.
+     * @param string[] $class_hints id/class substrings to try as a fallback.
+     */
+    private function extract_region( string $html, string $tag, array $class_hints ): string {
+        $region = '';
+        if ( preg_match( '#<' . $tag . '\b[^>]*>(.*?)</' . $tag . '>#is', $html, $m ) ) {
+            $region = $m[1];
+        } else {
+            foreach ( $class_hints as $hint ) {
+                if ( preg_match( '#<([a-z0-9]+)\b[^>]*(?:id|class)="[^"]*' . preg_quote( $hint, '#' ) . '[^"]*"[^>]*>(.*?)</\1>#is', $html, $m ) ) {
+                    $region = $m[2];
+                    break;
+                }
+            }
+        }
+        if ( $region === '' ) {
+            return '';
+        }
+        $text = $this->clean_html( $region );
+        // Cap so sitewide nav/footer never dominates the knowledge base.
+        if ( mb_strlen( $text ) > 1500 ) {
+            $text = mb_substr( $text, 0, 1500 );
+        }
+        return $text;
     }
 
     /**
