@@ -1870,20 +1870,11 @@
 
 /* ── ≤ 480px (phones) — Full-screen mode ────────────────────────────── */
 @media (max-width: 480px) {
-  /* Proportional bottom panel — never full-screen, page stays visible above.
-     Bottom is lifted clear of any sticky mobile nav bar + the device safe-area
-     so the input + send button are always tappable (not hidden behind the bar). */
+  /* Compact, movable + resizable panel (size/position come from the inline
+     drag styles — same as desktop). It is anchored to the lifted floating
+     root, so it sits above any sticky mobile bottom bar without covering the
+     whole screen. */
   .sathi-window {
-    position: fixed;
-    left: 0.5rem !important;
-    right: 0.5rem !important;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-    top: 0.6rem !important;
-    transform: none !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
     border-radius: 20px;
     z-index: var(--sathi-z-widget);
   }
@@ -1896,8 +1887,8 @@
      Cart bars common on mobile commerce themes) + the device safe-area, so the
      mascot is always visible above them. */
   .sathi-floating-root {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 1rem !important;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 0.5rem !important;
     left: auto !important;
     top: auto !important;
   }
@@ -1935,18 +1926,13 @@
 /* ── ≥ 480px and ≤ 768px (large phones / small tablets) ─────────────── */
 @media (min-width: 480px) and (max-width: 768px) {
   /* Lift launcher (and the in-flow window anchored to it) above any sticky
-     mobile bottom bar + safe-area. */
+     mobile bottom bar + safe-area. Window size/position come from the inline
+     drag styles (movable + resizable). */
   .sathi-floating-root {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 1rem !important;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 0.5rem !important;
   }
-  /* Compact side panel anchored bottom-right, not full screen. */
   .sathi-window {
-    width: min(400px, calc(100vw - 1.5rem)) !important;
-    height: min(560px, calc(100dvh - 110px)) !important;
-    max-width: calc(100vw - 1.5rem) !important;
-    max-height: calc(100dvh - 100px) !important;
-    transform: none !important;
     border-radius: 20px;
   }
 }
@@ -2102,13 +2088,18 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   cursor: nwse-resize;
   z-index: 6;
+  touch-action: none; /* let touch-drag resize instead of scrolling the page */
 }
 /* No visible arrow/marker — the handle stays an invisible grab zone so
    resizing still works, just without the corner glyph. */
+/* Slightly larger grab zone on touch devices for easy finger resizing. */
+@media (hover: none) and (pointer: coarse) {
+  .sathi-resize-handle { width: 36px; height: 36px; }
+}
 
 /* Header icons clearly visible, no background box (per request) */
 .sathi-header .sathi-header-btn {

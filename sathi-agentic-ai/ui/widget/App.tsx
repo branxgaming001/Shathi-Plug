@@ -60,7 +60,9 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
   const sizeRef = useRef(winSize); sizeRef.current = winSize;
 
   useEffect(() => {
-    if (embedded || isSmall || !isOpen || isMinimized) return;
+    // Move + resize now work on touch devices too (the user can reposition /
+    // resize the window on phones), so we no longer gate this on screen size.
+    if (embedded || !isOpen || isMinimized) return;
     const win = windowRef.current; if (!win) return;
     const header = win.querySelector('.sathi-header') as HTMLElement | null;
     const handle = win.querySelector('.sathi-resize-handle') as HTMLElement | null;
@@ -77,10 +79,10 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
     };
     const headerDown = (e: PointerEvent) => { if ((e.target as HTMLElement).closest('button')) return; mode = 'drag'; sx = e.clientX; sy = e.clientY; sp = { ...posRef.current }; document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); };
     const handleDown = (e: PointerEvent) => { e.preventDefault(); e.stopPropagation(); mode = 'resize'; sx = e.clientX; sy = e.clientY; ss = { ...sizeRef.current }; document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); };
-    if (header) { header.addEventListener('pointerdown', headerDown); header.style.cursor = 'move'; }
+    if (header) { header.addEventListener('pointerdown', headerDown); header.style.cursor = 'move'; header.style.touchAction = 'none'; }
     if (handle) handle.addEventListener('pointerdown', handleDown);
     return () => { if (header) header.removeEventListener('pointerdown', headerDown); if (handle) handle.removeEventListener('pointerdown', handleDown); document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
-  }, [isOpen, isMinimized, embedded, isSmall]);
+  }, [isOpen, isMinimized, embedded]);
 
   // Auto-hide the speech bubble after a few seconds (no manual close button).
   useEffect(() => {
@@ -487,14 +489,16 @@ const App: React.FC<AppProps> = ({ embedded = false, defaultPersona }) => {
         </div>
       )}
 
-      {/* Chat window — draggable + resizable on desktop, proportional panel on mobile */}
+      {/* Chat window — draggable + resizable on desktop AND mobile. A compact
+          panel (never full-screen); clamps keep it on-screen and clear of any
+          sticky mobile bottom bar. */}
       {isOpen && !isMinimized && (
         <div
           ref={windowRef}
           className="sathi-window flex"
-          style={isSmall ? undefined : { width: winSize.w, height: winSize.h, transform: `translate(${winPos.x}px, ${winPos.y}px)`, maxWidth: 'calc(100vw - 2rem)', maxHeight: 'calc(100vh - 2rem)' }}
+          style={{ width: winSize.w, height: winSize.h, transform: `translate(${winPos.x}px, ${winPos.y}px)`, maxWidth: 'calc(100vw - 1rem)', maxHeight: 'calc(100dvh - 110px)' }}
         >
-          {!isSmall && <div className="sathi-resize-handle" title="Drag to resize" aria-hidden="true" />}
+          <div className="sathi-resize-handle" title="Drag to resize" aria-hidden="true" />
           {sidebarOpen && <ConversationSidebar />}
           <div className="flex-1 min-w-0">
             <ChatWidget
