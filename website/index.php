@@ -1,49 +1,229 @@
-<?php
-require __DIR__ . '/db.php';
-
-$cfg     = (require __DIR__ . '/config.php')['db'];
-$dbOk    = false;
-$dbVer   = '';
-$dbNote  = '';
-try {
-    $dbVer = db()->query('SELECT VERSION()')->fetchColumn();
-    $dbOk  = true;
-} catch (Throwable $e) {
-    // Don't crash the page if the DB isn't attached yet — show a friendly note.
-    $dbNote = $e->getMessage();
-}
-?>
+<?php $YEAR = date('Y'); $IMG = require __DIR__ . '/assets/images.php'; ?>
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Saathi Website — Live</title>
-  <style>
-    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;margin:0;background:linear-gradient(135deg,#ece8ff,#fdeee9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .card{background:#fff;border-radius:20px;box-shadow:0 18px 50px rgba(80,60,200,.18);padding:34px 30px;max-width:520px;width:100%}
-    h1{margin:.2rem 0 .4rem;font-size:1.5rem;color:#1f1147}
-    .pill{display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
-    .ok{background:#e7f9f0;color:#0e9f6e}.warn{background:#fff4e5;color:#b25e00}
-    .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0eefb;font-size:14px}
-    .row b{color:#6D5DFB}
-    .muted{color:#8a86a3;font-size:12.5px;margin-top:14px;line-height:1.5}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saathi — the AI chatbot that supports & sells for your website</title>
+<meta name="description" content="Saathi is an agentic AI support + sales assistant for WordPress & WooCommerce. Knows your site, sells your products in chat, speaks every language, fully customizable, and improves over time.">
+<link rel="icon" href="<?=$IMG['logo']?>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
-  <div class="card">
-    <h1>Saathi website is live 🚀</h1>
-    <p class="pill <?= $dbOk ? 'ok' : 'warn' ?>"><?= $dbOk ? 'PHP + MySQL connected' : 'PHP running · database pending' ?></p>
-    <div style="margin-top:18px">
-      <div class="row"><span>PHP version</span><b><?= htmlspecialchars(PHP_VERSION) ?></b></div>
-      <div class="row"><span>Database host</span><b><?= htmlspecialchars($cfg['host']) ?>:<?= htmlspecialchars($cfg['port']) ?></b></div>
-      <div class="row"><span>Database</span><b><?= $dbOk ? htmlspecialchars($dbVer) : 'not connected yet' ?></b></div>
-    </div>
-    <?php if (!$dbOk): ?>
-      <p class="muted">Add a MySQL service in Railway and reference its variables on this service — the page will turn green automatically on next load.</p>
-    <?php else: ?>
-      <p class="muted">Deployment pipeline working. Ready to build the real website on this same live URL.</p>
-    <?php endif; ?>
+
+<!-- NAV -->
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#top"><img src="<?=$IMG['logo']?>" alt="Saathi logo">Saathi</a>
+  <nav class="nav-links">
+    <a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav-cta">
+    <button class="btn btn-ghost" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">Live demo</button>
+    <a class="btn btn-primary" href="login.php">Get started</a>
   </div>
+</div></header>
+
+<!-- HERO -->
+<section class="hero" id="top"><div class="wrap">
+  <div>
+    <span class="eyebrow">The best WordPress AI chatbot</span>
+    <h1>Meet <span class="grad">Saathi</span> — the bot that <span class="grad">supports & sells</span> for you.</h1>
+    <p class="lead">An agentic AI assistant that learns your real website content, recommends and sells your products inside chat, speaks every visitor's language, and gets smarter over time.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary btn-lg" href="login.php">Start free</a>
+      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">▶ Try the live bot</button>
+    </div>
+    <div class="ministats">
+      <div><b>5 min</b><span>setup</span></div>
+      <div><b>40+</b><span>languages</span></div>
+      <div><b>Any</b><span>AI model (even free)</span></div>
+      <div><b>24/7</b><span>support & sales</span></div>
+    </div>
+  </div>
+  <div class="hero-art"><img src="<?=$IMG['hero']?>" alt="Saathi chat widget on a website"></div>
+</div></section>
+
+<!-- TRUST -->
+<div class="trust"><div class="wrap">
+  <?php
+  $pills = ['WooCommerce ready','Multilingual','Works with any AI key','Privacy-first','Fully customizable','Self-improving AI'];
+  $check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
+  foreach ($pills as $p) echo '<span class="pill">'.$check.' '.$p.'</span>';
+  ?>
+</div></div>
+
+<!-- FEATURES (alternating) -->
+<section class="section" id="features"><div class="wrap">
+  <span class="eyebrow" style="display:block;text-align:center;margin:0 auto">Features</span>
+  <h2>Everything your website needs in one bot</h2>
+  <p class="sub">Saathi blends agentic support, in-chat commerce, and deep site knowledge — wrapped in a premium, fully-customizable widget.</p>
+
+  <div class="feat">
+    <div class="feat-img"><img src="<?=$IMG['feature-commerce']?>" alt="Product showcase in chat"></div>
+    <div class="feat-text">
+      <h3>Sell inside the chat 🛍️</h3>
+      <p>Saathi shows real product cards with image, rating and price — and lets customers <strong>Add to Cart</strong> or <strong>Buy Now</strong> without leaving the conversation.</p>
+      <ul class="feat-list">
+        <li><?=$check?> Live WooCommerce product showcase</li>
+        <li><?=$check?> One-tap Add to Cart & instant checkout</li>
+        <li><?=$check?> Recommends the right product from your catalog</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feat rev">
+    <div class="feat-text">
+      <h3>Knows your site — not generic answers 🧠</h3>
+      <p>A deep scan indexes only your <strong>published</strong> pages, posts and products, so every answer is grounded in your real content. No hallucinated info.</p>
+      <ul class="feat-list">
+        <li><?=$check?> Reads your live, current content</li>
+        <li><?=$check?> Follow-up suggestions from your real pages</li>
+        <li><?=$check?> Ignores drafts, trash & junk automatically</li>
+      </ul>
+    </div>
+    <div class="feat-img"><img src="<?=$IMG['feature-knowledge']?>" alt="Knowledge scan"></div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-img"><img src="<?=$IMG['feature-multilingual']?>" alt="Multilingual chat"></div>
+    <div class="feat-text">
+      <h3>Speaks your visitor's language 🌍</h3>
+      <p>English, Hindi, Hinglish, Gujarati and 40+ more — Saathi auto-replies in whatever language each visitor types.</p>
+      <ul class="feat-list">
+        <li><?=$check?> Automatic language matching</li>
+        <li><?=$check?> Keeps brand & product names intact</li>
+        <li><?=$check?> Works on any AI model — even free ones</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feat rev">
+    <div class="feat-text">
+      <h3>Make it truly yours 🎨</h3>
+      <p>Pick your brand colour and choose a friendly mascot — the whole widget re-themes instantly. Try it live in the demo bot (bottom-right) right now.</p>
+      <ul class="feat-list">
+        <li><?=$check?> Brand colour + 8 mascots</li>
+        <li><?=$check?> Drag, resize & position the window</li>
+        <li><?=$check?> Beautiful on mobile & desktop</li>
+      </ul>
+    </div>
+    <div class="feat-img"><img src="<?=$IMG['feature-customize']?>" alt="Customization"></div>
+  </div>
+</div></section>
+
+<!-- SMALL CARDS -->
+<section class="section" style="padding-top:0"><div class="wrap">
+  <div class="cards">
+    <?php
+    $bolt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>';
+    $chat='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l1.9-5.5A8.5 8.5 0 1 1 21 11.5z"/></svg>';
+    $move='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4"/></svg>';
+    $phone='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>';
+    $spark='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>';
+    $shield='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5z"/></svg>';
+    $cards=[
+      [$chat,'Agentic support','Answers questions, guides visitors, and takes action — not just canned replies.'],
+      [$spark,'Self-improving','Learns from chats and your content over time, so answers keep getting sharper.'],
+      [$bolt,'Smart follow-ups','Suggests the next best question — always grounded in your real site.'],
+      [$move,'Drag & resize','Visitors can move and resize the window; you control default position.'],
+      [$phone,'Mobile-perfect','Sits cleanly above mobile nav bars, fully responsive, fast to load.'],
+      [$shield,'Secure & private','Refuses sensitive data, respects privacy, and stays in your scope.'],
+    ];
+    foreach($cards as $c) echo '<div class="card"><div class="ico">'.$c[0].'</div><h4>'.$c[1].'</h4><p>'.$c[2].'</p></div>';
+    ?>
+  </div>
+</div></section>
+
+<!-- LIVE DEMO -->
+<section class="section" style="padding-top:0"><div class="wrap">
+  <div class="demo">
+    <span class="eyebrow">See it live</span>
+    <h2 style="margin-top:10px">Talk to Saathi right now</h2>
+    <p>Open the bot in the bottom-right corner. Ask about features or pricing, type <em>“show me a product demo”</em>, and switch its colour & mascot — live.</p>
+    <button class="btn btn-primary btn-lg" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">Open the demo bot</button>
+  </div>
+</div></section>
+
+<!-- PRICING -->
+<section class="section" id="pricing"><div class="wrap">
+  <span class="eyebrow" style="display:block;text-align:center;margin:0 auto">Pricing</span>
+  <h2>Simple, honest pricing</h2>
+  <p class="sub">Start free. Upgrade when you're ready. Lifetime means pay once — forever.</p>
+  <div class="prices">
+    <div class="price">
+      <h4>Free</h4><div class="amt">₹0<span>/forever</span></div>
+      <ul>
+        <li><?=$check?> Core AI chat</li><li><?=$check?> 1 website</li>
+        <li><?=$check?> Any AI provider key</li><li><?=$check?> Community support</li>
+      </ul>
+      <a class="btn btn-ghost" href="login.php">Start free</a>
+    </div>
+    <div class="price pop">
+      <h4>Pro</h4><div class="amt">₹999<span>/month</span></div>
+      <ul>
+        <li><?=$check?> Everything in Free</li><li><?=$check?> WooCommerce product showcase</li>
+        <li><?=$check?> Multilingual + deep knowledge scan</li><li><?=$check?> Colour & mascot customization</li>
+        <li><?=$check?> Priority support</li>
+      </ul>
+      <a class="btn btn-primary" href="login.php">Get Pro</a>
+    </div>
+    <div class="price">
+      <h4>Lifetime</h4><div class="amt">₹9,999<span>/once</span></div>
+      <ul>
+        <li><?=$check?> Everything in Pro</li><li><?=$check?> Unlimited duration</li>
+        <li><?=$check?> All future updates</li><li><?=$check?> Best value</li>
+      </ul>
+      <a class="btn btn-ghost" href="login.php">Buy Lifetime</a>
+    </div>
+  </div>
+</div></section>
+
+<!-- FAQ -->
+<section class="section" id="faq" style="padding-top:0"><div class="wrap">
+  <h2>Frequently asked</h2>
+  <div class="faq">
+    <?php
+    $faqs=[
+      ['Do I need a paid AI account?','No — Saathi works with any AI provider, including free models. Add your key and you are ready.'],
+      ['Will it answer from MY content?','Yes. Saathi deep-scans only your published pages, posts and products, so answers stay accurate and on-brand.'],
+      ['Can it sell my products?','Absolutely. On WooCommerce it shows product cards with Add to Cart and Buy Now right inside the chat.'],
+      ['Can I match my brand?','Pick any colour and mascot — the whole widget re-themes instantly. Try it in the demo bot now.'],
+      ['Is it hard to set up?','Install, add your AI key, run the deep scan — live in about five minutes.'],
+    ];
+    foreach($faqs as $q) echo '<details class="qa"><summary>'.$q[0].' <span>+</span></summary><p>'.$q[1].'</p></details>';
+    ?>
+  </div>
+</div></section>
+
+<!-- CTA -->
+<section class="wrap"><div class="cta-band">
+  <h2>Ready to give your site a Saathi?</h2>
+  <p>Join the websites turning visitors into happy customers — with the best AI chatbot in WordPress.</p>
+  <a class="btn btn-ghost btn-lg" href="login.php">Get started free</a>
+</div></section>
+
+<!-- FOOTER -->
+<footer><div class="wrap">
+  <div>
+    <a class="brand" href="#top"><img src="<?=$IMG['logo']?>" alt="" style="width:30px;height:30px"> Saathi</a>
+    <p style="color:#a99fe0;font-size:14px;margin-top:12px;max-width:280px">The agentic AI chatbot that supports and sells for your website. A product by RAI.</p>
+  </div>
+  <div><h5>Product</h5><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="login.php">Get started</a></div>
+  <div><h5>Company</h5><a href="#">About</a><a href="#">Contact</a><a href="#">Blog</a></div>
+  <div><h5>Legal</h5><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Refund</a></div>
+</div><div class="foot-bottom">© <?=$YEAR?> Saathi · a product by RAI. All rights reserved.</div></footer>
+
+<!-- SAATHI DEMO BOT -->
+<div id="sbot"></div>
+<script>
+window.SAATHI_IMG = <?php
+  $m = [];
+  for ($i = 1; $i <= 8; $i++) { $m['mascot-' . $i] = $IMG['mascot-' . $i]; }
+  echo json_encode($m);
+?>;
+</script>
+<script src="assets/widget/saathi-embed.js" defer></script>
 </body>
 </html>
