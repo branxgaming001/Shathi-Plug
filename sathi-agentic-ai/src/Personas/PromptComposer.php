@@ -86,9 +86,15 @@ class PromptComposer {
                 . "- Second option\n"
                 . "- Third option\n"
                 . "</followups>\n"
-                . "Rules: keep each option under ~6 words and phrase it from the VISITOR's point of view (what they'd tap, e.g. \"See pricing\", \"Talk to a human\", \"Show more products\"). "
-                . "Use the same language as the rest of your reply. Put NOTHING after the closing </followups> tag. "
-                . "Only include the block when there is a clear, useful next step — skip it for simple confirmations or goodbyes.";
+                . "CRITICAL GROUNDING RULE: every option MUST be based ONLY on what THIS website actually contains — the real "
+                . "pages, services, topics and products shown in the website content/knowledge above (and the visitor's current question). "
+                . "NEVER invent generic options (e.g. \"consulting services\", \"completed projects\", \"talk to the engineering team\") "
+                . "unless that exact thing truly exists on this site. If this site sells products, prefer options that reference its real "
+                . "product types or categories. If you are not sure an option is supported by the site content, leave it out — and if none "
+                . "of your options would be grounded in this site, OMIT the entire block.\n"
+                . "Also: keep each option under ~6 words, phrase it from the VISITOR's point of view (what they'd tap, e.g. \"See pricing\", "
+                . "\"Contact the team\", \"Show more products\"), use the same language as the rest of your reply, and put NOTHING after the "
+                . "closing </followups> tag. Skip the block entirely for simple confirmations or goodbyes.";
         }
 
         // ── Site context ──────────────────────────────────────────────

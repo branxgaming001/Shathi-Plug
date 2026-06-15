@@ -409,16 +409,16 @@ const ChatbotTab: React.FC<any> = ({ settings, onSave, accent }) => {
                     </div>
                     <span className="w-9 h-9 rounded-lg border border-gray-200 shrink-0" style={{ background: isHex ? current : '#6D5DFB' }} title="Live preview" />
                   </div>
-                  {/* Colour grid — click any swatch to select */}
-                  <div className="grid grid-cols-6 gap-1.5 mt-2.5">
+                  {/* Colour grid — compact swatches, click any to select */}
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
                     {BRAND_PRESETS.map((c) => {
                       const cur = current.toLowerCase() === c.toLowerCase();
                       return (
                         <button key={c} type="button" title={c} aria-label={`Use ${c}`} aria-pressed={cur}
                           onClick={() => set('sathi_accent_color', c)}
-                          className={`relative w-full aspect-square rounded-lg border-2 transition hover:scale-110 ${cur ? 'border-gray-900 scale-110 shadow-md' : 'border-white shadow'}`}
+                          className={`relative w-6 h-6 rounded-md border transition hover:scale-110 ${cur ? 'border-gray-900 scale-110 shadow' : 'border-white/70 shadow-sm'}`}
                           style={{ background: c }}>
-                          {cur && <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold drop-shadow">✓</span>}
+                          {cur && <span className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold drop-shadow">✓</span>}
                         </button>
                       );
                     })}

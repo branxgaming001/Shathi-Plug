@@ -599,17 +599,13 @@ const fmtCount = (n: number): string =>
 const ProductCards: React.FC<{ products: any[] }> = ({ products }) => {
   const single = products.length === 1;
   return (
-    <div
-      className={`sathi-products ${single ? 'sathi-products-single' : 'sathi-products-scroll'}`}
-      role="list"
-      aria-label="Matching products"
-    >
-      {products.map((p) => <ProductCard key={p.id} product={p} single={single} />)}
+    <div className="sathi-products" role="list" aria-label="Matching products">
+      {products.map((p) => <ProductCard key={p.id} product={p} />)}
     </div>
   );
 };
 
-const ProductCard: React.FC<{ product: any; single?: boolean }> = ({ product, single }) => {
+const ProductCard: React.FC<{ product: any }> = ({ product }) => {
   const [status, setStatus] = useState<'' | 'adding' | 'added' | 'error'>('');
   const [fav, setFav] = useState<boolean>(() => {
     try { return JSON.parse(localStorage.getItem('sathi_wishlist') || '[]').includes(product.id); }
@@ -684,7 +680,7 @@ const ProductCard: React.FC<{ product: any; single?: boolean }> = ({ product, si
   const addLabel = status === 'adding' ? '…' : status === 'added' ? '✓' : status === 'error' ? '!' : '+';
 
   return (
-    <div className={`sathi-product-card ${single ? 'is-single' : ''}`} role="listitem">
+    <div className="sathi-product-card" role="listitem">
       <div className="sathi-product-media">
         <a href={product.permalink} target="_blank" rel="noopener noreferrer" aria-label={product.name}>
           {product.image
@@ -700,30 +696,34 @@ const ProductCard: React.FC<{ product: any; single?: boolean }> = ({ product, si
           aria-label={fav ? 'Remove from wishlist' : 'Save to wishlist'}
           title={fav ? 'Saved' : 'Save'}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill={fav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill={fav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
           </svg>
         </button>
       </div>
 
       <div className="sathi-product-body">
+        <a href={product.permalink} target="_blank" rel="noopener noreferrer" className="sathi-product-name">
+          {product.name}
+        </a>
         {ratingCount > 0 && (
           <div className="sathi-product-rating">
             <Stars rating={avg} />
             <span className="sathi-product-rcount">({fmtCount(ratingCount)})</span>
           </div>
         )}
-        <a href={product.permalink} target="_blank" rel="noopener noreferrer" className="sathi-product-name">
-          {product.name}
-        </a>
         {product.subtitle && <div className="sathi-product-sub">{product.subtitle}</div>}
 
-        <div className="sathi-product-foot">
-          <span className="sathi-product-price">
-            {product.regular_display && <del>{product.regular_display}</del>}
-            <span>{product.price_display || product.price_html || ''}</span>
-          </span>
-          {product.in_stock ? (
+        <div className="sathi-product-price">
+          {product.regular_display && <del>{product.regular_display}</del>}
+          <span className="sathi-product-now">{product.price_display || product.price_html || ''}</span>
+        </div>
+
+        {product.in_stock ? (
+          <div className="sathi-product-actions">
+            <button type="button" className="sathi-buy-btn" onClick={buyNow}>
+              Buy now
+            </button>
             <button
               type="button"
               className={`sathi-add-btn ${status ? 'is-' + status : ''}`}
@@ -734,15 +734,9 @@ const ProductCard: React.FC<{ product: any; single?: boolean }> = ({ product, si
             >
               {addLabel}
             </button>
-          ) : (
-            <span className="sathi-product-oos">Out of stock</span>
-          )}
-        </div>
-
-        {product.in_stock && (
-          <button type="button" className="sathi-buy-btn" onClick={buyNow}>
-            Buy now
-          </button>
+          </div>
+        ) : (
+          <span className="sathi-product-oos">Out of stock</span>
         )}
       </div>
     </div>
