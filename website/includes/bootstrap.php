@@ -7,6 +7,12 @@
 declare(strict_types=1);
 date_default_timezone_set('UTC');
 
+/* On shared hosting (e.g. Hostinger) there are no env vars — load a local
+   config file that sets DB creds + secrets via putenv(). No-op on Railway. */
+if (is_file(__DIR__ . '/../config.local.php')) {
+    require __DIR__ . '/../config.local.php';
+}
+
 /* ---------- DB ---------- */
 function pdo(): PDO {
     static $pdo = null;
