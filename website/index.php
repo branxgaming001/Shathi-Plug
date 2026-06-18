@@ -15,6 +15,45 @@ if (!is_array($FR)) $FR = [$IMG['mascot-1']];
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
+<style>
+/* ===== Hero upgrade + provider slider (v2) ===== */
+.hero.blobs:before,.hero.blobs:after{content:"";position:absolute;border-radius:50%;filter:blur(72px);z-index:0;pointer-events:none}
+.hero.blobs:before{width:460px;height:460px;background:rgba(109,93,251,.20);top:-130px;left:-110px}
+.hero.blobs:after{width:400px;height:400px;background:rgba(255,107,94,.16);top:10px;right:-120px}
+.hero .wrap{position:relative;z-index:2}
+.hero h1 .grad.shine{background-image:linear-gradient(120deg,var(--v),var(--c2),var(--v));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.hero-art{min-height:380px;display:flex;align-items:center;justify-content:center}
+#heroMascot{position:relative;width:300px;height:300px;object-fit:contain;border-radius:0;box-shadow:none;filter:drop-shadow(0 30px 44px rgba(109,93,251,.40));z-index:3;cursor:pointer;transition:opacity .3s ease;animation:none}
+@media(max-width:860px){#heroMascot{width:228px;height:228px}}
+.ring{position:absolute;border:2px dashed rgba(109,93,251,.22);border-radius:50%;z-index:1}
+.ring.r1{width:410px;height:410px;animation:spin 26s linear infinite}
+.ring.r2{width:288px;height:288px;border-color:rgba(255,107,94,.26);animation:spin 18s linear infinite reverse}
+@media(max-width:860px){.ring.r1{width:300px;height:300px}.ring.r2{width:216px;height:216px}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.speech{position:absolute;top:4%;right:0;background:#fff;border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--ink);box-shadow:var(--shadow-sm);z-index:4;max-width:200px}
+.float-card{position:absolute;background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px 13px;box-shadow:var(--shadow-sm);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;z-index:4}
+.float-card .dot{width:9px;height:9px;border-radius:50%}
+.fc1{bottom:30px;left:-4px;animation:bob 4s ease-in-out infinite}
+.fc2{bottom:118px;right:-6px;animation:bob 5s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-12px)}}
+.spark{position:absolute;width:8px;height:8px;background:#FFC93C;border-radius:50%;opacity:.8;z-index:1;animation:tw 3s ease-in-out infinite;pointer-events:none}
+@keyframes tw{0%,100%{transform:scale(.4);opacity:.3}50%{transform:scale(1.2);opacity:.9}}
+/* provider slider */
+.marq{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;padding:16px 0}
+.marq .track{display:flex;gap:38px;white-space:nowrap;animation:scrollx 26s linear infinite;width:max-content}
+.marq:hover .track{animation-play-state:paused}
+.marq b{font-family:var(--display);font-weight:700;font-size:18px;color:var(--muted);opacity:.72;display:flex;align-items:center;gap:8px}
+@keyframes scrollx{to{transform:translateX(-50%)}}
+/* stats */
+.statsec{padding:36px 0 6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 16px;text-align:center;box-shadow:var(--shadow-sm)}
+.stat .n{font-family:var(--display);font-weight:800;font-size:33px;background:linear-gradient(120deg,var(--v),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{color:var(--muted);font-size:13px;margin-top:3px}
+@media(prefers-reduced-motion:reduce){.ring,.spark,.float-card,.marq .track,.hero h1 .grad.shine{animation:none}}
+</style>
 </head>
 <body>
 
@@ -31,23 +70,34 @@ if (!is_array($FR)) $FR = [$IMG['mascot-1']];
 </div></header>
 
 <!-- HERO -->
-<section class="hero" id="top"><div class="wrap">
+<section class="hero blobs" id="top"><div class="wrap">
   <div>
     <span class="eyebrow">The best WordPress AI chatbot</span>
-    <h1>Meet <span class="grad">Saathi</span> — the bot that <span class="grad">supports & sells</span> for you.</h1>
+    <h1>Meet <span class="grad shine">Saathi</span> — the bot that <span class="grad shine">supports &amp; sells</span> for you.</h1>
     <p class="lead">An agentic AI assistant that learns your real website content, recommends and sells your products inside chat, speaks every visitor's language, and gets smarter over time.</p>
     <div class="cta-row">
-      <a class="btn btn-primary btn-lg" href="login.php">Start free</a>
+      <a class="btn btn-primary btn-lg" href="login.php">Start free →</a>
       <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">▶ Try the live bot</button>
     </div>
-    <div class="ministats">
-      <div><b>5 min</b><span>setup</span></div>
-      <div><b>40+</b><span>languages</span></div>
-      <div><b>Any</b><span>AI model (even free)</span></div>
-      <div><b>24/7</b><span>support & sales</span></div>
-    </div>
   </div>
-  <div class="hero-art"><img src="<?=$IMG['hero']?>" alt="Saathi chat widget on a website"><img class="hero-mascot" id="heroMascot" src="<?=$FR[0]?>" alt="Saathi mascot"></div>
+  <div class="hero-art" id="heroArt">
+    <div class="ring r1"></div><div class="ring r2"></div>
+    <div class="speech" id="heroSpeech">Hi! I'm Saathi 👋</div>
+    <img id="heroMascot" src="<?=$FR[0]?>" alt="Saathi mascot" title="Tap a colour &amp; mascot below to switch me!">
+    <div class="float-card fc1"><span class="dot" style="background:#19C37D"></span> Online now</div>
+    <div class="float-card fc2"><span class="dot" style="background:#FF6B5E"></span> Added to cart ✓</div>
+  </div>
+</div></section>
+
+<!-- PROVIDER SLIDER -->
+<div class="marq" aria-hidden="true"><div class="track" id="provMarq"></div></div>
+
+<!-- STATS -->
+<section class="statsec"><div class="wrap stats">
+  <div class="stat"><div class="n" data-c="40" data-suf="+">0</div><div class="l">Languages</div></div>
+  <div class="stat"><div class="n" data-c="15" data-suf="+">0</div><div class="l">AI providers</div></div>
+  <div class="stat"><div class="n" data-c="8">0</div><div class="l">Mascots</div></div>
+  <div class="stat"><div class="n" data-c="24" data-suf="/7">0</div><div class="l">Support &amp; sales</div></div>
 </div></section>
 
 <!-- TRUST -->
@@ -241,9 +291,9 @@ window.SAATHI_FRAMES = <?php echo json_encode(array_values($FR)); ?>;
 <script src="assets/widget/saathi-embed.js" defer></script>
 <script>
 (function () {
-  // Hero signature mascot — cycle emotion frames every second.
+  // Hero signature mascot — cycle emotion frames with a soft fade.
   var fr = window.SAATHI_FRAMES || [], i = 0, hm = document.getElementById('heroMascot');
-  if (hm && fr.length > 1) { setInterval(function () { i = (i + 1) % fr.length; hm.src = fr[i]; }, 1000); }
+  if (hm && fr.length > 1) { setInterval(function () { i = (i + 1) % fr.length; hm.style.opacity = .35; setTimeout(function(){ hm.src = fr[i]; hm.style.opacity = 1; }, 160); }, 2600); }
 
   // On-page customizer (colour + mascot) that drives the live bot too.
   var COLORS = ['#6D5DFB', '#2DB4FF', '#19C37D', '#FF6B5E', '#F0567A', '#7C3AED'];
@@ -263,6 +313,29 @@ window.SAATHI_FRAMES = <?php echo json_encode(array_values($FR)); ?>;
   if (cc) COLORS.forEach(function (c) { var d = document.createElement('span'); d.className = 'cust-dot' + (c === sel.color ? ' on' : ''); d.style.background = c; d.onclick = function () { sel.color = c; refresh(); apply(); }; cc.appendChild(d); });
   if (cm && window.SAATHI_IMG) MASC.forEach(function (n) { var im = document.createElement('img'); im.className = 'cust-mini' + (n === sel.mascot ? ' on' : ''); im.src = window.SAATHI_IMG['mascot-' + n]; im.onclick = function () { sel.mascot = n; refresh(); apply(); }; cm.appendChild(im); });
   var ob = document.getElementById('custOpen'); if (ob) ob.onclick = function () { apply(); if (window.SaathiBot) window.SaathiBot.open(); };
+})();
+</script>
+<script>
+(function(){
+  // Provider slider — duplicate the list so the loop is seamless.
+  var provs=['OpenAI','Anthropic Claude','Google Gemini','xAI Grok','DeepSeek','Mistral','OpenRouter','Groq','Together AI','Fireworks','Ollama','Cohere','Perplexity','LM Studio'];
+  var mq=document.getElementById('provMarq');
+  if(mq) mq.innerHTML=provs.concat(provs).map(function(p){return '<b>✦ '+p+'</b>';}).join('');
+  // Hero speech rotator
+  var tips=["Hi! I'm Saathi 👋","Ask me about products 🛍️","I answer from your site 📚","Tap a colour & mascot below!","Add to cart inside chat ✓"];
+  var sp=document.getElementById('heroSpeech'),ti=0;
+  if(sp) setInterval(function(){ti=(ti+1)%tips.length;sp.style.opacity=0;setTimeout(function(){sp.textContent=tips[ti];sp.style.transition='opacity .3s';sp.style.opacity=1;},150);},3200);
+  // Sparkles around the mascot
+  var ha=document.getElementById('heroArt');
+  if(ha){for(var k=0;k<7;k++){var s=document.createElement('div');s.className='spark';s.style.left=(10+Math.random()*80)+'%';s.style.top=(10+Math.random()*80)+'%';s.style.animationDelay=(Math.random()*3)+'s';ha.appendChild(s);}}
+  // Cursor parallax on the mascot
+  if(ha){ha.addEventListener('mousemove',function(e){var r=ha.getBoundingClientRect();var x=(e.clientX-r.left-r.width/2)/24;var y=(e.clientY-r.top-r.height/2)/24;var hm=document.getElementById('heroMascot');if(hm)hm.style.transform='translate('+x+'px,'+y+'px)';});
+  ha.addEventListener('mouseleave',function(){var hm=document.getElementById('heroMascot');if(hm)hm.style.transform='';});}
+  // Stats count-up when scrolled into view
+  function countup(st){var el=st.querySelector('.n');if(!el||el.dataset.done)return;el.dataset.done=1;var end=+el.dataset.c,suf=el.dataset.suf||'',t=0;var iv=setInterval(function(){t+=Math.ceil(end/30);if(t>=end){t=end;clearInterval(iv);}el.textContent=t+suf;},28);}
+  var stats=[].slice.call(document.querySelectorAll('.stat'));
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countup(e.target);io.unobserve(e.target);}});},{threshold:.4});stats.forEach(function(s){io.observe(s);});}
+  else stats.forEach(countup);
 })();
 </script>
 </body>
