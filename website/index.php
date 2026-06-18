@@ -1,17 +1,27 @@
 <?php
 $YEAR = date('Y');
+$BASE = 'https://saathi.railabs.in';
 $IMG = require __DIR__ . '/assets/images.php';
 $FR = @include __DIR__ . '/assets/mascot_frames.php';
 if (!is_array($FR)) $FR = [$IMG['mascot-1']];
+require __DIR__ . '/includes/layout.php';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Saathi — the AI chatbot that supports & sells for your website</title>
-<meta name="description" content="Saathi is an agentic AI support + sales assistant for WordPress & WooCommerce. Knows your site, sells your products in chat, speaks every language, fully customizable, and improves over time.">
+<title>Saathi — AI Chatbot for WordPress that Supports &amp; Sells</title>
+<meta name="description" content="Saathi is an agentic AI chatbot for WordPress &amp; WooCommerce. Trained on your real content, sells products in chat, speaks 40+ languages, works with any AI key. By RAI Labs Pvt. Ltd.">
+<link rel="canonical" href="<?=$BASE?>/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Saathi">
+<meta property="og:title" content="Saathi — AI Chatbot for WordPress that Supports & Sells">
+<meta property="og:description" content="Trained on your real content, sells products in chat, 40+ languages, any AI key. By RAI Labs Pvt. Ltd.">
+<meta property="og:url" content="<?=$BASE?>/"><meta property="og:image" content="<?=$BASE?>/assets/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Saathi — AI Chatbot for WordPress"><meta name="twitter:description" content="Supports and sells for your WordPress site. By RAI Labs Pvt. Ltd."><meta name="twitter:image" content="<?=$BASE?>/assets/og.png">
 <link rel="icon" href="<?=$IMG['logo']?>">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"RAI Labs Pvt. Ltd.","url":"https://railabs.in","logo":"<?=$BASE?>/assets/og.png","sameAs":["https://railabs.in"],"brand":{"@type":"Brand","name":"Saathi"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Saathi","applicationCategory":"BusinessApplication","operatingSystem":"WordPress","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"publisher":{"@type":"Organization","name":"RAI Labs Pvt. Ltd.","url":"https://railabs.in"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -58,16 +68,7 @@ if (!is_array($FR)) $FR = [$IMG['mascot-1']];
 <body>
 
 <!-- NAV -->
-<header class="nav"><div class="wrap">
-  <a class="brand" href="#top"><img src="<?=$IMG['logo']?>" alt="Saathi logo">Saathi</a>
-  <nav class="nav-links">
-    <a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
-  </nav>
-  <div class="nav-cta">
-    <button class="btn btn-ghost" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">Live demo</button>
-    <a class="btn btn-primary" href="login.php">Get started</a>
-  </div>
-</div></header>
+<?php site_nav('home'); ?>
 
 <!-- HERO -->
 <section class="hero blobs" id="top"><div class="wrap">
@@ -268,15 +269,7 @@ if (!is_array($FR)) $FR = [$IMG['mascot-1']];
 </div></section>
 
 <!-- FOOTER -->
-<footer><div class="wrap">
-  <div>
-    <a class="brand" href="#top"><img src="<?=$IMG['logo']?>" alt="" style="width:30px;height:30px"> Saathi</a>
-    <p style="color:#a99fe0;font-size:14px;margin-top:12px;max-width:280px">The agentic AI chatbot that supports and sells for your website. A product by RAI.</p>
-  </div>
-  <div><h5>Product</h5><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="login.php">Get started</a></div>
-  <div><h5>Company</h5><a href="#">About</a><a href="#">Contact</a><a href="#">Blog</a></div>
-  <div><h5>Legal</h5><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Refund</a></div>
-</div><div class="foot-bottom">© <?=$YEAR?> Saathi · a product by RAI. All rights reserved.</div></footer>
+<?php site_footer(); ?>
 
 <!-- SAATHI DEMO BOT -->
 <div id="sbot"></div>

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin.php
+Disallow: /dashboard.php
+Disallow: /profile.php
+Disallow: /checkout.php
+Disallow: /pay.php
+Disallow: /renew.php
+Disallow: /verify.php
+Disallow: /google_callback.php
+
+Sitemap: https://saathi.railabs.in/sitemap.xml
