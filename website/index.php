@@ -242,6 +242,7 @@ require __DIR__ . '/includes/layout.php';
       <a class="btn btn-ghost" href="login.php">Buy Lifetime</a>
     </div>
   </div>
+  <p class="sub" style="margin-top:20px">Need annual billing, USD pricing, or 25-site Agency? <a href="pricing.php" style="color:var(--v);font-weight:700">See all plans →</a></p>
 </div></section>
 
 <!-- FAQ -->

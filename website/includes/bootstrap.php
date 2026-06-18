@@ -60,6 +60,7 @@ function ensure_schema(): void {
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(40) UNIQUE NOT NULL, name VARCHAR(80) NOT NULL,
         price_inr INT UNSIGNED NOT NULL DEFAULT 0,
+        price_usd INT UNSIGNED NOT NULL DEFAULT 0,
         period ENUM('month','year','lifetime') NOT NULL DEFAULT 'month',
         max_activations INT NOT NULL DEFAULT 1, features TEXT, active TINYINT NOT NULL DEFAULT 1,
         sort INT NOT NULL DEFAULT 0
@@ -121,10 +122,12 @@ function seed(): void {
     $db = pdo();
     // Plans
     if ((int)$db->query("SELECT COUNT(*) FROM plans")->fetchColumn() === 0) {
-        $st = $db->prepare("INSERT INTO plans(code,name,price_inr,period,max_activations,features,sort) VALUES(?,?,?,?,?,?,?)");
-        $st->execute(['free','Free',0,'lifetime',1,'Core AI chat|1 website|Any AI key',1]);
-        $st->execute(['pro','Pro',999,'month',3,'Everything in Free|WooCommerce showcase|Multilingual + deep scan|Colour & mascot customization|Priority support',2]);
-        $st->execute(['lifetime','Lifetime',9999,'lifetime',10,'Everything in Pro|Unlimited duration|All future updates',3]);
+        $st = $db->prepare("INSERT INTO plans(code,name,price_inr,price_usd,period,max_activations,features,sort) VALUES(?,?,?,?,?,?,?,?)");
+        $st->execute(['free','Free',0,0,'lifetime',1,'Core agentic AI chat|Bring your own AI key (incl. free models)|1 website|Basic site scan (up to 50 pages)|1 mascot|Multilingual replies|Community support',1]);
+        $st->execute(['pro','Pro',999,12,'month',3,'Everything in Free|WooCommerce in-chat selling|Full deep scan + embeddings|All 8 mascots + theming|Smart follow-ups & analytics|Remove Saathi branding|Priority support|3 websites',2]);
+        $st->execute(['pro_annual','Pro (Annual)',7999,89,'year',3,'Everything in Free|WooCommerce in-chat selling|Full deep scan + embeddings|All 8 mascots + theming|Smart follow-ups & analytics|Remove Saathi branding|Priority support|3 websites',3]);
+        $st->execute(['lifetime','Lifetime',9999,119,'lifetime',5,'Everything in Pro|Pay once — lifetime updates|5 websites|Best value',4]);
+        $st->execute(['agency','Agency',24999,299,'lifetime',25,'Everything in Lifetime|25 websites|White-label option|Priority queue',5]);
     }
     // Initial admin (from env, else default — change after first login)
     if ((int)$db->query("SELECT COUNT(*) FROM admins")->fetchColumn() === 0) {
