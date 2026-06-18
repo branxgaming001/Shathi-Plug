@@ -17,6 +17,7 @@ if ($code) {
     if (!$plan) redirect('index.php#pricing');
 }
 $u = current_user();
+require_profile($u);
 $order = $_SESSION['order'];
 $isRenew = !empty($order['renew']);
 $amount = (int)$plan['price_inr'];

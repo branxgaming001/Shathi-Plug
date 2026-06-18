@@ -84,9 +84,15 @@ function n($q){ return (int)pdo()->query($q)->fetchColumn(); }
     $users = $db->query("SELECT u.*, (SELECT COUNT(*) FROM licenses WHERE user_id=u.id) lic, (SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE user_id=u.id AND status='paid') spent FROM users u ORDER BY u.id DESC LIMIT 200")->fetchAll();
   ?>
     <h1>Users</h1><p class="muted">Everyone who signed in, the ID they used, their keys and payments.</p>
-    <div class="panel"><table><tr><th>ID</th><th>Login</th><th>Via</th><th>Keys</th><th>Spent</th><th>Status</th><th>Joined</th><th></th></tr>
-      <?php foreach ($users as $u): ?><tr>
-        <td>#<?=(int)$u['id']?></td><td><?=e($u['email'] ?: $u['phone'])?></td><td class="small"><?=e($u['provider'])?></td>
+    <div class="panel"><table><tr><th>ID</th><th>Login</th><th>Name</th><th>Company</th><th>Via</th><th>Keys</th><th>Spent</th><th>Status</th><th>Joined</th><th></th></tr>
+      <?php foreach ($users as $u):
+        $uname = trim((($u['first_name'] ?? '') . ' ' . ($u['last_name'] ?? '')));
+        $tip = trim('Use case: ' . ($u['use_case'] ?? '—') . ' | Industry: ' . ($u['industry'] ?? '—') . ' | Heard: ' . ($u['heard_from'] ?? '—') . ' | ' . ($u['address'] ?? '') . ' ' . ($u['country'] ?? '')); ?><tr>
+        <td>#<?=(int)$u['id']?></td>
+        <td><?=e($u['email'] ?: $u['phone'])?><?php if (!empty($u['mobile'])): ?><div class="small"><?=e($u['mobile'])?></div><?php endif; ?></td>
+        <td title="<?=e($tip)?>"><?=e($uname ?: '—')?></td>
+        <td><?=e($u['company'] ?? '') ?: '—'?><?php if (!empty($u['website'])): ?><div class="small"><?=e($u['website'])?></div><?php endif; ?></td>
+        <td class="small"><?=e($u['provider'])?></td>
         <td><?=(int)$u['lic']?></td><td>₹<?=number_format((int)$u['spent'])?></td>
         <td><span class="badge <?=$u['status']==='active'?'g':'r'?>"><?=e($u['status'])?></span></td>
         <td class="small"><?=e(date('d M Y',strtotime($u['created_at'])))?></td>

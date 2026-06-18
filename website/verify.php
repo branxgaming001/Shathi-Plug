@@ -20,7 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             login_user($pending['channel'], $pending['dest'], $pending['channel']);
             unset($_SESSION['otp_pending'], $_SESSION['otp_dev']);
             $u = current_user();
-            $next = is_admin_email($u['email'] ?? '') ? 'admin.php' : ($_SESSION['next'] ?? 'dashboard.php');
+            if (is_admin_email($u['email'] ?? '')) { unset($_SESSION['next']); redirect('admin.php'); }
+            if (!profile_complete($u)) redirect('profile.php');   // keep 'next' for after onboarding
+            $next = $_SESSION['next'] ?? 'dashboard.php';
             unset($_SESSION['next']);
             redirect($next);
         }

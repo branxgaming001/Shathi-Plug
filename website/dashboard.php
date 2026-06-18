@@ -3,6 +3,7 @@ require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/payments.php';
 $IMG = require __DIR__ . '/assets/images.php';
 $u = require_login();
+require_profile($u);
 
 $lics = pdo()->prepare("SELECT l.*, p.name plan_name, p.code plan_code FROM licenses l JOIN plans p ON p.id=l.plan_id WHERE l.user_id=? ORDER BY l.id DESC");
 $lics->execute([(int)$u['id']]); $licenses = $lics->fetchAll();

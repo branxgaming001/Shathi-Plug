@@ -99,6 +99,21 @@ function ensure_schema(): void {
     $db->exec("CREATE TABLE IF NOT EXISTS settings(
         k VARCHAR(60) PRIMARY KEY, v TEXT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Profile / onboarding columns on users — added idempotently (works on existing tables).
+    $profileCols = [
+        'first_name'=>"VARCHAR(80)", 'last_name'=>"VARCHAR(80)", 'mobile'=>"VARCHAR(30)",
+        'company'=>"VARCHAR(150)", 'website'=>"VARCHAR(190)", 'use_case'=>"VARCHAR(60)",
+        'industry'=>"VARCHAR(80)", 'address'=>"VARCHAR(400)", 'country'=>"VARCHAR(80)",
+        'heard_from'=>"VARCHAR(60)", 'goal'=>"VARCHAR(500)",
+        'profile_completed'=>"TINYINT NOT NULL DEFAULT 0",
+    ];
+    $have = [];
+    foreach ($db->query("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users'") as $r) { $have[$r['COLUMN_NAME']] = 1; }
+    foreach ($profileCols as $col => $def) {
+        if (!isset($have[$col])) { try { $db->exec("ALTER TABLE users ADD COLUMN `$col` $def"); } catch (Throwable $e) { /* ignore */ } }
+    }
+
     seed();
 }
 
@@ -183,6 +198,21 @@ function admin_emails(): array {
 function is_admin_email(?string $email): bool {
     $email = mb_strtolower(trim((string) $email));
     return $email !== '' && in_array($email, admin_emails(), true);
+}
+
+/* ---------- Profile / onboarding ---------- */
+function profile_complete(?array $u): bool {
+    if (!$u) return false;
+    if ((int)($u['profile_completed'] ?? 0) !== 1) return false;
+    foreach (['first_name','last_name','mobile','company','website','use_case','address','country','heard_from'] as $f) {
+        if (trim((string)($u[$f] ?? '')) === '') return false;
+    }
+    return true;
+}
+/** Gate user-only pages: incomplete profiles are sent to onboarding. Admins skip. */
+function require_profile(array $u): void {
+    if (is_admin_email($u['email'] ?? '')) return;
+    if (!profile_complete($u)) redirect('profile.php');
 }
 
 /* ---------- Settings ---------- */

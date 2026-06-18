@@ -5,7 +5,10 @@ $IMG = require __DIR__ . '/assets/images.php';
 
 // One login for everyone — admins and users land on the right place automatically.
 $u = current_user();
-if ($u) redirect(is_admin_email($u['email'] ?? '') ? 'admin.php' : 'dashboard.php');
+if ($u) {
+    if (is_admin_email($u['email'] ?? '')) redirect('admin.php');
+    redirect(profile_complete($u) ? 'dashboard.php' : 'profile.php');
+}
 
 $err = '';
 if (!empty($_GET['next'])) $_SESSION['next'] = $_GET['next'];

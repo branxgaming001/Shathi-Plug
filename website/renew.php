@@ -5,6 +5,7 @@ require __DIR__ . '/includes/payments.php';
 $id = (int)($_GET['license'] ?? 0);
 if (!current_user()) { $_SESSION['next'] = 'renew.php?license=' . $id; redirect('login.php'); }
 $u = current_user();
+require_profile($u);
 $st = pdo()->prepare("SELECT * FROM licenses WHERE id=? AND user_id=?"); $st->execute([$id,(int)$u['id']]);
 $lic = $st->fetch();
 if (!$lic) redirect('dashboard.php');

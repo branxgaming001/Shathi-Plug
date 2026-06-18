@@ -85,6 +85,8 @@ if (!empty($name)) {
     catch (Throwable $e) { /* non-fatal */ }
 }
 $u = current_user();
-$next = is_admin_email($u['email'] ?? '') ? 'admin.php' : ($_SESSION['next'] ?? 'dashboard.php');
+if (is_admin_email($u['email'] ?? '')) { unset($_SESSION['next']); redirect('admin.php'); }
+if (!profile_complete($u)) redirect('profile.php');   // keep 'next' for after onboarding
+$next = $_SESSION['next'] ?? 'dashboard.php';
 unset($_SESSION['next']);
 redirect($next);
