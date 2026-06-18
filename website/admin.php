@@ -46,7 +46,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $tab = $_GET['tab'] ?? 'overview';
 $tabs = ['overview'=>'Overview','users'=>'Users','licenses'=>'Licenses','payments'=>'Payments','pricing'=>'Pricing','admins'=>'Admins','audit'=>'Audit log','settings'=>'Settings'];
-function n($q){ return (int)pdo()->query($q)->fetchColumn(); }
+function n($qq){ return (int)pdo()->query($qq)->fetchColumn(); }
+$q = trim((string)($_GET['q'] ?? ''));   // search term (users tab)
+
+// ---- CSV export (runs before any HTML) ----
+if (($_GET['export'] ?? '') === 'csv') {
+    $what = in_array($tab, ['users','licenses','payments'], true) ? $tab : 'users';
+    audit('admin_export_csv', ['what'=>$what]);
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="saathi-'.$what.'-'.date('Ymd').'.csv"');
+    $out = fopen('php://output', 'w');
+    if ($what === 'users') {
+        fputcsv($out, ['id','email','first_name','last_name','company','website','mobile','country','use_case','industry','heard_from','provider','status','licenses','spent_inr','created_at']);
+        foreach ($db->query("SELECT u.*, (SELECT COUNT(*) FROM licenses WHERE user_id=u.id) lic, (SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE user_id=u.id AND status='paid') spent FROM users u ORDER BY u.id DESC") as $r)
+            fputcsv($out, [$r['id'],$r['email'],$r['first_name'],$r['last_name'],$r['company'],$r['website'],$r['mobile'],$r['country'],$r['use_case'],$r['industry'],$r['heard_from'],$r['provider'],$r['status'],$r['lic'],$r['spent'],$r['created_at']]);
+    } elseif ($what === 'licenses') {
+        fputcsv($out, ['id','key_prefix','owner_email','plan','status','activations','max_activations','expires_at','created_at']);
+        foreach ($db->query("SELECT l.*, p.name plan_name, u.email, (SELECT COUNT(*) FROM license_activations WHERE license_id=l.id AND status='active') acts FROM licenses l JOIN plans p ON p.id=l.plan_id JOIN users u ON u.id=l.user_id ORDER BY l.id DESC") as $r)
+            fputcsv($out, [$r['id'],$r['key_prefix'],$r['email'],$r['plan_name'],$r['status'],$r['acts'],$r['max_activations'],$r['expires_at'],$r['created_at']]);
+    } else {
+        fputcsv($out, ['id','user_email','plan','amount_inr','status','gateway','gateway_payment_id','created_at','paid_at']);
+        foreach ($db->query("SELECT pay.*, p.name plan_name, u.email FROM payments pay JOIN plans p ON p.id=pay.plan_id JOIN users u ON u.id=pay.user_id ORDER BY pay.id DESC") as $r)
+            fputcsv($out, [$r['id'],$r['email'],$r['plan_name'],$r['amount_inr'],$r['status'],$r['gateway'],$r['gateway_payment_id'],$r['created_at'],$r['paid_at']]);
+    }
+    fclose($out); exit;
+}
 ?>
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -65,44 +89,89 @@ function n($q){ return (int)pdo()->query($q)->fetchColumn(); }
   <?php if ($tab==='overview'):
     $rev = (int)$db->query("SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE status='paid'")->fetchColumn();
     $activeLic = n("SELECT COUNT(*) FROM licenses WHERE status='active' AND (expires_at IS NULL OR expires_at>NOW())");
-    $logins = $db->query("SELECT * FROM audit_log WHERE action IN ('user_login','admin_login','user_signup') ORDER BY id DESC LIMIT 12")->fetchAll();
+    $totUsers = n("SELECT COUNT(*) FROM users");
+    $new7 = n("SELECT COUNT(*) FROM users WHERE created_at >= (NOW() - INTERVAL 7 DAY)");
+    $active30 = n("SELECT COUNT(*) FROM users WHERE last_login_at >= (NOW() - INTERVAL 30 DAY)");
+    $paid = n("SELECT COUNT(*) FROM payments WHERE status='paid'");
+    $trend = $db->query("SELECT DATE(created_at) d, COUNT(*) c FROM users WHERE created_at >= (CURDATE() - INTERVAL 13 DAY) GROUP BY DATE(created_at)")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $days = []; for ($i=13;$i>=0;$i--){ $dd=date('Y-m-d', strtotime("-$i day")); $days[$dd]=(int)($trend[$dd] ?? 0); }
+    $maxd = max(1, max($days));
+    $logins = $db->query("SELECT * FROM audit_log WHERE action IN ('user_login','admin_login','user_signup','profile_completed') ORDER BY id DESC LIMIT 12")->fetchAll();
   ?>
     <h1>Overview</h1><p class="muted">Live platform metrics. Payment mode: <strong><?=e(payment_mode())?></strong> · Email: <strong><?=mailer_configured()?'configured':'dev mode'?></strong></p>
     <div class="stats">
-      <div class="stat"><b><?=n("SELECT COUNT(*) FROM users")?></b><span>Users</span></div>
+      <div class="stat"><b><?=$totUsers?></b><span>Total users <?=$new7?'· +'.$new7.' (7d)':''?></span></div>
+      <div class="stat"><b><?=$active30?></b><span>Active users (30d)</span></div>
       <div class="stat"><b><?=$activeLic?></b><span>Active keys running</span></div>
-      <div class="stat"><b><?=n("SELECT COUNT(*) FROM payments WHERE status='paid'")?></b><span>Paid orders</span></div>
-      <div class="stat"><b>₹<?=number_format($rev)?></b><span>Revenue</span></div>
+      <div class="stat"><b>₹<?=number_format($rev)?></b><span>Revenue · <?=$paid?> paid</span></div>
     </div>
-    <div class="panel"><h3>Recent logins &amp; signups</h3>
+    <div class="panel"><h3>Signups — last 14 days <span class="small" style="color:var(--muted)">(+<?=$new7?> this week)</span></h3>
+      <div style="display:flex;align-items:flex-end;gap:5px;height:96px;margin-top:12px">
+        <?php foreach ($days as $d=>$c): ?>
+          <div title="<?=e($d)?>: <?=$c?> signup(s)" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px">
+            <div style="width:100%;background:linear-gradient(180deg,var(--v),#7c3aed);border-radius:4px 4px 0 0;height:<?=max(3,(int)round($c/$maxd*70))?>px"></div>
+            <span style="font-size:9px;color:var(--muted)"><?=date('d',strtotime($d))?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="panel"><h3>Recent activity</h3>
       <table><tr><th>When</th><th>Type</th><th>Action</th><th>IP</th></tr>
       <?php foreach ($logins as $l): ?><tr><td class="small"><?=e($l['created_at'])?></td><td><span class="badge <?=$l['actor_type']==='admin'?'v':'g'?>"><?=e($l['actor_type'])?></span></td><td><?=e($l['action'])?></td><td class="small"><?=e($l['ip'])?></td></tr><?php endforeach; ?>
       </table>
     </div>
 
   <?php elseif ($tab==='users'):
-    $users = $db->query("SELECT u.*, (SELECT COUNT(*) FROM licenses WHERE user_id=u.id) lic, (SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE user_id=u.id AND status='paid') spent FROM users u ORDER BY u.id DESC LIMIT 200")->fetchAll();
+    $detail = null;
+    if (($uid = (int)($_GET['user'] ?? 0)) > 0) { $st=$db->prepare("SELECT * FROM users WHERE id=?"); $st->execute([$uid]); $detail=$st->fetch() ?: null; }
+    if ($q !== '') {
+        $like = '%'.$q.'%';
+        $st = $db->prepare("SELECT u.*, (SELECT COUNT(*) FROM licenses WHERE user_id=u.id) lic, (SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE user_id=u.id AND status='paid') spent FROM users u WHERE u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.company LIKE ? OR u.website LIKE ? OR u.mobile LIKE ? ORDER BY u.id DESC LIMIT 200");
+        $st->execute([$like,$like,$like,$like,$like,$like]); $users = $st->fetchAll();
+    } else {
+        $users = $db->query("SELECT u.*, (SELECT COUNT(*) FROM licenses WHERE user_id=u.id) lic, (SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE user_id=u.id AND status='paid') spent FROM users u ORDER BY u.id DESC LIMIT 200")->fetchAll();
+    }
   ?>
-    <h1>Users</h1><p class="muted">Everyone who signed in, the ID they used, their keys and payments.</p>
-    <div class="panel"><table><tr><th>ID</th><th>Login</th><th>Name</th><th>Company</th><th>Via</th><th>Keys</th><th>Spent</th><th>Status</th><th>Joined</th><th></th></tr>
-      <?php foreach ($users as $u):
-        $uname = trim((($u['first_name'] ?? '') . ' ' . ($u['last_name'] ?? '')));
-        $tip = trim('Use case: ' . ($u['use_case'] ?? '—') . ' | Industry: ' . ($u['industry'] ?? '—') . ' | Heard: ' . ($u['heard_from'] ?? '—') . ' | ' . ($u['address'] ?? '') . ' ' . ($u['country'] ?? '')); ?><tr>
-        <td>#<?=(int)$u['id']?></td>
+    <h1>Users</h1><p class="muted">Search, open a full profile, export to CSV, and manage accounts.</p>
+
+    <?php if ($detail):
+        $dpaid = (int)$db->query("SELECT COALESCE(SUM(amount_inr),0) FROM payments WHERE status='paid' AND user_id=".(int)$detail['id'])->fetchColumn();
+        $dkeys = (int)$db->query("SELECT COUNT(*) FROM licenses WHERE user_id=".(int)$detail['id'])->fetchColumn();
+        $drows = ['Email'=>$detail['email'],'Mobile'=>$detail['mobile'],'Company'=>$detail['company'],'Website'=>$detail['website'],'Country'=>$detail['country'],'Use case'=>$detail['use_case'],'Industry'=>$detail['industry'],'Heard from'=>$detail['heard_from'],'Address'=>$detail['address'],'Provider'=>$detail['provider'],'Status'=>$detail['status'],'Joined'=>$detail['created_at'],'Last login'=>$detail['last_login_at'],'Goal'=>$detail['goal']];
+    ?>
+    <div class="panel" style="border:2px solid var(--v)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">User #<?=(int)$detail['id']?> · <?=e(trim((($detail['first_name']??'').' '.($detail['last_name']??''))) ?: ($detail['email'] ?: '—'))?></h3><a class="btn btn-ghost" href="admin.php?tab=users<?=$q!==''?'&q='.urlencode($q):''?>" style="padding:6px 12px">✕ Close</a></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:10px">
+        <?php foreach ($drows as $k=>$v) if (trim((string)$v)!=='') echo '<div style="display:flex;gap:8px"><span style="color:var(--muted);min-width:92px;font-size:13px">'.e($k).'</span><span style="font-weight:600;font-size:13.5px">'.e((string)$v).'</span></div>'; ?>
+      </div>
+      <p class="small" style="margin-top:12px"><b><?=$dkeys?></b> license(s) · spent <b>₹<?=number_format($dpaid)?></b></p>
+    </div>
+    <?php endif; ?>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <form method="get" style="display:flex;gap:8px;margin:0"><input type="hidden" name="tab" value="users"><input name="q" value="<?=e($q)?>" placeholder="Search email, name, company, domain…" style="border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;font:inherit;min-width:230px"><button class="btn btn-ghost" style="padding:9px 16px">Search</button><?php if($q!==''): ?><a class="btn btn-ghost" href="admin.php?tab=users" style="padding:9px 14px">Clear</a><?php endif; ?></form>
+        <a class="btn btn-primary" href="admin.php?tab=users&export=csv" style="padding:9px 16px">⬇ Export CSV</a>
+      </div>
+      <table><tr><th>ID</th><th>Login</th><th>Name</th><th>Company</th><th>Via</th><th>Keys</th><th>Spent</th><th>Status</th><th>Joined</th><th></th></tr>
+      <?php if (!$users): ?><tr><td colspan="10" class="small">No users found<?=$q!==''?' for "'.e($q).'"':''?>.</td></tr><?php endif; ?>
+      <?php foreach ($users as $u): $uname = trim((($u['first_name'] ?? '') . ' ' . ($u['last_name'] ?? ''))); ?><tr>
+        <td><a href="admin.php?tab=users&user=<?=(int)$u['id']?>" style="color:var(--v);font-weight:700">#<?=(int)$u['id']?></a></td>
         <td><?=e($u['email'] ?: $u['phone'])?><?php if (!empty($u['mobile'])): ?><div class="small"><?=e($u['mobile'])?></div><?php endif; ?></td>
-        <td title="<?=e($tip)?>"><?=e($uname ?: '—')?></td>
+        <td><a href="admin.php?tab=users&user=<?=(int)$u['id']?>" style="color:var(--ink)"><?=e($uname ?: '—')?></a></td>
         <td><?=e($u['company'] ?? '') ?: '—'?><?php if (!empty($u['website'])): ?><div class="small"><?=e($u['website'])?></div><?php endif; ?></td>
         <td class="small"><?=e($u['provider'])?></td>
         <td><?=(int)$u['lic']?></td><td>₹<?=number_format((int)$u['spent'])?></td>
         <td><span class="badge <?=$u['status']==='active'?'g':'r'?>"><?=e($u['status'])?></span></td>
         <td class="small"><?=e(date('d M Y',strtotime($u['created_at'])))?></td>
-        <td><form method="post" style="margin:0"><?=csrf_field()?><input type="hidden" name="action" value="block_user"><input type="hidden" name="id" value="<?=(int)$u['id']?>"><input type="hidden" name="to" value="<?=$u['status']==='active'?'block':'unblock'?>"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px"><?=$u['status']==='active'?'Block':'Unblock'?></button></form></td>
-      </tr><?php endforeach; ?></table></div>
+        <td><form method="post" style="margin:0" onsubmit="return confirm('<?=$u['status']==='active'?'Block':'Unblock'?> this user?')"><?=csrf_field()?><input type="hidden" name="action" value="block_user"><input type="hidden" name="id" value="<?=(int)$u['id']?>"><input type="hidden" name="to" value="<?=$u['status']==='active'?'block':'unblock'?>"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px"><?=$u['status']==='active'?'Block':'Unblock'?></button></form></td>
+      </tr><?php endforeach; ?></table>
+    </div>
 
   <?php elseif ($tab==='licenses'):
     $lic = $db->query("SELECT l.*, p.name plan_name, u.email, u.phone, (SELECT COUNT(*) FROM license_activations WHERE license_id=l.id AND status='active') acts FROM licenses l JOIN plans p ON p.id=l.plan_id JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 300")->fetchAll();
   ?>
-    <h1>Licenses</h1><p class="muted">All issued keys, owners, activations and expiry.</p>
+    <h1>Licenses</h1><p class="muted">All issued keys, owners, activations and expiry. <a class="btn btn-ghost" href="admin.php?tab=licenses&export=csv" style="padding:5px 12px;font-size:13px;margin-left:8px">⬇ CSV</a></p>
     <div class="panel"><table><tr><th>Key</th><th>Owner</th><th>Plan</th><th>Status</th><th>Activations</th><th>Expires</th><th></th></tr>
       <?php foreach ($lic as $l): $valid=$l['status']==='active'&&($l['expires_at']===null||strtotime($l['expires_at'])>time()); ?><tr>
         <td><code><?=e($l['key_prefix'])?></code></td><td class="small"><?=e($l['email'] ?: $l['phone'])?></td><td><?=e($l['plan_name'])?></td>
@@ -115,7 +184,7 @@ function n($q){ return (int)pdo()->query($q)->fetchColumn(); }
   <?php elseif ($tab==='payments'):
     $pays = $db->query("SELECT pay.*, p.name plan_name, u.email, u.phone FROM payments pay JOIN plans p ON p.id=pay.plan_id JOIN users u ON u.id=pay.user_id ORDER BY pay.id DESC LIMIT 300")->fetchAll();
   ?>
-    <h1>Payments</h1><p class="muted">All payment intents and their outcome.</p>
+    <h1>Payments</h1><p class="muted">All payment intents and their outcome. <a class="btn btn-ghost" href="admin.php?tab=payments&export=csv" style="padding:5px 12px;font-size:13px;margin-left:8px">⬇ CSV</a></p>
     <div class="panel"><table><tr><th>ID</th><th>User</th><th>Plan</th><th>Amount</th><th>Status</th><th>Gateway</th><th>When</th></tr>
       <?php foreach ($pays as $p): ?><tr><td>#<?=(int)$p['id']?></td><td class="small"><?=e($p['email'] ?: $p['phone'])?></td><td><?=e($p['plan_name'])?></td><td>₹<?=number_format((int)$p['amount_inr'])?></td><td><span class="badge <?=$p['status']==='paid'?'g':($p['status']==='failed'?'r':'m')?>"><?=e($p['status'])?></span></td><td class="small"><?=e($p['gateway'])?></td><td class="small"><?=e(date('d M Y H:i',strtotime($p['created_at'])))?></td></tr><?php endforeach; ?></table></div>
 

@@ -5,7 +5,8 @@ $u = require_login();
 
 // Admins skip onboarding; already-complete users go straight in.
 if (is_admin_email($u['email'] ?? '')) redirect('admin.php');
-if (profile_complete($u)) redirect($_SESSION['next'] ?? 'dashboard.php');
+$editing = profile_complete($u);
+if ($editing && !isset($_GET['edit'])) redirect($_SESSION['next'] ?? 'dashboard.php');
 
 $USE_CASES = [
   'support' => 'Customer support & FAQs',
@@ -90,8 +91,8 @@ $v = fn(string $k): string => e($f[$k] ?? '');
 </style>
 </head><body>
 <div class="ob-wrap"><div class="ob-card">
-  <div class="ob-head"><img src="<?=$IMG['logo']?>" alt=""><h1>Welcome to Saathi 🎉</h1></div>
-  <p class="ob-sub">You're verified as <strong><?=e($u['email'] ?: $u['mobile'])?></strong>. Just a few quick details so we can tailor Saathi to your website and keep your licenses in order. All fields marked <span style="color:#e0567a">*</span> are required.</p>
+  <div class="ob-head"><img src="<?=$IMG['logo']?>" alt=""><h1><?=$editing?'Edit your profile':'Welcome to Saathi 🎉'?></h1></div>
+  <p class="ob-sub"><?php if ($editing): ?>Update your details below. <a href="dashboard.php" style="color:var(--v)">← Back to dashboard</a><?php else: ?>You're verified as <strong><?=e($u['email'] ?: $u['mobile'])?></strong>. Just a few quick details so we can tailor Saathi to your website and keep your licenses in order. All fields marked <span style="color:#e0567a">*</span> are required.<?php endif; ?></p>
   <?php if ($err): ?><div class="msg err"><?=e($err)?></div><?php endif; ?>
 
   <form method="post" autocomplete="on" novalidate>
