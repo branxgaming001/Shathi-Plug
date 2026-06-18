@@ -65,6 +65,12 @@ function login_user(string $channel, string $destination, string $provider='emai
         audit('user_signup', [$col=>$destination,'provider'=>$provider], 'user', $id);
     } else { $id = (int)$u['id']; }
     $db->prepare("UPDATE users SET last_login_at=NOW() WHERE id=?")->execute([$id]);
+    // Bootstrap: the very first sign-in (when no admin email is configured yet)
+    // claims the owner/admin seat. After that, admins are managed in Admin → Admins.
+    if ($col === 'email' && $destination !== '' && !admin_emails()) {
+        setting_set('ADMIN_EMAILS', $destination);
+        audit('admin_bootstrap', ['email' => $destination], 'system', $id);
+    }
     session_regenerate_id(true);
     $_SESSION['uid'] = $id; unset($_SESSION['admin_id']);
     audit('user_login', [$col=>$destination], 'user', $id);

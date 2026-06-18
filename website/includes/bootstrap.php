@@ -162,13 +162,28 @@ function current_user(): ?array {
     $st = pdo()->prepare("SELECT * FROM users WHERE id=? AND status='active'"); $st->execute([(int)$_SESSION['uid']]);
     return $st->fetch() ?: null;
 }
+/* Admin is now identified purely by the signed-in user's email (single login). */
 function current_admin(): ?array {
-    if (empty($_SESSION['admin_id'])) return null;
-    $st = pdo()->prepare("SELECT * FROM admins WHERE id=? AND status='active'"); $st->execute([(int)$_SESSION['admin_id']]);
-    return $st->fetch() ?: null;
+    $u = current_user();
+    if (!$u || !is_admin_email($u['email'] ?? '')) return null;
+    return $u + ['username' => $u['email'], 'role' => 'super'];
 }
 function require_login(): array { $u = current_user(); if (!$u) redirect('login.php'); return $u; }
-function require_admin(): array { $a = current_admin(); if (!$a) redirect('login.php?admin=1'); return $a; }
+function require_admin(): array {
+    $u = require_login();
+    if (!is_admin_email($u['email'] ?? '')) redirect('dashboard.php');
+    return $u + ['username' => $u['email'], 'role' => 'super'];
+}
+
+/* ---------- Admin-by-email ---------- */
+function admin_emails(): array {
+    $raw = (string) cfg('ADMIN_EMAILS', '');
+    return preg_split('/[\s,;]+/', mb_strtolower($raw), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+}
+function is_admin_email(?string $email): bool {
+    $email = mb_strtolower(trim((string) $email));
+    return $email !== '' && in_array($email, admin_emails(), true);
+}
 
 /* ---------- Settings ---------- */
 function setting_get(string $k, $default=null) {

@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($r['ok']) {
             login_user($pending['channel'], $pending['dest'], $pending['channel']);
             unset($_SESSION['otp_pending'], $_SESSION['otp_dev']);
-            $next = $_SESSION['next'] ?? 'dashboard.php';
+            $u = current_user();
+            $next = is_admin_email($u['email'] ?? '') ? 'admin.php' : ($_SESSION['next'] ?? 'dashboard.php');
             unset($_SESSION['next']);
             redirect($next);
         }

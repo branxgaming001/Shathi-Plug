@@ -13,18 +13,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->prepare("UPDATE plans SET name=?, price_inr=?, max_activations=?, active=? WHERE id=?")
            ->execute([trim($_POST['name']), max(0,(int)$_POST['price']), max(1,(int)$_POST['acts']), isset($_POST['active'])?1:0, (int)$_POST['id']]);
         audit('admin_plan_update', ['plan_id'=>(int)$_POST['id'],'price'=>(int)$_POST['price']]); $flash = 'Plan updated.';
-    } elseif ($act === 'create_admin') {
-        if ($a['role'] !== 'super') { $flash = 'Only a super-admin can add admins.'; }
+    } elseif ($act === 'add_admin_email') {
+        $em = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+        if (!filter_var($em, FILTER_VALIDATE_EMAIL)) { $flash = 'Enter a valid email address.'; }
         else {
-            $un = trim($_POST['username']); $pw = (string)$_POST['password'];
-            if (strlen($un) < 3 || strlen($pw) < 8) { $flash = 'Username ≥3 and password ≥8 chars required.'; }
-            else {
-                try {
-                    $db->prepare("INSERT INTO admins(username,pass_hash,name,role,created_by) VALUES(?,?,?,?,?)")
-                       ->execute([$un, password_hash($pw, PASSWORD_DEFAULT), trim($_POST['name'] ?? ''), ($_POST['role']==='super'?'super':'admin'), (int)$a['id']]);
-                    audit('admin_created', ['username'=>$un]); $flash = 'Admin created.';
-                } catch (Throwable $x) { $flash = 'Username already exists.'; }
-            }
+            $list = admin_emails(); if (!in_array($em, $list, true)) $list[] = $em;
+            setting_set('ADMIN_EMAILS', implode(',', $list));
+            audit('admin_email_added', ['email'=>$em]); $flash = 'Admin added: ' . $em;
+        }
+    } elseif ($act === 'remove_admin_email') {
+        $em = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+        if ($em === mb_strtolower((string)($a['email'] ?? ''))) { $flash = 'You cannot remove your own admin access.'; }
+        else {
+            $list = array_values(array_filter(admin_emails(), fn($x) => $x !== $em));
+            if (!$list) { $flash = 'At least one admin email must remain.'; }
+            else { setting_set('ADMIN_EMAILS', implode(',', $list)); audit('admin_email_removed', ['email'=>$em]); $flash = 'Admin removed: ' . $em; }
         }
     } elseif ($act === 'save_settings') {
         foreach (['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','BREVO_API_KEY','RESEND_API_KEY','MAIL_FROM','MAIL_FROM_NAME','REMINDER_DAYS'] as $k) {
@@ -124,21 +127,26 @@ function n($q){ return (int)pdo()->query($q)->fetchColumn(); }
     </form></div>
     <?php endforeach; ?>
 
-  <?php elseif ($tab==='admins'): $admins = $db->query("SELECT * FROM admins ORDER BY id")->fetchAll(); ?>
-    <h1>Admins</h1><p class="muted">Staff accounts (username + password). Only super-admins can add new ones.</p>
-    <div class="panel"><table><tr><th>ID</th><th>Username</th><th>Role</th><th>Status</th><th>Last login</th></tr>
-      <?php foreach ($admins as $ad): ?><tr><td>#<?=(int)$ad['id']?></td><td><?=e($ad['username'])?></td><td><span class="badge v"><?=e($ad['role'])?></span></td><td><?=e($ad['status'])?></td><td class="small"><?=$ad['last_login_at']?e($ad['last_login_at']):'—'?></td></tr><?php endforeach; ?></table></div>
-    <?php if ($a['role']==='super'): ?>
-    <div class="panel"><h3>Add a new admin</h3>
-      <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="create_admin">
-        <div class="field"><label>Username</label><input name="username" required></div>
-        <div class="field"><label>Name</label><input name="name"></div>
-        <div class="field"><label>Password</label><input name="password" type="password" required></div>
-        <div class="field"><label>Role</label><select name="role" class="field"><option value="admin">admin</option><option value="super">super</option></select></div>
-        <button class="btn btn-primary" style="padding:11px 18px">Create admin</button>
+  <?php elseif ($tab==='admins'): $aemails = admin_emails(); $meEmail = mb_strtolower((string)($a['email'] ?? '')); ?>
+    <h1>Admins</h1><p class="muted">Anyone who signs in (email code or Google) with one of these addresses gets the Admin panel. Everyone else gets the user dashboard.</p>
+    <div class="panel"><table><tr><th>Admin email</th><th></th></tr>
+      <?php foreach ($aemails as $em): ?>
+      <tr><td><?=e($em)?><?= $em===$meEmail ? ' <span class="badge v">you</span>' : '' ?></td>
+        <td style="text-align:right"><?php if ($em !== $meEmail): ?>
+          <form method="post" onsubmit="return confirm('Remove admin access for <?=e($em)?>?')" style="display:inline">
+            <?=csrf_field()?><input type="hidden" name="action" value="remove_admin_email"><input type="hidden" name="email" value="<?=e($em)?>">
+            <button class="btn btn-ghost" style="padding:6px 12px;color:#c0392b">Remove</button>
+          </form>
+        <?php endif; ?></td></tr>
+      <?php endforeach; ?>
+      <?php if (!$aemails): ?><tr><td colspan="2" class="small">No admin emails set yet — the next person to sign in becomes the owner.</td></tr><?php endif; ?>
+    </table></div>
+    <div class="panel"><h3>Add an admin</h3>
+      <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="add_admin_email">
+        <div class="field"><label>Email address</label><input name="email" type="email" placeholder="person@example.com" required></div>
+        <button class="btn btn-primary" style="padding:11px 18px">Add admin</button>
       </form>
     </div>
-    <?php endif; ?>
 
   <?php elseif ($tab==='audit'): $logs = $db->query("SELECT * FROM audit_log ORDER BY id DESC LIMIT 100")->fetchAll(); ?>
     <h1>Audit log</h1><p class="muted">Every sensitive action is recorded for security.</p>
