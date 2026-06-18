@@ -3,16 +3,16 @@
  * Saathi Agentic AI — WordPress Support Agent Framework
  *
  * @package           SathiAgenticAI
- * @author            RAI Labs P. Ltd.
- * @copyright         2026 RAI Labs P. Ltd.
+ * @author            RAI Labs Pvt. Ltd.
+ * @copyright         2026 RAI Labs Pvt. Ltd.
  * @license           GPL-2.0-or-later
  *
  * @wordpress-plugin
  * Plugin Name:       Saathi Agentic AI
  * Plugin URI:        https://railabs.in/sathi
  * Description:       Intelligent support agent for WordPress — chat, knowledge base, persistent memory, and real-time site navigation. Powered by multiple AI providers with a highly customizable 2026 UI.
- * Version:           1.9.4
- * Author:            RAI Labs P. Ltd.
+ * Version:           1.9.5
+ * Author:            RAI Labs Pvt. Ltd.
  * Author URI:        https://railabs.in
  * Text Domain:       sathi-agentic-ai
  * Domain Path:       /languages
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin constants ───────────────────────────────────────────────────
-define( 'SATHI_VERSION', '1.9.4' );
+define( 'SATHI_VERSION', '1.9.5' );
 define( 'SATHI_PREFIX', 'sathi' );
 define( 'SATHI_DOMAIN', 'sathi-agentic-ai' );
 define( 'SATHI_ENTRY', __FILE__ );

@@ -665,7 +665,7 @@ class AdminBoot {
     private function render_admin_footer(): void {
         echo '<div class="sathi-admin-footer" style="margin-top:40px;padding:16px 0;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;">';
         echo esc_html__( 'Saathi Agentic AI', 'sathi-agentic-ai' ) . ' v' . esc_html( SATHI_VERSION );
-        echo ' — <a href="https://railabs.in" target="_blank" rel="noopener noreferrer">RAI Labs P. Ltd.</a>';
+        echo ' — <a href="https://railabs.in" target="_blank" rel="noopener noreferrer">RAI Labs Pvt. Ltd.</a>';
         echo '</div>';
     }
 }

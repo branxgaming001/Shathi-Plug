@@ -2,7 +2,7 @@
 
 > Intelligent WordPress Support Agent Framework — chat, knowledge base, persistent memory, real-time site navigation. Multi-provider, highly customizable 2026 UI.
 
-**By [RAI Labs P. Ltd.](https://railabs.in)** | License: GPL v2+ | Requires: PHP 8.1+, WP 6.4+
+**By [RAI Labs Pvt. Ltd.](https://railabs.in)** | License: GPL v2+ | Requires: PHP 8.1+, WP 6.4+
 
 ---
 
@@ -211,7 +211,7 @@ Base: `{site}/wp-json/sathi/v1/`
 
 ## Credits
 
-Built with ❤️ by [RAI Labs P. Ltd.](https://railabs.in)
+Built with ❤️ by [RAI Labs Pvt. Ltd.](https://railabs.in)
 
 Architectural reference: AI Engine Pro (GPLv2, used for algorithm study only).  
 All Sathi code is original and GPLv2 licensed. No license-bypass logic carried over.
