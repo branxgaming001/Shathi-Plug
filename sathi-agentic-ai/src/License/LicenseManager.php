@@ -1,12 +1,18 @@
 <?php
 /**
  * License Manager — verifies / activates / deactivates the plugin license
- * against the RAI license server, caches the result, and gates features.
+ * against the RAI Labs license server, cryptographically VERIFIES every
+ * response (RS256, embedded public key), caches the signed entitlement, and
+ * gates premium features.
+ *
+ * Why signing: a nulled copy or a DNS-redirected fake server cannot forge a
+ * "valid" response without the private key (which never leaves our server).
+ * Premium grants (system directive) only ever come from a genuinely signed
+ * server response, so a cracked plugin cannot unlock paid behaviour.
  *
  * SAFETY: enforcement is OFF by default. With enforcement off, is_active()
- * always returns true so the plugin works normally. Turn enforcement on (via
- * the License tab, the SATHI_LICENSE_ENFORCE constant, or the
- * sathi_license_enforce filter) only after the license server is live.
+ * returns true so the plugin runs normally. Turn it on via the License tab,
+ * the SATHI_LICENSE_ENFORCE constant, or the sathi_license_enforce filter.
  *
  * @package RaiLabs\Sathi\License
  */
@@ -18,9 +24,26 @@ use RaiLabs\Sathi\Support\Helpers;
 
 class LicenseManager {
 
-    public const TRANSIENT = 'sathi_license_status';
-    public const CRON_HOOK = 'sathi_license_check';
-    public const PRODUCT   = 'sathi-agentic-ai';
+    public const TRANSIENT    = 'sathi_license_status';
+    public const LASTGOOD_OPT = 'sathi_license_lastgood';
+    public const CRON_HOOK    = 'sathi_license_check';
+    public const PRODUCT      = 'sathi-agentic-ai';
+    public const DEFAULT_SERVER = 'https://saathi.railabs.in';
+    /** Offline grace: keep last verified entitlement working if the server is unreachable. */
+    public const GRACE_SECONDS = 14 * DAY_IN_SECONDS;
+
+    /** RS256 public key — pairs with the private key held only on the license server. */
+    private const PUBLIC_KEY = <<<'PEM'
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqHHkVBh6xpnXNR8DlckG
+cZ80HIZo7VMJnLmXWKGvpzZEYarGzj9ZFbteoYh0gaXs987yaUXV8fHO6hzqHrmn
+2s4z+oQ6pSsfdh5tY1jxwRK0sB6j41SBJSV5hII+tEmQDifNZ+2DaXkSYr/uT/lX
+aAZfaw6wvhXwg+flm3r4b7yyrFd+/34ZhunaHDqgQdTX7ZaGi1yCqXvSMm1QJp2A
+RE0oRYTUtsXzU1iEcajugpmQymXQOVq+tpM+XdQdnQaUCP+ffaFHsXDlA7giDUBc
+PN+RxQBKPdKgODsyVREn7SiIsmJB/PUYJNB3+WNlWW7mHq5Q8OIPyEgYFviTEp9T
+RQIDAQAB
+-----END PUBLIC KEY-----
+PEM;
 
     private Settings $settings;
 
@@ -28,7 +51,6 @@ class LicenseManager {
         $this->settings = $settings ?: new Settings();
     }
 
-    /** Register the daily re-check cron + admin notice. */
     public function register(): void {
         add_action( self::CRON_HOOK, [ $this, 'cron_check' ] );
         if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
@@ -44,7 +66,22 @@ class LicenseManager {
         if ( '' === $url && defined( 'SATHI_LICENSE_SERVER' ) ) {
             $url = (string) SATHI_LICENSE_SERVER;
         }
+        if ( '' === $url ) {
+            $url = self::DEFAULT_SERVER;
+        }
         return rtrim( (string) apply_filters( 'sathi_license_server_url', $url ), '/' );
+    }
+
+    /** Full endpoint. Accepts either a base URL or a direct .../api/license.php. */
+    private function endpoint(): string {
+        $url = $this->server_url();
+        if ( '' === $url ) {
+            return '';
+        }
+        if ( false !== stripos( $url, 'license.php' ) ) {
+            return $url;
+        }
+        return $url . '/api/license.php';
     }
 
     public function get_key(): string {
@@ -58,15 +95,14 @@ class LicenseManager {
     public function clear_key(): void {
         $this->settings->set( Settings::KEY_LICENSE_KEY, '' );
         delete_transient( self::TRANSIENT );
+        delete_option( self::LASTGOOD_OPT );
     }
 
-    /** Site domain (host) used to bind the license. */
     public function domain(): string {
         $host = wp_parse_url( home_url(), PHP_URL_HOST );
-        return $host ?: home_url();
+        return $host ? strtolower( $host ) : home_url();
     }
 
-    /** Whether feature-gating is active. OFF by default. */
     public function enforcement_enabled(): bool {
         $on = (bool) $this->settings->get( Settings::KEY_LICENSE_ENFORCE, false );
         if ( defined( 'SATHI_LICENSE_ENFORCE' ) ) {
@@ -77,12 +113,6 @@ class LicenseManager {
 
     // ── Status / gating ───────────────────────────────────────────────
 
-    /**
-     * Get the cached (or freshly fetched) license status.
-     *
-     * @param bool $force Bypass the cache.
-     * @return array{status:string, plan?:string, expires?:string, domains?:array, max_domains?:int, message?:string}
-     */
     public function status( bool $force = false ): array {
         if ( ! $force ) {
             $cached = get_transient( self::TRANSIENT );
@@ -90,22 +120,64 @@ class LicenseManager {
                 return $cached;
             }
         }
-        $status = $this->remote( 'verify' );
+        $status = $this->remote( 'validate' );
+        // Offline grace: if the server is unreachable, keep the last verified grant alive.
+        if ( in_array( $status['status'], [ 'error', 'unknown' ], true ) ) {
+            $last = get_option( self::LASTGOOD_OPT );
+            if ( is_array( $last ) && ( time() - (int) ( $last['verified_at'] ?? 0 ) ) < self::GRACE_SECONDS ) {
+                $last['graced'] = true;
+                return $last;
+            }
+        } elseif ( 'active' === $status['status'] ) {
+            $status['verified_at'] = time();
+            update_option( self::LASTGOOD_OPT, $status, false );
+        }
         set_transient( self::TRANSIENT, $status, DAY_IN_SECONDS );
         return $status;
     }
 
-    /** True when the plugin's gated features may run. */
+    /** True when gated features may run (enforcement off => always true). */
     public function is_active(): bool {
         if ( ! $this->enforcement_enabled() ) {
-            return true; // Gating off — never block.
+            return true;
         }
         return ( $this->status()['status'] ?? '' ) === 'active';
+    }
+
+    /** Entitlement check for a specific premium feature (e.g. 'woocommerce', 'deep_scan'). */
+    public function can( string $feature ): bool {
+        if ( ! $this->enforcement_enabled() ) {
+            return true;
+        }
+        $s = $this->status();
+        if ( ( $s['status'] ?? '' ) !== 'active' ) {
+            return false;
+        }
+        return ! empty( $s['entitlements'][ $feature ] );
+    }
+
+    /**
+     * Server-side premium grant — the license-validated "value" a nulled copy
+     * cannot obtain. Returns the signed system directive, or '' if unlicensed.
+     */
+    public function premium_directive(): string {
+        if ( ! $this->enforcement_enabled() ) {
+            return '';
+        }
+        $res = $this->remote( 'premium' );
+        if ( ( $res['status'] ?? '' ) === 'active' && ! empty( $res['premium']['system_directive'] ) ) {
+            return (string) $res['premium']['system_directive'];
+        }
+        return '';
     }
 
     public function activate( string $key ): array {
         $this->set_key( $key );
         $res = $this->remote( 'activate' );
+        if ( 'active' === $res['status'] ) {
+            $res['verified_at'] = time();
+            update_option( self::LASTGOOD_OPT, $res, false );
+        }
         set_transient( self::TRANSIENT, $res, DAY_IN_SECONDS );
         return $res;
     }
@@ -120,50 +192,94 @@ class LicenseManager {
         $this->status( true );
     }
 
-    // ── Remote call ───────────────────────────────────────────────────
+    // ── Remote call + signature verification ──────────────────────────
 
     private function remote( string $action ): array {
         $key = $this->get_key();
-        $url = $this->server_url();
+        $ep  = $this->endpoint();
 
         if ( '' === $key ) {
             return [ 'status' => 'inactive', 'message' => __( 'No license key entered.', 'sathi-agentic-ai' ) ];
         }
-        if ( '' === $url ) {
+        if ( '' === $ep ) {
             return [ 'status' => 'unknown', 'message' => __( 'License server URL is not configured.', 'sathi-agentic-ai' ) ];
         }
 
-        $resp = wp_remote_post( $url . '/api/license/' . $action, [
+        $resp = wp_remote_post( $ep, [
             'timeout' => 15,
-            'headers' => [ 'Content-Type' => 'application/json', 'Accept' => 'application/json' ],
-            'body'    => wp_json_encode( [
+            'headers' => [ 'Accept' => 'application/json' ],
+            'body'    => [
+                'action'  => $action,
                 'key'     => $key,
                 'domain'  => $this->domain(),
                 'product' => self::PRODUCT,
-            ] ),
+            ],
         ] );
 
         if ( is_wp_error( $resp ) ) {
             return [ 'status' => 'error', 'message' => $resp->get_error_message() ];
         }
-        $code = wp_remote_retrieve_response_code( $resp );
         $data = json_decode( wp_remote_retrieve_body( $resp ), true );
-        if ( ! is_array( $data ) ) {
-            $data = [];
-        }
-        if ( $code >= 400 ) {
-            return [ 'status' => $data['status'] ?? 'invalid', 'message' => $data['message'] ?? "HTTP {$code}" ];
+        if ( ! is_array( $data ) || empty( $data['signed'] ) ) {
+            // No signed envelope => untrusted. Never accept.
+            return [ 'status' => 'invalid', 'message' => __( 'Unsigned or invalid license response.', 'sathi-agentic-ai' ) ];
         }
 
+        $verified = $this->verify_envelope( $data['signed'] );
+        if ( null === $verified ) {
+            return [ 'status' => 'invalid', 'message' => __( 'License signature failed verification.', 'sathi-agentic-ai' ) ];
+        }
+
+        // Bind to this product + domain (reject tokens minted for another site).
+        if ( ( $verified['product'] ?? '' ) !== self::PRODUCT ) {
+            return [ 'status' => 'invalid', 'message' => __( 'License is for a different product.', 'sathi-agentic-ai' ) ];
+        }
+        $vdom = (string) ( $verified['domain'] ?? '' );
+        if ( '' !== $vdom && $vdom !== $this->domain() ) {
+            return [ 'status' => 'invalid', 'message' => __( 'License is bound to a different domain.', 'sathi-agentic-ai' ) ];
+        }
+
+        $active = ! empty( $verified['valid'] );
         return [
-            'status'      => $data['status'] ?? 'invalid',
-            'plan'        => $data['plan'] ?? '',
-            'expires'     => $data['expires'] ?? '',
-            'domains'     => $data['domains'] ?? [],
-            'max_domains' => (int) ( $data['max_domains'] ?? 1 ),
-            'message'     => $data['message'] ?? '',
-            'checked_at'  => current_time( 'mysql' ),
+            'status'       => $active ? 'active' : ( $verified['reason'] ?? 'invalid' ),
+            'valid'        => $active,
+            'plan'         => $verified['plan'] ?? '',
+            'expires'      => $verified['expires_at'] ?? '',
+            'entitlements' => is_array( $verified['entitlements'] ?? null ) ? $verified['entitlements'] : [],
+            'premium'      => is_array( $verified['premium'] ?? null ) ? $verified['premium'] : null,
+            'reason'       => $verified['reason'] ?? '',
+            'token_exp'    => (int) ( $verified['exp'] ?? 0 ),
+            'message'      => $active ? '' : ( $verified['reason'] ?? 'invalid' ),
+            'checked_at'   => current_time( 'mysql' ),
         ];
+    }
+
+    /** Verify the RS256 signed envelope with the embedded public key. */
+    private function verify_envelope( $env ): ?array {
+        if ( ! is_array( $env ) || empty( $env['payload'] ) || empty( $env['sig'] ) ) {
+            return null;
+        }
+        if ( ! function_exists( 'openssl_verify' ) ) {
+            return null; // No OpenSSL => cannot trust; fail closed.
+        }
+        $payload = (string) $env['payload'];
+        $sig     = self::b64url_decode( (string) $env['sig'] );
+        $ok      = openssl_verify( $payload, $sig, self::PUBLIC_KEY, OPENSSL_ALGO_SHA256 );
+        if ( 1 !== $ok ) {
+            return null;
+        }
+        $data = json_decode( self::b64url_decode( $payload ), true );
+        if ( ! is_array( $data ) ) {
+            return null;
+        }
+        if ( isset( $data['exp'] ) && time() > (int) $data['exp'] + DAY_IN_SECONDS ) {
+            return null; // Token too old (small skew allowance).
+        }
+        return $data;
+    }
+
+    private static function b64url_decode( string $s ): string {
+        return (string) base64_decode( strtr( $s, '-_', '+/' ) . str_repeat( '=', ( 4 - strlen( $s ) % 4 ) % 4 ) );
     }
 
     // ── Admin notice ──────────────────────────────────────────────────
@@ -175,10 +291,10 @@ class LicenseManager {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        $purchase = $this->server_url() ?: 'https://railabs.in/sathi';
+        $purchase = 'https://saathi.railabs.in/pricing.php';
         printf(
-            '<div class="notice notice-warning"><p><strong>Sathi AI</strong> — %s <a href="%s">%s</a> &middot; <a href="%s" target="_blank" rel="noopener">%s</a></p></div>',
-            esc_html__( 'Activate your Sathi AI license to enable the chatbot.', 'sathi-agentic-ai' ),
+            '<div class="notice notice-warning"><p><strong>Saathi AI</strong> — %s <a href="%s">%s</a> &middot; <a href="%s" target="_blank" rel="noopener">%s</a></p></div>',
+            esc_html__( 'Activate your Saathi AI license to enable premium features.', 'sathi-agentic-ai' ),
             esc_url( admin_url( 'admin.php?page=sathi-dashboard#license' ) ),
             esc_html__( 'Enter license key', 'sathi-agentic-ai' ),
             esc_url( $purchase ),
