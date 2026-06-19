@@ -26,6 +26,7 @@ class LicenseManager {
 
     public const TRANSIENT    = 'sathi_license_status';
     public const LASTGOOD_OPT = 'sathi_license_lastgood';
+    public const PREMIUM_TRANSIENT = 'sathi_premium_grant';
     public const CRON_HOOK    = 'sathi_license_check';
     public const PRODUCT      = 'sathi-agentic-ai';
     public const DEFAULT_SERVER = 'https://saathi.railabs.in';
@@ -57,6 +58,8 @@ PEM;
             wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', self::CRON_HOOK );
         }
         add_action( 'admin_notices', [ $this, 'admin_notice' ] );
+        // Premium value lives server-side: the signed directive is appended to the system prompt.
+        add_filter( 'sathi_system_prompt', [ $this, 'inject_premium_directive' ], 20 );
     }
 
     // ── Configuration ─────────────────────────────────────────────────
@@ -95,6 +98,7 @@ PEM;
     public function clear_key(): void {
         $this->settings->set( Settings::KEY_LICENSE_KEY, '' );
         delete_transient( self::TRANSIENT );
+        delete_transient( self::PREMIUM_TRANSIENT );
         delete_option( self::LASTGOOD_OPT );
     }
 
@@ -164,15 +168,36 @@ PEM;
         if ( ! $this->enforcement_enabled() ) {
             return '';
         }
-        $res = $this->remote( 'premium' );
-        if ( ( $res['status'] ?? '' ) === 'active' && ! empty( $res['premium']['system_directive'] ) ) {
-            return (string) $res['premium']['system_directive'];
+        $cached = get_transient( self::PREMIUM_TRANSIENT );
+        if ( is_string( $cached ) ) {
+            return $cached;
         }
-        return '';
+        $res = $this->remote( 'premium' );
+        $d   = ( ( $res['status'] ?? '' ) === 'active' && ! empty( $res['premium']['system_directive'] ) )
+            ? (string) $res['premium']['system_directive'] : '';
+        set_transient( self::PREMIUM_TRANSIENT, $d, DAY_IN_SECONDS );
+        return $d;
+    }
+
+    /**
+     * Append the server-signed premium directive to the system prompt. The premium
+     * "brain" instructions come from our license-validated server, so a nulled copy
+     * (no valid signed grant) silently loses the premium behaviour.
+     *
+     * @param mixed $prompt
+     * @return mixed
+     */
+    public function inject_premium_directive( $prompt ) {
+        if ( ! $this->enforcement_enabled() ) {
+            return $prompt;
+        }
+        $d = $this->premium_directive();
+        return ( '' !== $d ) ? ( (string) $prompt . "\n\n" . $d ) : $prompt;
     }
 
     public function activate( string $key ): array {
         $this->set_key( $key );
+        delete_transient( self::PREMIUM_TRANSIENT );
         $res = $this->remote( 'activate' );
         if ( 'active' === $res['status'] ) {
             $res['verified_at'] = time();
@@ -189,6 +214,7 @@ PEM;
     }
 
     public function cron_check(): void {
+        delete_transient( self::PREMIUM_TRANSIENT );
         $this->status( true );
     }
 
