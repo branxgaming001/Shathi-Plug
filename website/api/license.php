@@ -62,7 +62,7 @@ if ($action === 'deactivate') {
         pdo()->prepare("UPDATE license_activations SET status='removed' WHERE license_id=? AND domain=?")->execute([(int)$lic['id'], $dom]);
         audit('license_deactivated', ['license_id' => (int)$lic['id'], 'domain' => $dom], 'system');
     }
-    $data = ['valid' => false, 'deactivated' => true, 'domain' => $dom, 'product' => 'saathi-agentic-ai'];
+    $data = ['valid' => false, 'deactivated' => true, 'domain' => $dom, 'product' => 'sathi-agentic-ai'];
     json_out(['valid' => false, 'deactivated' => true, 'signed' => sign_envelope($data, 86400)]);
 }
 
@@ -78,7 +78,7 @@ $data = [
     'prefix'      => $res['prefix'] ?? null,
     'domain'      => $dom,
     'entitlements'=> $ent,
-    'product'     => 'saathi-agentic-ai',
+    'product'     => 'sathi-agentic-ai',
 ];
 
 if ($action === 'premium') {

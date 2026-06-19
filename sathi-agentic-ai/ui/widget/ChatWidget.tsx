@@ -879,7 +879,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onStop }) => {
 
       {/* Brand credit */}
       <div className="sathi-credit" style={{ textAlign: 'center', fontSize: '10px', letterSpacing: '0.02em', color: '#9ca3af', marginTop: '6px' }}>
-        <strong style={{ color: '#6D5DFB', fontWeight: 700 }}>Saathi</strong> · a product by RAI
+        <strong style={{ color: '#6D5DFB', fontWeight: 700 }}>Saathi</strong> · a product by RAI Labs Pvt. Ltd.
       </div>
     </div>
   );
