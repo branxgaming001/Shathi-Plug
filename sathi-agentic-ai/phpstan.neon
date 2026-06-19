@@ -1,0 +1,15 @@
+# PHPStan config — strong static analysis for a commercial WordPress plugin.
+# Setup once:  composer install   (pulls wordpress-stubs + phpstan-wordpress)
+# Run:         composer analyse
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+    level: 8
+    paths:
+        - src
+    bootstrapFiles:
+        - sathi-agentic-ai.php
+    # WooCommerce classes are optional at analysis time.
+    ignoreErrors:
+        - '#Class WC_[a-zA-Z_]+ not found#'
+        - '#Function (wc|WC)_[a-zA-Z_]+ not found#'

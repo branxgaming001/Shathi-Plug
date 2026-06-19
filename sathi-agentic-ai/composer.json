@@ -2,7 +2,7 @@
     "name": "railabs/sathi-agentic-ai",
     "description": "Intelligent WordPress support agent with multi-provider AI, persistent memory, knowledge base, and real-time site navigation.",
     "type": "wordpress-plugin",
-    "version": "1.9.6",
+    "version": "1.9.7",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
@@ -17,6 +17,8 @@
         "phpunit/phpunit": "^10.0",
         "wp-coding-standards/wpcs": "^3.0",
         "phpstan/phpstan": "^1.10",
+        "php-stubs/wordpress-stubs": "^6.4",
+        "szepeviktor/phpstan-wordpress": "^1.3",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
     },
     "autoload": {
@@ -40,6 +42,6 @@
         "lint": "phpcs --standard=WordPress src/",
         "lint:fix": "phpcbf --standard=WordPress src/",
         "test": "phpunit",
-        "analyse": "phpstan analyse src/ --level=5"
+        "analyse": "phpstan analyse"
     }
 }
