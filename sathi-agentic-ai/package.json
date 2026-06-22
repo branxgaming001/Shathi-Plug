@@ -2,8 +2,8 @@
   "name": "sathi-agentic-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "Sathi Agentic AI — WordPress Support Agent by RAI Labs",
-  "author": "RAI Labs Pvt. Ltd.",
+  "description": "Sathi Agentic AI — WordPress Support Agent by NEER Media",
+  "author": "NEER Media",
   "license": "GPL-2.0-or-later",
   "scripts": {
     "dev": "vite",

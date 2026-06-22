@@ -71,7 +71,7 @@ class WP7Bridge {
                     'type'        => 'ai_provider',
                     'name'        => $this->get_provider_label( $provider ),
                     'description' => sprintf(
-                        __( 'AI Engine provided by RAI Labs Sathi (%s)', 'sathi-agentic-ai' ),
+                        __( 'AI Engine provided by NEER Media Sathi (%s)', 'sathi-agentic-ai' ),
                         $provider
                     ),
                     'auth_method' => 'api_key',

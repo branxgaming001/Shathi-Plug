@@ -1,7 +1,7 @@
 <?php
 /**
  * License Manager — verifies / activates / deactivates the plugin license
- * against the RAI Labs license server, cryptographically VERIFIES every
+ * against the NEER Media license server, cryptographically VERIFIES every
  * response (RS256, embedded public key), caches the signed entitlement, and
  * gates premium features.
  *
@@ -29,7 +29,7 @@ class LicenseManager {
     public const PREMIUM_TRANSIENT = 'sathi_premium_grant';
     public const CRON_HOOK    = 'sathi_license_check';
     public const PRODUCT      = 'sathi-agentic-ai';
-    public const DEFAULT_SERVER = 'https://saathi.railabs.in';
+    public const DEFAULT_SERVER = 'https://saathi.neermedia.com';
     /** Offline grace: keep last verified entitlement working if the server is unreachable. */
     public const GRACE_SECONDS = 14 * DAY_IN_SECONDS;
 
@@ -317,7 +317,7 @@ PEM;
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        $purchase = 'https://saathi.railabs.in/pricing.php';
+        $purchase = 'https://saathi.neermedia.com/pricing.php';
         printf(
             '<div class="notice notice-warning"><p><strong>Saathi AI</strong> — %s <a href="%s">%s</a> &middot; <a href="%s" target="_blank" rel="noopener">%s</a></p></div>',
             esc_html__( 'Activate your Saathi AI license to enable premium features.', 'sathi-agentic-ai' ),

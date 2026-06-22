@@ -151,4 +151,4 @@ AI Engine Pro (v3.5.3, GPLv2) by Jordy Meow was used as an *algorithmic and arch
 - REST API structure with per-module controllers
 - Streaming SSE parsing approach
 
-No license-bypass logic, no copyrighted UI, no compiled assets, and no proprietary code were carried over. Sathi Agentic AI is 100% original code written by RAI Labs Pvt. Ltd. and licensed GPLv2.
+No license-bypass logic, no copyrighted UI, no compiled assets, and no proprietary code were carried over. Sathi Agentic AI is 100% original code written by NEER Media and licensed GPLv2.

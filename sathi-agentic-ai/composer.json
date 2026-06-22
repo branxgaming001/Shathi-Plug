@@ -1,13 +1,13 @@
 {
-    "name": "railabs/sathi-agentic-ai",
+    "name": "neermedia/sathi-agentic-ai",
     "description": "Intelligent WordPress support agent with multi-provider AI, persistent memory, knowledge base, and real-time site navigation.",
     "type": "wordpress-plugin",
-    "version": "1.9.9",
+    "version": "2.0.0",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "RAI Labs Pvt. Ltd.",
-            "homepage": "https://railabs.in"
+            "name": "NEER Media",
+            "homepage": "https://neermedia.com"
         }
     ],
     "require": {

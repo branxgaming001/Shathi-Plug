@@ -1,7 +1,7 @@
 # Saathi Agentic AI — Hooks Reference
 
 Public extension points for developers and AI assistants. Use these to customise
-behaviour without editing core. By **RAI Labs Pvt. Ltd.** — https://railabs.in
+behaviour without editing core. By **NEER Media** — https://neermedia.com
 
 > Convention: actions are side-effects, filters return a (possibly modified) value.
 > All hook names are prefixed `sathi_`.

@@ -1,6 +1,6 @@
 # Contributing to Saathi Agentic AI
 
-By **RAI Labs Pvt. Ltd.** — https://railabs.in · License: GPL-2.0-or-later
+By **NEER Media** — https://neermedia.com · License: GPL-2.0-or-later
 
 This guide helps a human developer **or an AI assistant** safely extend the plugin.
 

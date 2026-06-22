@@ -116,7 +116,7 @@ const AdminPanel: React.FC = () => {
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-rai-black leading-tight tracking-tight">Saathi AI</h1>
-          <p className="text-xs text-gray-500">v{admin.version} · {admin.siteName} · a product by RAI Labs Pvt. Ltd.</p>
+          <p className="text-xs text-gray-500">v{admin.version} · {admin.siteName} · a product by NEER Media</p>
         </div>
         {configuredCount === 0 && (
           <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-rai-gold-50 text-rai-gold-600 border border-rai-gold-100">
@@ -151,7 +151,7 @@ const AdminPanel: React.FC = () => {
 
       {/* RAI brand credit */}
       <div className="mt-10 pt-5 border-t border-gray-100 text-center">
-        <span className="text-xs text-gray-400"><strong className="text-rai-blue-700 font-semibold">Saathi</strong> · a product by RAI Labs Pvt. Ltd.</span>
+        <span className="text-xs text-gray-400"><strong className="text-rai-blue-700 font-semibold">Saathi</strong> · a product by NEER Media</span>
       </div>
 
       {toast && (
