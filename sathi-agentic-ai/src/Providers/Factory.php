@@ -5,13 +5,13 @@
  * Handles per-task default routing: chat vs embeddings vs images can each
  * target a different provider.
  *
- * @package RaiLabs\Sathi\Providers
+ * @package NeerMedia\Sathi\Providers
  */
 
-namespace RaiLabs\Sathi\Providers;
+namespace NeerMedia\Sathi\Providers;
 
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Providers\Contracts\ProviderInterface;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Providers\Contracts\ProviderInterface;
 
 class Factory {
 

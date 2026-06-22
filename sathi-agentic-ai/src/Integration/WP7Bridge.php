@@ -6,10 +6,10 @@
  * when they are available. Never hard-depends on them — everything degrades
  * gracefully on WP < 7.0.
  *
- * @package RaiLabs\Sathi\Integration
+ * @package NeerMedia\Sathi\Integration
  */
 
-namespace RaiLabs\Sathi\Integration;
+namespace NeerMedia\Sathi\Integration;
 
 class WP7Bridge {
 
@@ -169,7 +169,7 @@ class WP7Bridge {
      * @return array
      */
     public function ability_knowledge_search( array $args ): array {
-        $manager = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+        $manager = new \NeerMedia\Sathi\Knowledge\KnowledgeManager();
         $results = $manager->search( $args['query'], 3 );
 
         return [
@@ -185,7 +185,7 @@ class WP7Bridge {
      * @return array
      */
     public function ability_navigate( array $args ): array {
-        $nav     = new \RaiLabs\Sathi\Navigation\NavigationManager();
+        $nav     = new \NeerMedia\Sathi\Navigation\NavigationManager();
         $result  = $nav->resolve_url( $args['intent'] );
 
         if ( $result ) {
@@ -206,7 +206,7 @@ class WP7Bridge {
      * Get Sathi provider config for connector bridging.
      */
     private function get_sathi_provider_config( string $provider ): ?array {
-        $settings = new \RaiLabs\Sathi\Core\Settings();
+        $settings = new \NeerMedia\Sathi\Core\Settings();
         return $settings->get_provider_config( $provider );
     }
 

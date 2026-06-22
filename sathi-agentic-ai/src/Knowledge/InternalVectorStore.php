@@ -7,10 +7,10 @@
  * with fewer than ~5 000 chunks. For larger sites, use an external adapter
  * (Pinecone, Qdrant, Chroma) that implements VectorStoreInterface.
  *
- * @package RaiLabs\Sathi\Knowledge
+ * @package NeerMedia\Sathi\Knowledge
  */
 
-namespace RaiLabs\Sathi\Knowledge;
+namespace NeerMedia\Sathi\Knowledge;
 
 class InternalVectorStore implements VectorStoreInterface {
 

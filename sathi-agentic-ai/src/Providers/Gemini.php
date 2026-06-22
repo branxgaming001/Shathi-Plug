@@ -4,14 +4,14 @@
  *
  * Supports: Gemini API, streaming, function calling, vision, embeddings.
  *
- * @package RaiLabs\Sathi\Providers
+ * @package NeerMedia\Sathi\Providers
  */
 
-namespace RaiLabs\Sathi\Providers;
+namespace NeerMedia\Sathi\Providers;
 
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Providers\Contracts\ProviderInterface;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Providers\Contracts\ProviderInterface;
+use NeerMedia\Sathi\Support\Helpers;
 
 class Gemini implements ProviderInterface {
 

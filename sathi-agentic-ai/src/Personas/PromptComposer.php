@@ -8,12 +8,12 @@
  * voice is used. Sensitive-information requests are always refused safely,
  * regardless of persona.
  *
- * @package RaiLabs\Sathi\Personas
+ * @package NeerMedia\Sathi\Personas
  */
 
-namespace RaiLabs\Sathi\Personas;
+namespace NeerMedia\Sathi\Personas;
 
-use RaiLabs\Sathi\Core\Settings;
+use NeerMedia\Sathi\Core\Settings;
 
 class PromptComposer {
 

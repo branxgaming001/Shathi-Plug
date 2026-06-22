@@ -5,18 +5,18 @@
  * Bypasses the WP REST API (which buffers all output) and uses template_redirect
  * to intercept a sathi-stream/* URL. Outputs raw text/event-stream.
  *
- * @package RaiLabs\Sathi\Chat
+ * @package NeerMedia\Sathi\Chat
  */
 
-namespace RaiLabs\Sathi\Chat;
+namespace NeerMedia\Sathi\Chat;
 
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Memory\MemoryStore;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Personas\PromptComposer;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Memory\MemoryStore;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Personas\PromptComposer;
+use NeerMedia\Sathi\Support\Helpers;
 
 class StreamEndpoint {
 
@@ -115,7 +115,7 @@ class StreamEndpoint {
         $available_tools = apply_filters( 'sathi_chat_tools', [], null );
 
         // ── License gating (no-op unless enforcement is enabled) ───
-        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager() )->is_active() ) {
+        if ( ! ( new \NeerMedia\Sathi\License\LicenseManager() )->is_active() ) {
             $this->emit( 'token', [ 'token' => __( 'Saathi AI is not activated yet. Please ask the site owner to activate the license.', 'sathi-agentic-ai' ) ] );
             $this->done();
             return;
@@ -142,7 +142,7 @@ class StreamEndpoint {
         // ── Retrieve relevant site content (RAG) ──────────────────
         $knowledge_summary = '';
         try {
-            $km   = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+            $km   = new \NeerMedia\Sathi\Knowledge\KnowledgeManager();
             $hits = $km->hybridSearch( $message, 5 );
             $parts = [];
             foreach ( $hits as $h ) {
@@ -255,7 +255,7 @@ class StreamEndpoint {
             // ── Emit matching WooCommerce product cards ──────────
             if ( $settings->get( Settings::KEY_PRODUCT_CARDS, true ) ) {
                 try {
-                    $ps = new \RaiLabs\Sathi\Commerce\ProductSearch();
+                    $ps = new \NeerMedia\Sathi\Commerce\ProductSearch();
                     if ( $ps->available() ) {
                         $products = $ps->search( $message, 3 );
                         if ( ! empty( $products ) ) {

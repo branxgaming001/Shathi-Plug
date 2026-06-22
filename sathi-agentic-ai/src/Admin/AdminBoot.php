@@ -3,13 +3,13 @@
  * Admin Boot — registers admin pages, enqueues admin assets, wires React mount points,
  * and provides the Abilities management page.
  *
- * @package RaiLabs\Sathi\Admin
+ * @package NeerMedia\Sathi\Admin
  */
 
-namespace RaiLabs\Sathi\Admin;
+namespace NeerMedia\Sathi\Admin;
 
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Abilities\AbilityRegistry;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Abilities\AbilityRegistry;
 
 class AdminBoot {
 
@@ -504,7 +504,7 @@ class AdminBoot {
         echo '<div id="sathi-admin-knowledge" class="sathi-admin-wrap">';
         echo '<h1>' . esc_html__( 'Knowledge Base', 'sathi-agentic-ai' ) . '</h1>';
 
-        $stats = ( new \RaiLabs\Sathi\Knowledge\KnowledgeManager() )->get_stats();
+        $stats = ( new \NeerMedia\Sathi\Knowledge\KnowledgeManager() )->get_stats();
         echo '<div class="sathi-stats">';
         echo '<p>' . sprintf( esc_html__( 'Total chunks indexed: %d', 'sathi-agentic-ai' ), $stats['total_chunks'] ) . '</p>';
         echo '<p>' . sprintf( esc_html__( 'Unique sources: %d', 'sathi-agentic-ai' ), $stats['total_sources'] ) . '</p>';
@@ -540,7 +540,7 @@ class AdminBoot {
      * Render the logs page.
      */
     public function render_logs(): void {
-        $logger = new \RaiLabs\Sathi\Support\Logger();
+        $logger = new \NeerMedia\Sathi\Support\Logger();
         $lines  = $logger->tail( 200 );
 
         echo '<div id="sathi-admin-logs" class="sathi-admin-wrap">';
@@ -665,7 +665,7 @@ class AdminBoot {
     private function render_admin_footer(): void {
         echo '<div class="sathi-admin-footer" style="margin-top:40px;padding:16px 0;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;">';
         echo esc_html__( 'Saathi Agentic AI', 'sathi-agentic-ai' ) . ' v' . esc_html( SATHI_VERSION );
-        echo ' — <a href="https://railabs.in" target="_blank" rel="noopener noreferrer">RAI Labs Pvt. Ltd.</a>';
+        echo ' — <a href="https://neermedia.com" target="_blank" rel="noopener noreferrer">NEER Media</a>';
         echo '</div>';
     }
 }

@@ -2,10 +2,10 @@
 /**
  * Usage & Cost Tracker — per-provider token counting, cost estimation, spend caps.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class UsageTracker {
 

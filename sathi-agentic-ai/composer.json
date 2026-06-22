@@ -2,7 +2,7 @@
     "name": "neermedia/sathi-agentic-ai",
     "description": "Intelligent WordPress support agent with multi-provider AI, persistent memory, knowledge base, and real-time site navigation.",
     "type": "wordpress-plugin",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "RaiLabs\\Sathi\\": "src/"
+            "NeerMedia\\Sathi\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "RaiLabs\\Sathi\\Tests\\": "tests/"
+            "NeerMedia\\Sathi\\Tests\\": "tests/"
         }
     },
     "config": {

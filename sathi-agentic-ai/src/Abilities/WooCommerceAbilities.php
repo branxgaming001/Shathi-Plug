@@ -6,10 +6,10 @@
  * capability gating. Automatically detects WooCommerce availability and
  * silently skips registration when WooCommerce is absent.
  *
- * @package RaiLabs\Sathi\Abilities
+ * @package NeerMedia\Sathi\Abilities
  */
 
-namespace RaiLabs\Sathi\Abilities;
+namespace NeerMedia\Sathi\Abilities;
 
 class WooCommerceAbilities {
 

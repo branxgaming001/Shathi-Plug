@@ -2,17 +2,17 @@
 /**
  * Chat Manager — conversation lifecycle, message routing, shortcode/block registration.
  *
- * @package RaiLabs\Sathi\Chat
+ * @package NeerMedia\Sathi\Chat
  */
 
-namespace RaiLabs\Sathi\Chat;
+namespace NeerMedia\Sathi\Chat;
 
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Memory\MemoryStore;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Memory\MemoryStore;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
 
 class ChatManager {
 
@@ -89,7 +89,7 @@ class ChatManager {
         }
 
         // License gating (no-op unless enforcement is enabled in the License tab).
-        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager( $this->settings ) )->is_active() ) {
+        if ( ! ( new \NeerMedia\Sathi\License\LicenseManager( $this->settings ) )->is_active() ) {
             return false;
         }
 
@@ -193,7 +193,7 @@ class ChatManager {
             return $this->settings->get_custom_avatar();
         }
         if ( strpos( $id, 'mascot-' ) === 0 ) {
-            return \RaiLabs\Sathi\Support\Mascots::get( $id );
+            return \NeerMedia\Sathi\Support\Mascots::get( $id );
         }
         return '';
     }
@@ -211,7 +211,7 @@ class ChatManager {
             return $c !== '' ? [ $c ] : [];
         }
         if ( strpos( $id, 'mascot-' ) === 0 ) {
-            return \RaiLabs\Sathi\Support\Mascots::frames_for( $id );
+            return \NeerMedia\Sathi\Support\Mascots::frames_for( $id );
         }
         return [];
     }
@@ -467,7 +467,7 @@ class ChatManager {
         // Retrieve relevant site content for grounding (RAG).
         if ( $user_input !== '' ) {
             try {
-                $km    = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+                $km    = new \NeerMedia\Sathi\Knowledge\KnowledgeManager();
                 $hits  = $km->hybridSearch( $user_input, 5 );
                 $parts = [];
                 foreach ( $hits as $h ) {
@@ -485,7 +485,7 @@ class ChatManager {
             }
         }
 
-        $prompt = ( new \RaiLabs\Sathi\Personas\PromptComposer() )->compose( '', $context );
+        $prompt = ( new \NeerMedia\Sathi\Personas\PromptComposer() )->compose( '', $context );
 
         return apply_filters( 'sathi_system_prompt', $prompt, $conv );
     }
@@ -588,13 +588,13 @@ class ChatManager {
         }
 
         // Fallback: use first 60 characters
-        $title = \RaiLabs\Sathi\Support\Helpers::clean_text( $first_msg, 60 );
+        $title = \NeerMedia\Sathi\Support\Helpers::clean_text( $first_msg, 60 );
 
         // Try LLM-based titling (best-effort)
         try {
             $provider = $this->factory->make( $conv->provider );
             if ( $provider ) {
-                $titling_msg = \RaiLabs\Sathi\Core\Data\Message::user(
+                $titling_msg = \NeerMedia\Sathi\Core\Data\Message::user(
                     sprintf( 'Generate a 5-word title for this user message: "%s". Reply with ONLY the title, no quotes.', $title )
                 );
                 $response = $provider->chat( [ $titling_msg ], [
@@ -602,7 +602,7 @@ class ChatManager {
                     'temperature' => 0.3,
                 ] );
                 if ( $response && ! empty( $response->content ) ) {
-                    $title = \RaiLabs\Sathi\Support\Helpers::clean_text( $response->content, 100 );
+                    $title = \NeerMedia\Sathi\Support\Helpers::clean_text( $response->content, 100 );
                 }
             }
         } catch ( \Throwable $e ) {

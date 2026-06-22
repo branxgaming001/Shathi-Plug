@@ -2,10 +2,10 @@
 /**
  * Static helper functions — namespaced to avoid global pollution.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class Helpers {
 

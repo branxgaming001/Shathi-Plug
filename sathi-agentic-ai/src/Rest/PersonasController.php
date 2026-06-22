@@ -2,12 +2,12 @@
 /**
  * Personas REST Controller.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Personas\PersonaRegistry;
+use NeerMedia\Sathi\Personas\PersonaRegistry;
 use WP_REST_Request;
 use WP_REST_Response;
 

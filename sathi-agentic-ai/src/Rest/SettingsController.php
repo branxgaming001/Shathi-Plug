@@ -2,12 +2,12 @@
 /**
  * Settings REST Controller — read/write plugin settings.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Core\Settings;
+use NeerMedia\Sathi\Core\Settings;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -64,9 +64,9 @@ class SettingsController {
      */
     public function list_mascots( WP_REST_Request $request ): WP_REST_Response {
         return new WP_REST_Response( [
-            'mascots' => \RaiLabs\Sathi\Support\Mascots::all(),     // id => first (neutral) frame
-            'frames'  => \RaiLabs\Sathi\Support\Mascots::frames(),  // id => [expression frames]
-            'labels'  => \RaiLabs\Sathi\Support\Mascots::labels(),
+            'mascots' => \NeerMedia\Sathi\Support\Mascots::all(),     // id => first (neutral) frame
+            'frames'  => \NeerMedia\Sathi\Support\Mascots::frames(),  // id => [expression frames]
+            'labels'  => \NeerMedia\Sathi\Support\Mascots::labels(),
         ] );
     }
 
@@ -76,9 +76,9 @@ class SettingsController {
     public function list_models( WP_REST_Request $request ): WP_REST_Response {
         $provider = sanitize_text_field( $request->get_param( 'provider' ) );
         $settings = new Settings();
-        $factory  = new \RaiLabs\Sathi\Providers\Factory( $settings );
+        $factory  = new \NeerMedia\Sathi\Providers\Factory( $settings );
 
-        $catalog = \RaiLabs\Sathi\Providers\ProviderCatalog::get( $provider );
+        $catalog = \NeerMedia\Sathi\Providers\ProviderCatalog::get( $provider );
         $fallback = $catalog['models'] ?? [];
 
         try {
@@ -140,15 +140,15 @@ class SettingsController {
         // Mask API keys for security
         foreach ( $configs as $provider => $config ) {
             if ( ! empty( $config['api_key'] ) ) {
-                $configs[ $provider ]['api_key'] = \RaiLabs\Sathi\Support\Helpers::mask_key( $config['api_key'] );
+                $configs[ $provider ]['api_key'] = \NeerMedia\Sathi\Support\Helpers::mask_key( $config['api_key'] );
             }
         }
 
         return new WP_REST_Response( [
             'providers'      => $configs,
-            'available'      => \RaiLabs\Sathi\Providers\ProviderCatalog::keys(),
-            'catalog'        => \RaiLabs\Sathi\Providers\ProviderCatalog::all(),
-            'embedding_keys' => \RaiLabs\Sathi\Providers\ProviderCatalog::embedding_keys(),
+            'available'      => \NeerMedia\Sathi\Providers\ProviderCatalog::keys(),
+            'catalog'        => \NeerMedia\Sathi\Providers\ProviderCatalog::all(),
+            'embedding_keys' => \NeerMedia\Sathi\Providers\ProviderCatalog::embedding_keys(),
             'default'        => $settings->get( Settings::KEY_DEFAULT_PROVIDER ),
             'enabled'        => $settings->get( Settings::KEY_ENABLED_PROVIDERS ),
             'embed_provider' => $settings->get( Settings::KEY_EMBED_PROVIDER, '' ),
@@ -161,7 +161,7 @@ class SettingsController {
      */
     public function update_provider( WP_REST_Request $request ): WP_REST_Response {
         $provider = $request->get_param( 'provider' );
-        $allowed  = \RaiLabs\Sathi\Providers\ProviderCatalog::keys();
+        $allowed  = \NeerMedia\Sathi\Providers\ProviderCatalog::keys();
 
         if ( ! in_array( $provider, $allowed, true ) ) {
             return new WP_REST_Response( [ 'error' => 'Invalid provider' ], 400 );
@@ -213,7 +213,7 @@ class SettingsController {
     public function test_provider( WP_REST_Request $request ): WP_REST_Response {
         $provider = $request->get_param( 'provider' );
         $settings = new Settings();
-        $factory  = new \RaiLabs\Sathi\Providers\Factory( $settings );
+        $factory  = new \NeerMedia\Sathi\Providers\Factory( $settings );
 
         try {
             $adapter = $factory->make( $provider );
@@ -225,7 +225,7 @@ class SettingsController {
             }
 
             // Send a minimal test request
-            $test_msg = \RaiLabs\Sathi\Core\Data\Message::user( 'Hello, reply with just "OK".' );
+            $test_msg = \NeerMedia\Sathi\Core\Data\Message::user( 'Hello, reply with just "OK".' );
             $response = $adapter->chat( [ $test_msg ], [
                 'max_tokens'  => 10,
                 'temperature' => 0,

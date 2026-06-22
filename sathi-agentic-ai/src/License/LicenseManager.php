@@ -14,13 +14,13 @@
  * returns true so the plugin runs normally. Turn it on via the License tab,
  * the SATHI_LICENSE_ENFORCE constant, or the sathi_license_enforce filter.
  *
- * @package RaiLabs\Sathi\License
+ * @package NeerMedia\Sathi\License
  */
 
-namespace RaiLabs\Sathi\License;
+namespace NeerMedia\Sathi\License;
 
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Support\Helpers;
 
 class LicenseManager {
 

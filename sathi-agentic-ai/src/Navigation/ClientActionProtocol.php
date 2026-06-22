@@ -5,10 +5,10 @@
  * Every action is validated against an allowlist before serialization.
  * The React widget interprets these on the client side.
  *
- * @package RaiLabs\Sathi\Navigation
+ * @package NeerMedia\Sathi\Navigation
  */
 
-namespace RaiLabs\Sathi\Navigation;
+namespace NeerMedia\Sathi\Navigation;
 
 class ClientActionProtocol {
 

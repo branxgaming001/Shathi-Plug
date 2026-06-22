@@ -2,10 +2,10 @@
 /**
  * Content Moderator — input/output safety filtering.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class ContentModerator {
 

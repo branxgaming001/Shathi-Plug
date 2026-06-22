@@ -9,14 +9,14 @@
  * Auto-indexes content on save_post and runs a background cron for embedding
  * generation so that large sites are indexed progressively.
  *
- * @package RaiLabs\Sathi\Knowledge
+ * @package NeerMedia\Sathi\Knowledge
  */
 
-namespace RaiLabs\Sathi\Knowledge;
+namespace NeerMedia\Sathi\Knowledge;
 
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
-use RaiLabs\Sathi\Core\Database\Schema;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Database\Schema;
 use WP_Post;
 
 class KnowledgeManager {
@@ -40,7 +40,7 @@ class KnowledgeManager {
         global $wpdb;
         $this->chunks_table    = $wpdb->prefix . 'sathi_knowledge_chunks';
         $this->crawler         = new SiteCrawler();
-        $this->factory         = new Factory( new \RaiLabs\Sathi\Core\Settings() );
+        $this->factory         = new Factory( new \NeerMedia\Sathi\Core\Settings() );
         $this->vector_store    = new InternalVectorStore();
         $this->embed_batch_size = (int) apply_filters( 'sathi_embed_batch_size', 20 );
     }

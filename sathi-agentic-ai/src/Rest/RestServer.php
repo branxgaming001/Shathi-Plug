@@ -2,10 +2,10 @@
 /**
  * REST Server — registers all API routes and dispatches to controllers.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
 class RestServer {
 

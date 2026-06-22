@@ -2,10 +2,10 @@
 /**
  * PSR-3 compatible logger for Sathi plugin.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class Logger {
 

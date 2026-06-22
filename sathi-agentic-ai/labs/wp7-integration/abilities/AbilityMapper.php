@@ -2,10 +2,10 @@
 /**
  * Maps Sathi's tool definitions to WP 7 Abilities.
  *
- * @package RaiLabs\Sathi\Labs\WP7Integration\Abilities
+ * @package NeerMedia\Sathi\Labs\WP7Integration\Abilities
  */
 
-namespace RaiLabs\Sathi\Labs\WP7Integration\Abilities;
+namespace NeerMedia\Sathi\Labs\WP7Integration\Abilities;
 
 class AbilityMapper {
 
@@ -27,7 +27,7 @@ class AbilityMapper {
                     'required' => [ 'query' ],
                 ],
                 'callback'    => function ( array $args ): array {
-                    $manager = new \RaiLabs\Sathi\Knowledge\KnowledgeManager();
+                    $manager = new \NeerMedia\Sathi\Knowledge\KnowledgeManager();
                     return [ 'results' => $manager->search( $args['query'], $args['limit'] ?? 5 ) ];
                 },
                 'show_in_rest' => true,
@@ -42,7 +42,7 @@ class AbilityMapper {
                     'properties' => [],
                 ],
                 'callback'    => function (): array {
-                    $nav = new \RaiLabs\Sathi\Navigation\NavigationManager();
+                    $nav = new \NeerMedia\Sathi\Navigation\NavigationManager();
                     return $nav->build_route_map();
                 },
                 'show_in_rest' => true,
@@ -61,9 +61,9 @@ class AbilityMapper {
                 'callback'    => function ( array $args ): array {
                     $user_id  = get_current_user_id() ?: null;
                     $guest_id = sanitize_text_field( $_REQUEST['guest_id'] ?? '' );
-                    $factory  = new \RaiLabs\Sathi\Providers\Factory( new \RaiLabs\Sathi\Core\Settings() );
-                    $memory   = new \RaiLabs\Sathi\Memory\MemoryStore();
-                    $chat     = new \RaiLabs\Sathi\Chat\ChatManager( $factory, $memory );
+                    $factory  = new \NeerMedia\Sathi\Providers\Factory( new \NeerMedia\Sathi\Core\Settings() );
+                    $memory   = new \NeerMedia\Sathi\Memory\MemoryStore();
+                    $chat     = new \NeerMedia\Sathi\Chat\ChatManager( $factory, $memory );
                     $convs    = $chat->get_recent_conversations( $user_id, $guest_id, $args['limit'] ?? 10 );
                     return [
                         'conversations' => array_map( fn( $c ) => $c->to_array(), $convs ),

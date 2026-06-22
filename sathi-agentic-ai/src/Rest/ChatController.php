@@ -2,16 +2,16 @@
 /**
  * Chat REST Controller — message send, streaming, conversation CRUD.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Chat\ChatManager;
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Memory\MemoryStore;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Chat\ChatManager;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Memory\MemoryStore;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -108,7 +108,7 @@ class ChatController {
         }
 
         // License gating (no-op unless enforcement is enabled).
-        if ( ! ( new \RaiLabs\Sathi\License\LicenseManager() )->is_active() ) {
+        if ( ! ( new \NeerMedia\Sathi\License\LicenseManager() )->is_active() ) {
             return new WP_REST_Response( [
                 'success' => true,
                 'conversation_id' => '',

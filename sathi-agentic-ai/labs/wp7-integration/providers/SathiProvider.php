@@ -2,10 +2,10 @@
 /**
  * Sathi Provider — bridges wp_ai_client_prompt() through Sathi's provider layer.
  *
- * @package RaiLabs\Sathi\Labs\WP7Integration\Providers
+ * @package NeerMedia\Sathi\Labs\WP7Integration\Providers
  */
 
-namespace RaiLabs\Sathi\Labs\WP7Integration\Providers;
+namespace NeerMedia\Sathi\Labs\WP7Integration\Providers;
 
 class SathiProvider {
 
@@ -50,7 +50,7 @@ class SathiProvider {
      * Log an outgoing prompt for cost tracking.
      */
     public function log_prompt( array $data ): void {
-        $logger = new \RaiLabs\Sathi\Support\Logger();
+        $logger = new \NeerMedia\Sathi\Support\Logger();
         $logger->info( 'WP7 AI prompt sent', [
             'model'   => $data['model'] ?? 'unknown',
             'tokens'  => $data['token_count'] ?? 0,
@@ -61,7 +61,7 @@ class SathiProvider {
      * Log a received response for cost tracking.
      */
     public function log_response( array $data ): void {
-        $logger = new \RaiLabs\Sathi\Support\Logger();
+        $logger = new \NeerMedia\Sathi\Support\Logger();
         $logger->info( 'WP7 AI response received', [
             'tokens' => $data['token_count'] ?? 0,
         ] );
@@ -71,7 +71,7 @@ class SathiProvider {
      * Log an AI client error.
      */
     public function log_error( array $data ): void {
-        $logger = new \RaiLabs\Sathi\Support\Logger();
+        $logger = new \NeerMedia\Sathi\Support\Logger();
         $logger->error( 'WP7 AI client error', [
             'error' => $data['error'] ?? 'Unknown error',
         ] );

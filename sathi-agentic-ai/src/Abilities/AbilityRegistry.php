@@ -5,12 +5,12 @@
  * Auto-discovers registered abilities, gates by capability, persists enable/disable
  * state, formats for provider consumption, and executes single or chained calls.
  *
- * @package RaiLabs\Sathi\Abilities
+ * @package NeerMedia\Sathi\Abilities
  */
 
-namespace RaiLabs\Sathi\Abilities;
+namespace NeerMedia\Sathi\Abilities;
 
-use RaiLabs\Sathi\Core\Data\FunctionResult;
+use NeerMedia\Sathi\Core\Data\FunctionResult;
 
 class AbilityRegistry {
 

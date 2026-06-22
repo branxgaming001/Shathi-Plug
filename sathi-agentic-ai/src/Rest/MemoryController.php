@@ -5,17 +5,17 @@
  * Public endpoints for the chat widget, admin endpoints for the memory
  * management page.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Memory\MemoryManager;
-use RaiLabs\Sathi\Memory\MemoryStore;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Memory\MemoryManager;
+use NeerMedia\Sathi\Memory\MemoryStore;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -342,7 +342,7 @@ class MemoryController {
         ), ARRAY_A );
 
         foreach ( $msg_rows ?: [] as $mr ) {
-            $conv->add_message( new \RaiLabs\Sathi\Core\Data\Message(
+            $conv->add_message( new \NeerMedia\Sathi\Core\Data\Message(
                 $mr['role'],
                 $mr['content'],
                 $mr['tool_calls'] ? json_decode( $mr['tool_calls'], true ) : null,

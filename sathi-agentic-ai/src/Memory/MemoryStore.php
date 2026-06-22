@@ -5,13 +5,13 @@
  * Stores and retrieves key-value memory entries, handles summarization of long
  * conversations, and prunes expired entries on schedule.
  *
- * @package RaiLabs\Sathi\Memory
+ * @package NeerMedia\Sathi\Memory
  */
 
-namespace RaiLabs\Sathi\Memory;
+namespace NeerMedia\Sathi\Memory;
 
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Support\Helpers;
 
 class MemoryStore {
 

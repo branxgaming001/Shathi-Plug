@@ -6,10 +6,10 @@
  * All WP 7 integration code lives under /labs so the core plugin
  * stays stable while the framework API evolves.
  *
- * @package RaiLabs\Sathi\Labs\WP7Integration
+ * @package NeerMedia\Sathi\Labs\WP7Integration
  */
 
-namespace RaiLabs\Sathi\Labs\WP7Integration;
+namespace NeerMedia\Sathi\Labs\WP7Integration;
 
 // Gate: only load if WP 7 AI framework is present
 if ( ! function_exists( 'wp_ai_client_prompt' ) ) {

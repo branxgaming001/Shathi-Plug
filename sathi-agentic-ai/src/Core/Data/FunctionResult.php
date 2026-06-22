@@ -2,10 +2,10 @@
 /**
  * Function result value object — the outcome of executing a tool call.
  *
- * @package RaiLabs\Sathi\Core\Data
+ * @package NeerMedia\Sathi\Core\Data
  */
 
-namespace RaiLabs\Sathi\Core\Data;
+namespace NeerMedia\Sathi\Core\Data;
 
 class FunctionResult {
 

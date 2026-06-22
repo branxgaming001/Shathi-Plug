@@ -2,10 +2,10 @@
 /**
  * Conversation value object.
  *
- * @package RaiLabs\Sathi\Core\Data
+ * @package NeerMedia\Sathi\Core\Data
  */
 
-namespace RaiLabs\Sathi\Core\Data;
+namespace NeerMedia\Sathi\Core\Data;
 
 class Conversation {
 

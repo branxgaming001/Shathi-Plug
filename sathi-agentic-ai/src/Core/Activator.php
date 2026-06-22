@@ -2,12 +2,12 @@
 /**
  * Activation / deactivation hooks.
  *
- * @package RaiLabs\Sathi\Core
+ * @package NeerMedia\Sathi\Core
  */
 
-namespace RaiLabs\Sathi\Core;
+namespace NeerMedia\Sathi\Core;
 
-use RaiLabs\Sathi\Core\Database\Schema;
+use NeerMedia\Sathi\Core\Database\Schema;
 
 class Activator {
 

@@ -6,10 +6,10 @@
  * MUST implement this contract so the KnowledgeManager can swap backends
  * without changing any calling code.
  *
- * @package RaiLabs\Sathi\Knowledge
+ * @package NeerMedia\Sathi\Knowledge
  */
 
-namespace RaiLabs\Sathi\Knowledge;
+namespace NeerMedia\Sathi\Knowledge;
 
 interface VectorStoreInterface {
 

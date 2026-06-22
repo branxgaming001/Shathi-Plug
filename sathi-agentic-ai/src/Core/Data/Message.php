@@ -2,10 +2,10 @@
 /**
  * Message value object — immutable record of a single chat turn.
  *
- * @package RaiLabs\Sathi\Core\Data
+ * @package NeerMedia\Sathi\Core\Data
  */
 
-namespace RaiLabs\Sathi\Core\Data;
+namespace NeerMedia\Sathi\Core\Data;
 
 class Message {
 

@@ -7,10 +7,10 @@
  * and Cohere have their own adapters. Adding a new provider later is usually
  * just one new entry in this array.
  *
- * @package RaiLabs\Sathi\Providers
+ * @package NeerMedia\Sathi\Providers
  */
 
-namespace RaiLabs\Sathi\Providers;
+namespace NeerMedia\Sathi\Providers;
 
 class ProviderCatalog {
 

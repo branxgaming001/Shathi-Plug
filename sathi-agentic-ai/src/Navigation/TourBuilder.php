@@ -6,10 +6,10 @@
  * client actions (navigate → scroll_to → highlight → show_tooltip) that
  * guide the user step by step through the site.
  *
- * @package RaiLabs\Sathi\Navigation
+ * @package NeerMedia\Sathi\Navigation
  */
 
-namespace RaiLabs\Sathi\Navigation;
+namespace NeerMedia\Sathi\Navigation;
 
 class TourBuilder {
 

@@ -5,23 +5,23 @@
  * Singleton that wires the DI container, registers service providers,
  * and boots all Sathi subsystems.
  *
- * @package RaiLabs\Sathi\Core
+ * @package NeerMedia\Sathi\Core
  */
 
-namespace RaiLabs\Sathi\Core;
+namespace NeerMedia\Sathi\Core;
 
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Agent\AgentManager;
-use RaiLabs\Sathi\Personas\PersonaRegistry;
-use RaiLabs\Sathi\Memory\MemoryStore;
-use RaiLabs\Sathi\Memory\MemoryManager;
-use RaiLabs\Sathi\Knowledge\KnowledgeManager;
-use RaiLabs\Sathi\Chat\ChatManager;
-use RaiLabs\Sathi\Navigation\NavigationManager;
-use RaiLabs\Sathi\Rest\RestServer;
-use RaiLabs\Sathi\Admin\AdminBoot;
-use RaiLabs\Sathi\Integration\WP7Bridge;
-use RaiLabs\Sathi\Support\Logger;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Agent\AgentManager;
+use NeerMedia\Sathi\Personas\PersonaRegistry;
+use NeerMedia\Sathi\Memory\MemoryStore;
+use NeerMedia\Sathi\Memory\MemoryManager;
+use NeerMedia\Sathi\Knowledge\KnowledgeManager;
+use NeerMedia\Sathi\Chat\ChatManager;
+use NeerMedia\Sathi\Navigation\NavigationManager;
+use NeerMedia\Sathi\Rest\RestServer;
+use NeerMedia\Sathi\Admin\AdminBoot;
+use NeerMedia\Sathi\Integration\WP7Bridge;
+use NeerMedia\Sathi\Support\Logger;
 
 /**
  * @psalm-import-type SathiEnv from Plugin
@@ -73,7 +73,7 @@ final class Plugin {
             $this->init_services();
         } catch ( \Throwable $e ) {
             $this->boot_error = $e;
-            error_log( 'Sathi Agentic AI failed to boot: ' . $e->getMessage() );
+            error_log( 'Saathi Agentic AI failed to boot: ' . $e->getMessage() );
             add_action( 'admin_notices', [ $this, 'render_boot_error_notice' ] );
             return;
         }
@@ -119,11 +119,11 @@ final class Plugin {
         $this->services['navigation']  = new NavigationManager();
         $this->services['rest']        = new RestServer();
         $this->services['admin']       = new AdminBoot( $this->get( 'settings' ) );
-        $this->services['license']     = new \RaiLabs\Sathi\License\LicenseManager( $this->get( 'settings' ) );
+        $this->services['license']     = new \NeerMedia\Sathi\License\LicenseManager( $this->get( 'settings' ) );
         $this->services['wp7bridge']   = new WP7Bridge();
-        $this->services['usage']       = new \RaiLabs\Sathi\Support\UsageTracker();
-        $this->services['gdpr']        = new \RaiLabs\Sathi\Support\GDPRManager();
-        $this->services['moderator']   = new \RaiLabs\Sathi\Support\ContentModerator();
+        $this->services['usage']       = new \NeerMedia\Sathi\Support\UsageTracker();
+        $this->services['gdpr']        = new \NeerMedia\Sathi\Support\GDPRManager();
+        $this->services['moderator']   = new \NeerMedia\Sathi\Support\ContentModerator();
     }
 
     /**
@@ -209,7 +209,7 @@ final class Plugin {
         }
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong> %s<br><code>%s</code></p></div>',
-            esc_html__( 'Sathi Agentic AI could not start.', 'sathi-agentic-ai' ),
+            esc_html__( 'Saathi Agentic AI could not start.', 'sathi-agentic-ai' ),
             esc_html__( 'Please check your server error log for details:', 'sathi-agentic-ai' ),
             esc_html( $this->boot_error->getMessage() )
         );

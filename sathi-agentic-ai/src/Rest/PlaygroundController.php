@@ -7,15 +7,15 @@
  * returns a *classified* error (auth / model / network / context / rate-limit)
  * with a plain-language hint, instead of a raw stack trace.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Core\Settings;
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Personas\PromptComposer;
+use NeerMedia\Sathi\Core\Settings;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Personas\PromptComposer;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -88,7 +88,7 @@ class PlaygroundController {
                 [ Message::system( $sys ), Message::user( $user ) ],
                 [ 'max_tokens' => 700, 'temperature' => 0.7 ]
             );
-            $text = \RaiLabs\Sathi\Support\Helpers::strip_reasoning( (string) $resp->content );
+            $text = \NeerMedia\Sathi\Support\Helpers::strip_reasoning( (string) $resp->content );
 
             // Pull the JSON object out of the reply.
             $name = '';

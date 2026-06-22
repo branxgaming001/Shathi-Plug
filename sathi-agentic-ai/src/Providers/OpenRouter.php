@@ -4,14 +4,14 @@
  *
  * Uses OpenAI-compatible Chat Completions API.
  *
- * @package RaiLabs\Sathi\Providers
+ * @package NeerMedia\Sathi\Providers
  */
 
-namespace RaiLabs\Sathi\Providers;
+namespace NeerMedia\Sathi\Providers;
 
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Providers\Contracts\ProviderInterface;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Providers\Contracts\ProviderInterface;
+use NeerMedia\Sathi\Support\Helpers;
 
 class OpenRouter implements ProviderInterface {
 
@@ -31,7 +31,7 @@ class OpenRouter implements ProviderInterface {
         $this->timeout     = $config['timeout'] ?? SATHI_DEFAULT_TIMEOUT;
         $this->temperature = (float) ( $config['temperature'] ?? 0.7 );
         $this->max_tokens  = (int) ( $config['max_tokens'] ?? 4096 );
-        $this->app_name    = $config['app_name'] ?? 'Sathi Agentic AI';
+        $this->app_name    = $config['app_name'] ?? 'Saathi Agentic AI';
         $this->site_url    = $config['site_url'] ?? home_url();
     }
 

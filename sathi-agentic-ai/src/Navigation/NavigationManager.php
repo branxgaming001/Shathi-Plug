@@ -2,10 +2,10 @@
 /**
  * Navigation Manager — builds site route map and serves it for agent-driven navigation.
  *
- * @package RaiLabs\Sathi\Navigation
+ * @package NeerMedia\Sathi\Navigation
  */
 
-namespace RaiLabs\Sathi\Navigation;
+namespace NeerMedia\Sathi\Navigation;
 
 class NavigationManager {
 

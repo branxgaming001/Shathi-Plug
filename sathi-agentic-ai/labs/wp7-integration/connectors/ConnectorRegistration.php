@@ -5,10 +5,10 @@
  * Overrides core stubs so the Connectors page shows Sathi-managed
  * providers instead of the WP AI Team's shims.
  *
- * @package RaiLabs\Sathi\Labs\WP7Integration\Connectors
+ * @package NeerMedia\Sathi\Labs\WP7Integration\Connectors
  */
 
-namespace RaiLabs\Sathi\Labs\WP7Integration\Connectors;
+namespace NeerMedia\Sathi\Labs\WP7Integration\Connectors;
 
 class ConnectorRegistration {
 
@@ -17,8 +17,8 @@ class ConnectorRegistration {
             return;
         }
 
-        $settings = new \RaiLabs\Sathi\Core\Settings();
-        $enabled  = $settings->get( \RaiLabs\Sathi\Core\Settings::KEY_ENABLED_PROVIDERS, [ 'openai' ] );
+        $settings = new \NeerMedia\Sathi\Core\Settings();
+        $enabled  = $settings->get( \NeerMedia\Sathi\Core\Settings::KEY_ENABLED_PROVIDERS, [ 'openai' ] );
 
         foreach ( $enabled as $provider ) {
             $config = $settings->get_provider_config( $provider );

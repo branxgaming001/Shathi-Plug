@@ -6,10 +6,10 @@
  * The widget, hero and playground cycle the frames so the mascot feels alive.
  * All frames are fully transparent (no background) — just the character.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class Mascots {
 

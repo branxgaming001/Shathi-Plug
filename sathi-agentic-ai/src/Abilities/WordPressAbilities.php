@@ -5,10 +5,10 @@
  * Registers 4 WordPress-native tools for content search, menu retrieval, user info,
  * and site diagnostics. All tools are capability-gated; site info requires admin access.
  *
- * @package RaiLabs\Sathi\Abilities
+ * @package NeerMedia\Sathi\Abilities
  */
 
-namespace RaiLabs\Sathi\Abilities;
+namespace NeerMedia\Sathi\Abilities;
 
 class WordPressAbilities {
 

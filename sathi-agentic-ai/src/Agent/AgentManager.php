@@ -2,19 +2,19 @@
 /**
  * Agent Manager — orchestrates the agent loop with tool execution.
  *
- * @package RaiLabs\Sathi\Agent
+ * @package NeerMedia\Sathi\Agent
  */
 
-namespace RaiLabs\Sathi\Agent;
+namespace NeerMedia\Sathi\Agent;
 
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Core\Data\FunctionCall;
-use RaiLabs\Sathi\Core\Data\FunctionResult;
-use RaiLabs\Sathi\Personas\PersonaRegistry;
-use RaiLabs\Sathi\Personas\PromptComposer;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Core\Data\FunctionCall;
+use NeerMedia\Sathi\Core\Data\FunctionResult;
+use NeerMedia\Sathi\Personas\PersonaRegistry;
+use NeerMedia\Sathi\Personas\PromptComposer;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
 
 class AgentManager {
 

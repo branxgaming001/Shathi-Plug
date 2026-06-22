@@ -2,12 +2,12 @@
 /**
  * Commerce REST controller — product search + add-to-cart for the chat widget.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Commerce\ProductSearch;
+use NeerMedia\Sathi\Commerce\ProductSearch;
 use WP_REST_Request;
 use WP_REST_Response;
 

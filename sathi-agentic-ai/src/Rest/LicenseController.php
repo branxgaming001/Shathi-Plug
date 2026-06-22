@@ -2,12 +2,12 @@
 /**
  * License REST controller — status / activate / deactivate (admin only).
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\License\LicenseManager;
+use NeerMedia\Sathi\License\LicenseManager;
 use WP_REST_Request;
 use WP_REST_Response;
 

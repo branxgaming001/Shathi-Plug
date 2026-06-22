@@ -11,7 +11,7 @@
  * Plugin Name:       Saathi Agentic AI
  * Plugin URI:        https://neermedia.com/sathi
  * Description:       Intelligent support agent for WordPress — chat, knowledge base, persistent memory, and real-time site navigation. Powered by multiple AI providers with a highly customizable 2026 UI.
- * Version:           2.0.0
+ * Version:           2.0.1
  * Author:            NEER Media
  * Author URI:        https://neermedia.com
  * Text Domain:       sathi-agentic-ai
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin constants ───────────────────────────────────────────────────
-define( 'SATHI_VERSION', '2.0.0' );
+define( 'SATHI_VERSION', '2.0.1' );
 define( 'SATHI_PREFIX', 'sathi' );
 define( 'SATHI_DOMAIN', 'sathi-agentic-ai' );
 define( 'SATHI_ENTRY', __FILE__ );
@@ -68,7 +68,7 @@ if ( file_exists( $autoloader ) ) {
 } else {
     // Graceful fallback: register a basic PSR-4 autoloader for development
     spl_autoload_register( function ( $class ) {
-        $prefix   = 'RaiLabs\\Sathi\\';
+        $prefix   = 'NeerMedia\\Sathi\\';
         $prefix_len = strlen( $prefix );
 
         if ( strncmp( $prefix, $class, $prefix_len ) !== 0 ) {
@@ -87,21 +87,21 @@ if ( file_exists( $autoloader ) ) {
 
 // ── Bootstrap ──────────────────────────────────────────────────────────
 add_action( 'plugins_loaded', function () {
-    if ( class_exists( 'RaiLabs\\Sathi\\Core\\Plugin' ) ) {
-        RaiLabs\Sathi\Core\Plugin::instance()->boot();
+    if ( class_exists( 'NeerMedia\\Sathi\\Core\\Plugin' ) ) {
+        NeerMedia\Sathi\Core\Plugin::instance()->boot();
     }
 }, 5 );
 
 // ── Activation / Deactivation ──────────────────────────────────────────
 register_activation_hook( __FILE__, function () {
-    if ( class_exists( 'RaiLabs\\Sathi\\Core\\Activator' ) ) {
-        RaiLabs\Sathi\Core\Activator::activate();
+    if ( class_exists( 'NeerMedia\\Sathi\\Core\\Activator' ) ) {
+        NeerMedia\Sathi\Core\Activator::activate();
     }
 } );
 
 register_deactivation_hook( __FILE__, function () {
-    if ( class_exists( 'RaiLabs\\Sathi\\Core\\Activator' ) ) {
-        RaiLabs\Sathi\Core\Activator::deactivate();
+    if ( class_exists( 'NeerMedia\\Sathi\\Core\\Activator' ) ) {
+        NeerMedia\Sathi\Core\Activator::deactivate();
     }
 } );
 

@@ -5,10 +5,10 @@
  * Degrades gracefully: every method is a no-op (returns empty / unavailable)
  * when WooCommerce is not active, so the plugin works on non-Woo sites.
  *
- * @package RaiLabs\Sathi\Commerce
+ * @package NeerMedia\Sathi\Commerce
  */
 
-namespace RaiLabs\Sathi\Commerce;
+namespace NeerMedia\Sathi\Commerce;
 
 class ProductSearch {
 

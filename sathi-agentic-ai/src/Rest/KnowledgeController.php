@@ -10,12 +10,12 @@
  *   POST /knowledge/embeddings/generate            Trigger embedding generation batch.
  *   GET  /knowledge/chunks?source_id=&status=       List chunks for a source.
  *
- * @package RaiLabs\Sathi\Rest
+ * @package NeerMedia\Sathi\Rest
  */
 
-namespace RaiLabs\Sathi\Rest;
+namespace NeerMedia\Sathi\Rest;
 
-use RaiLabs\Sathi\Knowledge\KnowledgeManager;
+use NeerMedia\Sathi\Knowledge\KnowledgeManager;
 use WP_REST_Request;
 use WP_REST_Response;
 

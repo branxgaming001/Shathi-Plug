@@ -3,15 +3,15 @@
  * Memory Manager — LLM-powered memory extraction, semantic recall, and
  * context generation on top of MemoryStore.
  *
- * @package RaiLabs\Sathi\Memory
+ * @package NeerMedia\Sathi\Memory
  */
 
-namespace RaiLabs\Sathi\Memory;
+namespace NeerMedia\Sathi\Memory;
 
-use RaiLabs\Sathi\Core\Data\Conversation;
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Providers\Factory;
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Core\Data\Conversation;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Providers\Factory;
+use NeerMedia\Sathi\Support\Helpers;
 
 class MemoryManager {
 

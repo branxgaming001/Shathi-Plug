@@ -6,14 +6,14 @@
  * can swap between OpenAI, Anthropic, Gemini, OpenRouter, local models, etc.
  * without changing any calling code.
  *
- * @package RaiLabs\Sathi\Providers\Contracts
+ * @package NeerMedia\Sathi\Providers\Contracts
  */
 
-namespace RaiLabs\Sathi\Providers\Contracts;
+namespace NeerMedia\Sathi\Providers\Contracts;
 
-use RaiLabs\Sathi\Core\Data\Message;
-use RaiLabs\Sathi\Core\Data\FunctionCall;
-use RaiLabs\Sathi\Core\Data\FunctionResult;
+use NeerMedia\Sathi\Core\Data\Message;
+use NeerMedia\Sathi\Core\Data\FunctionCall;
+use NeerMedia\Sathi\Core\Data\FunctionResult;
 
 interface ProviderInterface {
 

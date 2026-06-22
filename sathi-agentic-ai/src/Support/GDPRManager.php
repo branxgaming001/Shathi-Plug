@@ -2,10 +2,10 @@
 /**
  * GDPR & Privacy Manager — consent, data export, data erasure.
  *
- * @package RaiLabs\Sathi\Support
+ * @package NeerMedia\Sathi\Support
  */
 
-namespace RaiLabs\Sathi\Support;
+namespace NeerMedia\Sathi\Support;
 
 class GDPRManager {
 
@@ -170,7 +170,7 @@ class GDPRManager {
      */
     public function register_exporter( array $exporters ): array {
         $exporters['sathi-agentic-ai'] = [
-            'exporter_friendly_name' => __( 'Sathi Agentic AI', 'sathi-agentic-ai' ),
+            'exporter_friendly_name' => __( 'Saathi Agentic AI', 'sathi-agentic-ai' ),
             'callback'               => function ( string $email_address, int $page = 1 ) {
                 $user = get_user_by( 'email', $email_address );
                 if ( ! $user ) {
@@ -212,7 +212,7 @@ class GDPRManager {
      */
     public function register_eraser( array $erasers ): array {
         $erasers['sathi-agentic-ai'] = [
-            'eraser_friendly_name' => __( 'Sathi Agentic AI', 'sathi-agentic-ai' ),
+            'eraser_friendly_name' => __( 'Saathi Agentic AI', 'sathi-agentic-ai' ),
             'callback'             => function ( string $email_address, int $page = 1 ) {
                 $user = get_user_by( 'email', $email_address );
                 if ( ! $user ) {
@@ -223,7 +223,7 @@ class GDPRManager {
                 return [
                     'items_removed'  => $deleted,
                     'items_retained' => 0,
-                    'messages'       => [ sprintf( __( '%d Sathi AI records deleted.', 'sathi-agentic-ai' ), $deleted ) ],
+                    'messages'       => [ sprintf( __( '%d Saathi AI records deleted.', 'sathi-agentic-ai' ), $deleted ) ],
                     'done'           => true,
                 ];
             },
@@ -241,8 +241,8 @@ class GDPRManager {
         }
 
         wp_add_privacy_policy_content(
-            __( 'Sathi Agentic AI', 'sathi-agentic-ai' ),
-            __( 'When you use the Sathi AI chat widget, we process your messages through third-party AI providers (OpenAI, Anthropic, Google, etc.) to generate responses. Your chat messages and preferences may be stored on our servers to provide context-aware assistance across sessions. You can request deletion of your chat history at any time through your account privacy settings or by contacting us.', 'sathi-agentic-ai' )
+            __( 'Saathi Agentic AI', 'sathi-agentic-ai' ),
+            __( 'When you use the Saathi AI chat widget, we process your messages through third-party AI providers (OpenAI, Anthropic, Google, etc.) to generate responses. Your chat messages and preferences may be stored on our servers to provide context-aware assistance across sessions. You can request deletion of your chat history at any time through your account privacy settings or by contacting us.', 'sathi-agentic-ai' )
         );
     }
 

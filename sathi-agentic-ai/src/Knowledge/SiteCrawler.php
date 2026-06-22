@@ -2,12 +2,12 @@
 /**
  * Site Crawler — extracts and chunks all publishable WordPress content for the KB.
  *
- * @package RaiLabs\Sathi\Knowledge
+ * @package NeerMedia\Sathi\Knowledge
  */
 
-namespace RaiLabs\Sathi\Knowledge;
+namespace NeerMedia\Sathi\Knowledge;
 
-use RaiLabs\Sathi\Support\Helpers;
+use NeerMedia\Sathi\Support\Helpers;
 
 class SiteCrawler {
 

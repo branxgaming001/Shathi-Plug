@@ -2,10 +2,10 @@
 /**
  * Persona Registry — CRUD for agent mascots and custom personas.
  *
- * @package RaiLabs\Sathi\Personas
+ * @package NeerMedia\Sathi\Personas
  */
 
-namespace RaiLabs\Sathi\Personas;
+namespace NeerMedia\Sathi\Personas;
 
 class PersonaRegistry {
 

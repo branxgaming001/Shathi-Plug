@@ -2,10 +2,10 @@
 /**
  * Database schema definition and table management.
  *
- * @package RaiLabs\Sathi\Core\Database
+ * @package NeerMedia\Sathi\Core\Database
  */
 
-namespace RaiLabs\Sathi\Core\Database;
+namespace NeerMedia\Sathi\Core\Database;
 
 class Schema {
 

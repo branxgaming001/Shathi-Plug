@@ -4,10 +4,10 @@
  *
  * All plugin options flow through this class — never call get_option('sathi_*') directly.
  *
- * @package RaiLabs\Sathi\Core
+ * @package NeerMedia\Sathi\Core
  */
 
-namespace RaiLabs\Sathi\Core;
+namespace NeerMedia\Sathi\Core;
 
 class Settings {
 
@@ -126,7 +126,7 @@ class Settings {
         $cfg = $configs[ $provider ] ?? null;
         if ( is_array( $cfg ) && isset( $cfg['api_key'] ) ) {
             // Decrypt the at-rest key for adapter use.
-            $cfg['api_key'] = \RaiLabs\Sathi\Support\Helpers::decrypt( (string) $cfg['api_key'] );
+            $cfg['api_key'] = \NeerMedia\Sathi\Support\Helpers::decrypt( (string) $cfg['api_key'] );
         }
         return $cfg;
     }
@@ -143,7 +143,7 @@ class Settings {
         // other providers, so we only (re)encrypt the one being saved.
         $configs = $this->get_provider_configs();
         if ( ! empty( $config['api_key'] ) && strncmp( (string) $config['api_key'], 'enc:', 4 ) !== 0 ) {
-            $config['api_key'] = \RaiLabs\Sathi\Support\Helpers::encrypt( (string) $config['api_key'] );
+            $config['api_key'] = \NeerMedia\Sathi\Support\Helpers::encrypt( (string) $config['api_key'] );
         }
         $configs[ $provider ] = $config;
         return $this->set( self::KEY_PROVIDER_CONFIGS, $configs );
@@ -414,7 +414,7 @@ class Settings {
         if ( ! is_array( $value ) ) {
             return [ 'openai' ];
         }
-        $allowed = \RaiLabs\Sathi\Providers\ProviderCatalog::keys();
+        $allowed = \NeerMedia\Sathi\Providers\ProviderCatalog::keys();
         return array_values( array_intersect( $value, $allowed ) );
     }
 
