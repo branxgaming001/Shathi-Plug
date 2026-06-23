@@ -8,12 +8,18 @@
 namespace NeerMedia\Sathi\Rest;
 
 use NeerMedia\Sathi\Commerce\ProductSearch;
+use NeerMedia\Sathi\License\LicenseManager;
 use WP_REST_Request;
 use WP_REST_Response;
 
 class CommerceController {
 
     public const NAMESPACE = 'sathi/v1';
+
+    /** Entitlement check (true when enforcement is off, so free dev installs still work). */
+    private function entitled( string $feature ): bool {
+        return ( new LicenseManager() )->can( $feature );
+    }
 
     public function register_routes(): void {
         register_rest_route( self::NAMESPACE, '/products', [
@@ -34,6 +40,10 @@ class CommerceController {
     }
 
     public function search( WP_REST_Request $request ): WP_REST_Response {
+        // WooCommerce product showcase is a Max-tier feature.
+        if ( ! $this->entitled( 'woocommerce' ) ) {
+            return new WP_REST_Response( [ 'available' => false, 'products' => [], 'locked' => true, 'upgrade' => 'max' ] );
+        }
         $ps = new ProductSearch();
         if ( ! $ps->available() ) {
             return new WP_REST_Response( [ 'available' => false, 'products' => [] ] );
@@ -48,6 +58,11 @@ class CommerceController {
         $nonce = $request->get_header( 'X-WP-Nonce' );
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
             return new WP_REST_Response( [ 'success' => false, 'message' => 'Invalid nonce.' ], 403 );
+        }
+
+        // Direct add-to-cart in chat is a Max-tier feature.
+        if ( ! $this->entitled( 'add_to_cart' ) ) {
+            return new WP_REST_Response( [ 'success' => false, 'locked' => true, 'upgrade' => 'max', 'message' => 'Direct add-to-cart is available on the Max plan.' ], 402 );
         }
 
         $body       = (array) $request->get_json_params();

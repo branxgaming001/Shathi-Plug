@@ -185,10 +185,25 @@ class ChatManager {
     }
 
     /**
+     * The effective avatar id after applying tier entitlements. The full 8-mascot
+     * set is a Pro/Max feature; on Free the default mascot is used instead. The
+     * default mascot, custom upload, spark and none stay available to everyone.
+     */
+    private function effective_avatar_id(): string {
+        $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        if ( strpos( $id, 'mascot-' ) === 0 && $id !== 'mascot-1' ) {
+            if ( ! ( new \NeerMedia\Sathi\License\LicenseManager() )->can( 'all_mascots' ) ) {
+                return 'mascot-1';
+            }
+        }
+        return $id;
+    }
+
+    /**
      * Resolve the selected mascot avatar to a data URI (empty for spark/none).
      */
     private function resolve_avatar(): string {
-        $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        $id = $this->effective_avatar_id();
         if ( $id === 'custom' ) {
             return $this->settings->get_custom_avatar();
         }
@@ -205,7 +220,7 @@ class ChatManager {
      * @return string[]
      */
     private function resolve_avatar_frames(): array {
-        $id = (string) $this->settings->get( Settings::KEY_WIDGET_AVATAR, 'mascot-1' );
+        $id = $this->effective_avatar_id();
         if ( $id === 'custom' ) {
             $c = $this->settings->get_custom_avatar();
             return $c !== '' ? [ $c ] : [];

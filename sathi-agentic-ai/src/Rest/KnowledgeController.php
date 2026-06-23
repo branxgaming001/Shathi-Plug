@@ -16,12 +16,18 @@
 namespace NeerMedia\Sathi\Rest;
 
 use NeerMedia\Sathi\Knowledge\KnowledgeManager;
+use NeerMedia\Sathi\License\LicenseManager;
 use WP_REST_Request;
 use WP_REST_Response;
 
 class KnowledgeController {
 
     private const NAMESPACE = 'sathi/v1';
+
+    /** Admin + Max-tier "Deep scan" entitlement (building site knowledge). */
+    public function check_deep_scan(): bool {
+        return current_user_can( 'manage_options' ) && ( new LicenseManager() )->can( 'deep_scan' );
+    }
 
     /**
      * Allowed search modes.
@@ -58,7 +64,7 @@ class KnowledgeController {
         register_rest_route( self::NAMESPACE, '/knowledge/index', [
             'methods'             => 'POST',
             'callback'            => [ $this, 'trigger_index' ],
-            'permission_callback' => [ $this, 'check_admin' ],
+            'permission_callback' => [ $this, 'check_deep_scan' ],
         ] );
 
         // ── Statistics ────────────────────────────────────────
@@ -79,7 +85,7 @@ class KnowledgeController {
         register_rest_route( self::NAMESPACE, '/knowledge/embeddings/generate', [
             'methods'             => 'POST',
             'callback'            => [ $this, 'generate_embeddings' ],
-            'permission_callback' => [ $this, 'check_admin' ],
+            'permission_callback' => [ $this, 'check_deep_scan' ],
             'args'                => [
                 'max_chunks' => [
                     'required'          => false,
@@ -110,7 +116,7 @@ class KnowledgeController {
         register_rest_route( self::NAMESPACE, '/knowledge/index/(?P<source_id>\d+)', [
             'methods'             => 'POST',
             'callback'            => [ $this, 'index_single' ],
-            'permission_callback' => [ $this, 'check_admin' ],
+            'permission_callback' => [ $this, 'check_deep_scan' ],
             'args'                => [
                 'source_id' => [ 'required' => true, 'type' => 'integer' ],
                 'force'     => [ 'required' => false, 'type' => 'boolean', 'default' => false ],

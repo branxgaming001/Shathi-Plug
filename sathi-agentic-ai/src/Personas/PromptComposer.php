@@ -77,7 +77,9 @@ class PromptComposer {
         // ── Follow-up questions (clickable next-step options) ─────────
         $followups = $settings->get( Settings::KEY_FOLLOWUPS, true );
         if ( $followups === '' || $followups === null ) { $followups = true; }
-        if ( (bool) $followups ) {
+        // Smart follow-up questions are a Max-tier feature (entitlement-gated;
+        // returns true when enforcement is off, so dev installs are unaffected).
+        if ( (bool) $followups && ( new \NeerMedia\Sathi\License\LicenseManager() )->can( 'followups' ) ) {
             $lines[] = "FOLLOW-UP OPTIONS: After your answer, when it would genuinely help the visitor decide what to do next, "
                 . "offer 2–4 short, tappable follow-up choices. Put them in a block at the very END of your reply using EXACTLY this format:\n"
                 . "<followups>\n"
