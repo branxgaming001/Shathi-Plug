@@ -228,7 +228,7 @@ require __DIR__ . '/includes/layout.php';
       <h4>Pro</h4><div class="amt">₹499<span>/month</span></div>
       <ul>
         <li><?=$check?> Everything in Free</li><li><?=$check?> All 8 mascots + theming</li>
-        <li><?=$check?> Multiple &amp; AI personas</li><li><?=$check?> Memory + priority support · 3 sites</li>
+        <li><?=$check?> Multiple &amp; AI personas</li><li><?=$check?> Memory + priority support · 1 website</li>
       </ul>
       <a class="btn btn-ghost" href="login.php">Get Pro</a>
     </div>
@@ -236,7 +236,7 @@ require __DIR__ . '/includes/layout.php';
       <h4>Max</h4><div class="amt">₹699<span>/month</span></div>
       <ul>
         <li><?=$check?> Everything in Pro</li><li><?=$check?> WooCommerce showcase + add-to-cart</li>
-        <li><?=$check?> Deep scan + self-improving AI</li><li><?=$check?> Smart follow-ups · 5 sites</li>
+        <li><?=$check?> Deep scan + self-improving AI</li><li><?=$check?> Smart follow-ups · 1 website</li>
       </ul>
       <a class="btn btn-primary" href="login.php">Get Max</a>
     </div>

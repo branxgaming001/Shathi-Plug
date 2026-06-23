@@ -13,7 +13,7 @@ $faqs = [
   ['Do I need a paid AI account?', 'No. Saathi works with any of ~15 AI providers, including free models. You bring your own key, so you stay in control of usage and cost — and the Free plan can run a real chatbot at no cost.'],
   ['What\'s the difference between Pro and Max?', 'Pro unlocks the full assistant — all 8 mascots, multiple & AI-built personas, memory, navigation and priority support. Max adds the commerce & advanced features: WooCommerce product showcase, deep site scan, self-improving AI, smart follow-up questions and direct add-to-cart in chat.'],
   ['Can I switch or upgrade later?', 'Yes — upgrade or downgrade anytime from your dashboard. Your license updates automatically.'],
-  ['How many websites does each plan cover?', 'Free covers 1 site, Pro 3 sites, and Max 5 sites.'],
+  ['How many websites does each plan cover?', 'One website per licence — on every plan (Free, Pro and Max). Running more than one site? Just add a licence for each site.'],
   ['Do you offer refunds?', 'Yes — a 7-day money-back guarantee. See our Refund &amp; Cancellation Policy.'],
   ['Which currency am I charged in?', 'Prices are shown in Indian Rupees (₹) with an approximate USD figure. Buyers worldwide are welcome.'],
 ];
