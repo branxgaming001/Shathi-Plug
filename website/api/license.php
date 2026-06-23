@@ -32,16 +32,25 @@ audit('license_check', ['action' => $action], 'system');
 
 /** Feature entitlements derived from the plan (server is the source of truth). */
 function plan_entitlements(?string $code): array {
-    $paid = in_array($code, ['pro', 'pro_annual', 'lifetime', 'agency'], true);
+    // Tier classes: max (full) | pro | free. Legacy lifetime/agency map to max.
+    $max = in_array($code, ['max', 'lifetime', 'agency'], true);
+    $pro = in_array($code, ['pro', 'pro_annual'], true);
+    $paid = $max || $pro;
     return [
         'tier'            => $code ?: 'none',
         'paid'            => $paid,
-        'woocommerce'     => $paid,
-        'deep_scan'       => $paid,
+        // Pro + Max
         'all_mascots'     => $paid,
-        'analytics'       => $paid,
+        'memory'          => $paid,
+        'navigation'      => $paid,
         'remove_branding' => $paid,
         'multilingual'    => true,
+        // Max only (the 5 premium features)
+        'woocommerce'     => $max,
+        'deep_scan'       => $max,
+        'self_improve'    => $max,
+        'followups'       => $max,
+        'add_to_cart'     => $max,
     ];
 }
 

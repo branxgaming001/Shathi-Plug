@@ -38,9 +38,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($act === 'block_user') {
         $db->prepare("UPDATE users SET status=? WHERE id=?")->execute([$_POST['to']==='block'?'blocked':'active',(int)$_POST['id']]);
         audit('admin_user_'.$_POST['to'], ['user_id'=>(int)$_POST['id']]); $flash = 'User updated.';
-    } elseif ($act === 'revoke_license') {
-        $db->prepare("UPDATE licenses SET status='revoked' WHERE id=?")->execute([(int)$_POST['id']]);
-        audit('admin_license_revoke', ['license_id'=>(int)$_POST['id']]); $flash = 'License revoked.';
+    } elseif ($act === 'set_license_status') {
+        $to = in_array(($_POST['to'] ?? ''), ['active','revoked'], true) ? $_POST['to'] : 'revoked';
+        $db->prepare("UPDATE licenses SET status=? WHERE id=?")->execute([$to, (int)$_POST['id']]);
+        audit('admin_license_'.$to, ['license_id'=>(int)$_POST['id']]); $flash = 'License set to '.$to.'.';
+    } elseif ($act === 'create_license') {
+        $em = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+        $plan = plan_by_code((string)($_POST['plan'] ?? ''));
+        if (!filter_var($em, FILTER_VALIDATE_EMAIL) || !$plan) { $flash = 'Enter a valid email and a plan.'; }
+        else {
+            $s = $db->prepare("SELECT id FROM users WHERE email=?"); $s->execute([$em]); $uid = (int)$s->fetchColumn();
+            if (!$uid) { $db->prepare("INSERT INTO users(email,provider,profile_completed) VALUES(?, 'admin', 0)")->execute([$em]); $uid = (int)$db->lastInsertId(); }
+            $lic = issue_license($uid, $plan);
+            audit('admin_license_create', ['user'=>$em,'plan'=>$plan['code'],'license_id'=>$lic['id']]);
+            $flash = 'License created for '.$em.' ('.$plan['name'].'): '.$lic['key'].' — copy now, shown once!';
+        }
     }
 }
 
@@ -170,15 +182,30 @@ if (($_GET['export'] ?? '') === 'csv') {
 
   <?php elseif ($tab==='licenses'):
     $lic = $db->query("SELECT l.*, p.name plan_name, u.email, u.phone, (SELECT COUNT(*) FROM license_activations WHERE license_id=l.id AND status='active') acts FROM licenses l JOIN plans p ON p.id=l.plan_id JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 300")->fetchAll();
+    $lplans = plans_all(false);
   ?>
     <h1>Licenses</h1><p class="muted">All issued keys, owners, activations and expiry. <a class="btn btn-ghost" href="admin.php?tab=licenses&export=csv" style="padding:5px 12px;font-size:13px;margin-left:8px">⬇ CSV</a></p>
+    <div class="panel"><h3>Create a license</h3>
+      <p class="small">Issue a key for any email on any plan, instantly. If the email has no account yet, one is created. The full key is shown once — copy it immediately.</p>
+      <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="create_license">
+        <div class="field"><label>Owner email</label><input name="email" type="email" placeholder="person@example.com" required style="width:240px"></div>
+        <div class="field"><label>Plan</label><select name="plan" required style="border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;min-width:160px">
+          <?php foreach ($lplans as $p): ?><option value="<?=e($p['code'])?>"><?=e($p['name'])?> — ₹<?=number_format((int)$p['price_inr'])?><?=$p['period']==='month'?'/mo':''?></option><?php endforeach; ?>
+        </select></div>
+        <button class="btn btn-primary" style="padding:11px 18px">Generate key</button>
+      </form>
+    </div>
     <div class="panel"><table><tr><th>Key</th><th>Owner</th><th>Plan</th><th>Status</th><th>Activations</th><th>Expires</th><th></th></tr>
       <?php foreach ($lic as $l): $valid=$l['status']==='active'&&($l['expires_at']===null||strtotime($l['expires_at'])>time()); ?><tr>
         <td><code><?=e($l['key_prefix'])?></code></td><td class="small"><?=e($l['email'] ?: $l['phone'])?></td><td><?=e($l['plan_name'])?></td>
         <td><span class="badge <?=$valid?'g':'r'?>"><?=$valid?'active':e($l['status'])?></span></td>
         <td><?=(int)$l['acts']?>/<?=(int)$l['max_activations']?></td>
         <td class="small"><?=$l['expires_at']===null?'Lifetime':e(date('d M Y',strtotime($l['expires_at'])))?></td>
-        <td><?php if($l['status']!=='revoked'): ?><form method="post" style="margin:0" onsubmit="return confirm('Revoke this license?')"><?=csrf_field()?><input type="hidden" name="action" value="revoke_license"><input type="hidden" name="id" value="<?=(int)$l['id']?>"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:#b3261e">Revoke</button></form><?php endif; ?></td>
+        <td><?php if($l['status']==='active'): ?>
+          <form method="post" style="margin:0" onsubmit="return confirm('Deactivate (revoke) this license? The site using it will stop working at next check.')"><?=csrf_field()?><input type="hidden" name="action" value="set_license_status"><input type="hidden" name="to" value="revoked"><input type="hidden" name="id" value="<?=(int)$l['id']?>"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:#b3261e">Deactivate</button></form>
+        <?php else: ?>
+          <form method="post" style="margin:0" onsubmit="return confirm('Re-activate this license?')"><?=csrf_field()?><input type="hidden" name="action" value="set_license_status"><input type="hidden" name="to" value="active"><input type="hidden" name="id" value="<?=(int)$l['id']?>"><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:#15803d">Activate</button></form>
+        <?php endif; ?></td>
       </tr><?php endforeach; ?></table></div>
 
   <?php elseif ($tab==='payments'):

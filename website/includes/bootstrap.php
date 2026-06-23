@@ -123,11 +123,9 @@ function seed(): void {
     // Plans
     if ((int)$db->query("SELECT COUNT(*) FROM plans")->fetchColumn() === 0) {
         $st = $db->prepare("INSERT INTO plans(code,name,price_inr,price_usd,period,max_activations,features,sort) VALUES(?,?,?,?,?,?,?,?)");
-        $st->execute(['free','Free',0,0,'lifetime',1,'Core agentic AI chat|Bring your own AI key (incl. free models)|1 website|Basic site scan (up to 50 pages)|1 mascot|Multilingual replies|Community support',1]);
-        $st->execute(['pro','Pro',999,12,'month',3,'Everything in Free|WooCommerce in-chat selling|Full deep scan + embeddings|All 8 mascots + theming|Smart follow-ups & analytics|Remove Saathi branding|Priority support|3 websites',2]);
-        $st->execute(['pro_annual','Pro (Annual)',7999,89,'year',3,'Everything in Free|WooCommerce in-chat selling|Full deep scan + embeddings|All 8 mascots + theming|Smart follow-ups & analytics|Remove Saathi branding|Priority support|3 websites',3]);
-        $st->execute(['lifetime','Lifetime',9999,119,'lifetime',5,'Everything in Pro|Pay once — lifetime updates|5 websites|Best value',4]);
-        $st->execute(['agency','Agency',24999,299,'lifetime',25,'Everything in Lifetime|25 websites|White-label option|Priority queue',5]);
+        $st->execute(['free','Free',0,0,'lifetime',1,'Core agentic AI chat|Bring your own AI provider (free or paid)|Basic persona|Default mascot + colour|Custom mascot upload|Multilingual replies|1 website',1]);
+        $st->execute(['pro','Pro',499,6,'month',3,'Everything in Free|All 8 mascots + full theming|Multiple & AI-built personas|Memory + site navigation|Content moderation|Priority support|3 websites',2]);
+        $st->execute(['max','Max',699,9,'month',5,'Everything in Pro|WooCommerce product showcase|Deep scan (site knowledge)|Self-improving AI|Smart follow-up questions|Direct add-to-cart in chat|5 websites',3]);
     }
     // Initial admin (from env, else default — change after first login)
     if ((int)$db->query("SELECT COUNT(*) FROM admins")->fetchColumn() === 0) {

@@ -1,6 +1,6 @@
 <?php
 $YEAR = date('Y');
-$BASE = 'https://saathi.railabs.in';
+$BASE = 'https://saathi.neermedia.com';
 $IMG = require __DIR__ . '/assets/images.php';
 $FR = @include __DIR__ . '/assets/mascot_frames.php';
 if (!is_array($FR)) $FR = [$IMG['mascot-1']];
@@ -12,16 +12,16 @@ require __DIR__ . '/includes/layout.php';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Saathi — AI Chatbot for WordPress that Supports &amp; Sells</title>
-<meta name="description" content="Saathi is an agentic AI chatbot for WordPress &amp; WooCommerce. Trained on your real content, sells products in chat, speaks 40+ languages, works with any AI key. By RAI Labs Pvt. Ltd.">
+<meta name="description" content="Saathi is an agentic AI chatbot for WordPress &amp; WooCommerce. Trained on your real content, sells products in chat, speaks 40+ languages, works with any AI key. By NEER Media">
 <link rel="canonical" href="<?=$BASE?>/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Saathi">
 <meta property="og:title" content="Saathi — AI Chatbot for WordPress that Supports & Sells">
-<meta property="og:description" content="Trained on your real content, sells products in chat, 40+ languages, any AI key. By RAI Labs Pvt. Ltd.">
+<meta property="og:description" content="Trained on your real content, sells products in chat, 40+ languages, any AI key. By NEER Media">
 <meta property="og:url" content="<?=$BASE?>/"><meta property="og:image" content="<?=$BASE?>/assets/og.png">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Saathi — AI Chatbot for WordPress"><meta name="twitter:description" content="Supports and sells for your WordPress site. By RAI Labs Pvt. Ltd."><meta name="twitter:image" content="<?=$BASE?>/assets/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Saathi — AI Chatbot for WordPress"><meta name="twitter:description" content="Supports and sells for your WordPress site. By NEER Media"><meta name="twitter:image" content="<?=$BASE?>/assets/og.png">
 <link rel="icon" href="<?=$IMG['logo']?>">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"RAI Labs Pvt. Ltd.","url":"https://railabs.in","logo":"<?=$BASE?>/assets/og.png","sameAs":["https://railabs.in"],"brand":{"@type":"Brand","name":"Saathi"}}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Saathi","applicationCategory":"BusinessApplication","operatingSystem":"WordPress","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"publisher":{"@type":"Organization","name":"RAI Labs Pvt. Ltd.","url":"https://railabs.in"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"NEER Media","url":"https://neermedia.com","logo":"<?=$BASE?>/assets/og.png","sameAs":["https://neermedia.com"],"brand":{"@type":"Brand","name":"Saathi"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Saathi","applicationCategory":"BusinessApplication","operatingSystem":"WordPress","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"publisher":{"@type":"Organization","name":"NEER Media","url":"https://neermedia.com"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -214,35 +214,34 @@ require __DIR__ . '/includes/layout.php';
 <section class="section" id="pricing"><div class="wrap">
   <span class="eyebrow alt" style="display:block;text-align:center;margin:0 auto">Pricing</span>
   <h2>Simple, honest pricing</h2>
-  <p class="sub">Start free. Upgrade when you're ready. Lifetime means pay once — forever.</p>
+  <p class="sub">Start free. Upgrade when you're ready — bring your own AI key, no surprise usage bills.</p>
   <div class="prices">
     <div class="price">
       <h4>Free</h4><div class="amt">₹0<span>/forever</span></div>
       <ul>
-        <li><?=$check?> Core AI chat</li><li><?=$check?> 1 website</li>
-        <li><?=$check?> Any AI provider key</li><li><?=$check?> Community support</li>
+        <li><?=$check?> Core AI chat</li><li><?=$check?> Bring your own provider</li>
+        <li><?=$check?> Basic persona + default mascot</li><li><?=$check?> 1 website</li>
       </ul>
       <a class="btn btn-ghost" href="login.php">Start free</a>
     </div>
-    <div class="price pop">
-      <h4>Pro</h4><div class="amt">₹999<span>/month</span></div>
-      <ul>
-        <li><?=$check?> Everything in Free</li><li><?=$check?> WooCommerce product showcase</li>
-        <li><?=$check?> Multilingual + deep knowledge scan</li><li><?=$check?> Colour & mascot customization</li>
-        <li><?=$check?> Priority support</li>
-      </ul>
-      <a class="btn btn-primary" href="login.php">Get Pro</a>
-    </div>
     <div class="price">
-      <h4>Lifetime</h4><div class="amt">₹9,999<span>/once</span></div>
+      <h4>Pro</h4><div class="amt">₹499<span>/month</span></div>
       <ul>
-        <li><?=$check?> Everything in Pro</li><li><?=$check?> Unlimited duration</li>
-        <li><?=$check?> All future updates</li><li><?=$check?> Best value</li>
+        <li><?=$check?> Everything in Free</li><li><?=$check?> All 8 mascots + theming</li>
+        <li><?=$check?> Multiple &amp; AI personas</li><li><?=$check?> Memory + priority support · 3 sites</li>
       </ul>
-      <a class="btn btn-ghost" href="login.php">Buy Lifetime</a>
+      <a class="btn btn-ghost" href="login.php">Get Pro</a>
+    </div>
+    <div class="price pop">
+      <h4>Max</h4><div class="amt">₹699<span>/month</span></div>
+      <ul>
+        <li><?=$check?> Everything in Pro</li><li><?=$check?> WooCommerce showcase + add-to-cart</li>
+        <li><?=$check?> Deep scan + self-improving AI</li><li><?=$check?> Smart follow-ups · 5 sites</li>
+      </ul>
+      <a class="btn btn-primary" href="login.php">Get Max</a>
     </div>
   </div>
-  <p class="sub" style="margin-top:20px">Need annual billing, USD pricing, or 25-site Agency? <a href="pricing.php" style="color:var(--v);font-weight:700">See all plans →</a></p>
+  <p class="sub" style="margin-top:20px">Full feature comparison &amp; USD pricing — <a href="pricing.php" style="color:var(--v);font-weight:700">see all plans →</a></p>
 </div></section>
 
 <!-- FAQ -->
