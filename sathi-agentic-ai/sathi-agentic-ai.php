@@ -11,7 +11,7 @@
  * Plugin Name:       Saathi Agentic AI
  * Plugin URI:        https://neermedia.com/sathi
  * Description:       Intelligent support agent for WordPress — chat, knowledge base, persistent memory, and real-time site navigation. Powered by multiple AI providers with a highly customizable 2026 UI.
- * Version:           2.0.1
+ * Version:           2.1.0
  * Author:            NEER Media
  * Author URI:        https://neermedia.com
  * Text Domain:       sathi-agentic-ai
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin constants ───────────────────────────────────────────────────
-define( 'SATHI_VERSION', '2.0.1' );
+define( 'SATHI_VERSION', '2.1.0' );
 define( 'SATHI_PREFIX', 'sathi' );
 define( 'SATHI_DOMAIN', 'sathi-agentic-ai' );
 define( 'SATHI_ENTRY', __FILE__ );

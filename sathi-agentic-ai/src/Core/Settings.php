@@ -71,7 +71,7 @@ class Settings {
     // ── Licensing ─────────────────────────────────────────────────────
     public const KEY_LICENSE_KEY        = 'sathi_license_key';        // encrypted; NOT registered (kept out of generic settings)
     public const KEY_LICENSE_SERVER_URL = 'sathi_license_server_url';
-    public const KEY_LICENSE_ENFORCE    = 'sathi_license_enforce';    // gating OFF by default
+    public const KEY_LICENSE_ENFORCE    = 'sathi_license_enforce';    // gating ON by default (requires a verified licence)
 
     /**
      * Get a single option with type-safe default.
@@ -370,7 +370,7 @@ class Settings {
             ],
             self::KEY_LICENSE_ENFORCE => [
                 'type'    => 'boolean',
-                'default' => false,
+                'default' => true,
                 'sanitize'=> 'rest_sanitize_boolean',
             ],
         ];

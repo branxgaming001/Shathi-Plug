@@ -95,6 +95,9 @@ final class Plugin {
         // License: daily re-check cron + admin notice (gating is OFF by default).
         $this->get( 'license' )->register();
 
+        // First-run setup wizard + license gate (standalone admin page).
+        $this->get( 'setup' )->register();
+
         // Sathi's React bundles are ES modules — make WordPress emit them as such.
         add_filter( 'script_loader_tag', [ $this, 'filter_module_script_tag' ], 10, 2 );
 
@@ -120,6 +123,7 @@ final class Plugin {
         $this->services['rest']        = new RestServer();
         $this->services['admin']       = new AdminBoot( $this->get( 'settings' ) );
         $this->services['license']     = new \NeerMedia\Sathi\License\LicenseManager( $this->get( 'settings' ) );
+        $this->services['setup']       = new \NeerMedia\Sathi\Admin\SetupWizard( $this->get( 'settings' ), $this->get( 'license' ) );
         $this->services['wp7bridge']   = new WP7Bridge();
         $this->services['usage']       = new \NeerMedia\Sathi\Support\UsageTracker();
         $this->services['gdpr']        = new \NeerMedia\Sathi\Support\GDPRManager();

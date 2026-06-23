@@ -30,6 +30,13 @@ class Activator {
         // Set version marker
         update_option( 'sathi_db_version', SATHI_VERSION );
 
+        // Trigger the first-run setup wizard on the next admin page load.
+        // Matches SetupWizard::DONE_OPTION / ::REDIRECT_TRANSIENT (kept as
+        // literals so activation never depends on the Admin namespace loading).
+        if ( ! get_option( 'sathi_setup_complete' ) ) {
+            set_transient( 'sathi_setup_redirect', 1, 60 );
+        }
+
         do_action( 'sathi_activated' );
     }
 

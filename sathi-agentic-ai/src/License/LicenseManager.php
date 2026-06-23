@@ -10,9 +10,11 @@
  * Premium grants (system directive) only ever come from a genuinely signed
  * server response, so a cracked plugin cannot unlock paid behaviour.
  *
- * SAFETY: enforcement is OFF by default. With enforcement off, is_active()
- * returns true so the plugin runs normally. Turn it on via the License tab,
- * the SATHI_LICENSE_ENFORCE constant, or the sathi_license_enforce filter.
+ * SAFETY: enforcement is ON by default — the plugin requires a verified licence
+ * (the setup wizard gates the admin until one is entered; offline grace keeps a
+ * verified site running for 14 days if the server is briefly unreachable). Opt
+ * out by saving the option false, defining SATHI_LICENSE_ENFORCE false, or via
+ * the sathi_license_enforce filter.
  *
  * @package NeerMedia\Sathi\License
  */
@@ -108,7 +110,10 @@ PEM;
     }
 
     public function enforcement_enabled(): bool {
-        $on = (bool) $this->settings->get( Settings::KEY_LICENSE_ENFORCE, false );
+        // Enforcement is ON by default (the plugin requires a verified licence to
+        // run). Site owners can opt out by saving the option false, defining
+        // SATHI_LICENSE_ENFORCE false, or via the sathi_license_enforce filter.
+        $on = (bool) $this->settings->get( Settings::KEY_LICENSE_ENFORCE, true );
         if ( defined( 'SATHI_LICENSE_ENFORCE' ) ) {
             $on = (bool) SATHI_LICENSE_ENFORCE;
         }
