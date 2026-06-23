@@ -12,6 +12,12 @@ function send_email(string $to, string $subject, string $html): bool {
     $from = cfg('MAIL_FROM') ?: 'no-reply@saathi.app';
     $name = cfg('MAIL_FROM_NAME') ?: 'Saathi';
 
+    // Prefer brand SMTP (e.g. Hostinger saathi@neermedia.com) when fully
+    // configured — so mail is sent from your own domain. Opt-in: until SMTP
+    // host+user+pass are all set, delivery falls back to Brevo/Resend.
+    if (cfg('SMTP_HOST') && cfg('SMTP_USER') && cfg('SMTP_PASS')) {
+        return _smtp_send($to, $subject, $html, $from, $name);
+    }
     if ($k = cfg('BREVO_API_KEY')) {
         $body = json_encode(['sender'=>['email'=>$from,'name'=>$name],'to'=>[['email'=>$to]],'subject'=>$subject,'htmlContent'=>$html]);
         return _post_json('https://api.brevo.com/v3/smtp/email', $body, ['api-key: '.$k,'Content-Type: application/json']) < 400;
@@ -50,7 +56,7 @@ function _smtp_send(string $to, string $subject, string $html, string $from, str
     };
     $code = function (string $r): string { return substr($r, 0, 3); };
     $cmd  = function (string $c) use ($fp, $read) { fwrite($fp, $c . "\r\n"); return $read(); };
-    $ehlo = (string) (parse_url((string) cfg('PUBLIC_URL', 'https://saathi.railabs.in'), PHP_URL_HOST) ?: 'saathi.railabs.in');
+    $ehlo = (string) (parse_url((string) cfg('PUBLIC_URL', 'https://saathi.neermedia.com'), PHP_URL_HOST) ?: 'saathi.neermedia.com');
 
     if ($code($read()) !== '220') { fclose($fp); error_log('[saathi-smtp] no 220 greeting'); return false; }
     if ($code($cmd('EHLO ' . $ehlo)) !== '250') { $cmd('HELO ' . $ehlo); }

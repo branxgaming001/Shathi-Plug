@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else { setting_set('ADMIN_EMAILS', implode(',', $list)); audit('admin_email_removed', ['email'=>$em]); $flash = 'Admin removed: ' . $em; }
         }
     } elseif ($act === 'save_settings') {
-        foreach (['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','BREVO_API_KEY','RESEND_API_KEY','MAIL_FROM','MAIL_FROM_NAME','REMINDER_DAYS','DEMO_BOT_PROVIDER','DEMO_BOT_BASE_URL','DEMO_BOT_API_KEY','DEMO_BOT_MODEL'] as $k) {
+        foreach (['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','BREVO_API_KEY','RESEND_API_KEY','MAIL_FROM','MAIL_FROM_NAME','REMINDER_DAYS','DEMO_BOT_PROVIDER','DEMO_BOT_BASE_URL','DEMO_BOT_API_KEY','DEMO_BOT_MODEL','SMTP_HOST','SMTP_PORT','SMTP_SECURE','SMTP_USER','SMTP_PASS'] as $k) {
             $v = trim((string)($_POST[$k] ?? ''));
             if ($v !== '') setting_set($k, $v);   // only overwrite when a new value is provided
         }
@@ -319,7 +319,18 @@ if (($_GET['export'] ?? '') === 'csv') {
       <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="save_settings">
         <div class="field"><label>Brevo API key</label><input name="BREVO_API_KEY" type="password" style="width:220px"></div>
         <div class="field"><label>Resend API key</label><input name="RESEND_API_KEY" type="password" style="width:220px"></div>
-        <div class="field"><label>From email</label><input name="MAIL_FROM" placeholder="no-reply@yourdomain" style="width:200px"></div>
+        <div class="field"><label>From email</label><input name="MAIL_FROM" placeholder="saathi@neermedia.com" style="width:200px"></div>
+        <button class="btn btn-primary" style="padding:11px 18px">Save</button>
+      </form>
+    </div>
+    <div class="panel"><h3>Brand email (SMTP) — send from your own domain</h3>
+      <p class="small">Send OTPs, invoices &amp; receipts from your own mailbox (e.g. Hostinger <b>saathi@neermedia.com</b>). When host, username &amp; password are all set, SMTP is used instead of Brevo. Current: host <b><?=e($mask('SMTP_HOST'))?></b> · user <b><?=e(setting_get('SMTP_USER','') ?: 'not set')?></b>. Also set <b>From email</b> (above) to the same address. <em>The mailbox must exist in hPanel → Emails first.</em></p>
+      <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="save_settings">
+        <div class="field"><label>SMTP host</label><input name="SMTP_HOST" value="<?=e(setting_get('SMTP_HOST',''))?>" placeholder="smtp.hostinger.com" style="width:190px"></div>
+        <div class="field"><label>Port</label><input name="SMTP_PORT" value="<?=e(setting_get('SMTP_PORT',''))?>" placeholder="465" style="width:80px"></div>
+        <div class="field"><label>Security</label><select name="SMTP_SECURE" style="border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit"><?php $sec=setting_get('SMTP_SECURE','ssl'); foreach(['ssl','tls'] as $s): ?><option <?=$sec===$s?'selected':''?>><?=$s?></option><?php endforeach; ?></select></div>
+        <div class="field"><label>Username (full email)</label><input name="SMTP_USER" value="<?=e(setting_get('SMTP_USER',''))?>" placeholder="saathi@neermedia.com" style="width:220px"></div>
+        <div class="field"><label>Password</label><input name="SMTP_PASS" type="password" placeholder="<?=setting_get('SMTP_PASS','')!==''?'leave blank to keep current':'mailbox password'?>" style="width:190px"></div>
         <button class="btn btn-primary" style="padding:11px 18px">Save</button>
       </form>
     </div>

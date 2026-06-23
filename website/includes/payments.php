@@ -83,11 +83,13 @@ function fulfill_payment(int $paymentId, ?int $renewLicenseId=null, ?string $gpi
             extend_license($renewLicenseId, $plan);
             $db->prepare("UPDATE payments SET status='paid', paid_at=NOW(), gateway_payment_id=?, license_id=? WHERE id=?")->execute([$gpid,$renewLicenseId,$paymentId]);
             $db->commit(); audit('payment_paid', ['payment_id'=>$paymentId,'renew_license'=>$renewLicenseId]);
+            payment_receipt_email((int)$pay['user_id'], $plan, (int)$pay['amount_inr'], null, true);
             return ['ok'=>true,'renewed'=>true,'license_id'=>$renewLicenseId];
         }
         $lic = issue_license((int)$pay['user_id'], $plan);
         $db->prepare("UPDATE payments SET status='paid', paid_at=NOW(), gateway_payment_id=?, license_id=? WHERE id=?")->execute([$gpid,(int)$lic['id'],$paymentId]);
         $db->commit(); audit('payment_paid', ['payment_id'=>$paymentId,'license_id'=>(int)$lic['id']]);
+        payment_receipt_email((int)$pay['user_id'], $plan, (int)$pay['amount_inr'], $lic['key'], false);
         return ['ok'=>true,'license_id'=>(int)$lic['id'],'license_key'=>$lic['key']];
     } catch (Throwable $x) { $db->rollBack(); return ['ok'=>false,'error'=>'server_error']; }
 }
@@ -107,4 +109,47 @@ function razorpay_create_order(int $amountPaise, string $receipt): array {
 function razorpay_verify_signature(string $orderId, string $paymentId, string $signature): bool {
     $ks=cfg('RAZORPAY_KEY_SECRET'); if(!$ks) return false;
     return hash_equals(hash_hmac('sha256', $orderId.'|'.$paymentId, $ks), $signature);
+}
+
+/**
+ * Best-effort payment receipt / tax invoice email (also the licence-key email
+ * for new licences). Never throws — email failure must not block fulfilment.
+ */
+function payment_receipt_email(int $userId, array $plan, int $amountInr, ?string $licenseKey, bool $renewed): void {
+    try {
+        require_once __DIR__ . '/mailer.php';
+        if (!function_exists('send_email')) return;
+        $st = pdo()->prepare("SELECT email, first_name FROM users WHERE id=?"); $st->execute([$userId]);
+        $u = $st->fetch(); if (!$u || empty($u['email'])) return;
+        $to    = (string)$u['email'];
+        $name  = trim((string)($u['first_name'] ?? '')) ?: 'there';
+        $inv   = 'NM-' . date('Ymd') . '-' . str_pad((string)$userId, 4, '0', STR_PAD_LEFT) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+        $amt   = $amountInr > 0 ? '₹' . number_format($amountInr) : 'Free';
+        $per   = $plan['period']==='month' ? ' / month' : ($plan['period']==='year' ? ' / year' : '');
+        $base  = rtrim((string)(cfg('PUBLIC_URL') ?: 'https://saathi.neermedia.com'), '/');
+        $title = $renewed ? 'Your Saathi renewal receipt' : ($amountInr > 0 ? 'Your Saathi payment receipt & invoice' : 'Your Saathi licence is ready');
+        $intro = $renewed ? 'Your licence has been renewed — thank you!' : ($amountInr > 0 ? 'Thank you for your purchase! Here is your receipt.' : 'Your free licence is ready.');
+        $keyRow = $licenseKey
+            ? '<tr><td style="padding:9px 0;color:#6b7280">Licence key</td><td style="padding:9px 0;text-align:right;font-weight:800;letter-spacing:1px">' . htmlspecialchars($licenseKey) . '</td></tr>'
+            : '';
+        $html = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#1c1733">'
+            . '<div style="background:#6D5DFB;color:#fff;padding:20px 24px;border-radius:14px 14px 0 0"><div style="font-size:22px;font-weight:800">Saathi</div><div style="opacity:.9;font-size:12px">by NEER Media</div></div>'
+            . '<div style="border:1px solid #ececec;border-top:none;border-radius:0 0 14px 14px;padding:24px">'
+            . '<p>Hi ' . htmlspecialchars($name) . ',</p><p>' . $intro . '</p>'
+            . '<table style="width:100%;border-collapse:collapse;font-size:14px;margin:14px 0;border-top:1px solid #eee">'
+            . '<tr><td style="padding:9px 0;color:#6b7280">Invoice</td><td style="padding:9px 0;text-align:right;font-weight:700">' . $inv . '</td></tr>'
+            . '<tr><td style="padding:9px 0;color:#6b7280">Date</td><td style="padding:9px 0;text-align:right">' . date('d M Y') . '</td></tr>'
+            . '<tr><td style="padding:9px 0;color:#6b7280">Plan</td><td style="padding:9px 0;text-align:right;font-weight:700">' . htmlspecialchars((string)$plan['name']) . $per . '</td></tr>'
+            . '<tr><td style="padding:9px 0;color:#6b7280">Amount</td><td style="padding:9px 0;text-align:right;font-weight:700">' . $amt . '</td></tr>'
+            . $keyRow
+            . '</table>'
+            . ($licenseKey ? '<p style="font-size:13px;color:#6b7280">Paste your licence key into the plugin setup to activate. It is also saved in your dashboard.</p>' : '')
+            . '<p style="text-align:center;margin:22px 0"><a href="' . $base . '/dashboard.php" style="background:#6D5DFB;color:#fff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:700;display:inline-block">Go to your dashboard</a></p>'
+            . '<p style="font-size:12px;color:#9ca3af;border-top:1px solid #eee;padding-top:12px">' . ($amountInr > 0 ? 'This is your payment receipt / tax invoice from NEER Media.' : 'Confirmation from NEER Media.') . ' Need help? Visit ' . $base . '/contact.php</p>'
+            . '</div></div>';
+        send_email($to, $title, $html);
+        audit('receipt_email_sent', ['user_id'=>$userId, 'plan'=>$plan['code'] ?? '', 'amount'=>$amountInr, 'renewed'=>$renewed]);
+    } catch (Throwable $e) {
+        error_log('[saathi] receipt email failed: ' . $e->getMessage());
+    }
 }
