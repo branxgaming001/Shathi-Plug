@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else { setting_set('ADMIN_EMAILS', implode(',', $list)); audit('admin_email_removed', ['email'=>$em]); $flash = 'Admin removed: ' . $em; }
         }
     } elseif ($act === 'save_settings') {
-        foreach (['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','BREVO_API_KEY','RESEND_API_KEY','MAIL_FROM','MAIL_FROM_NAME','REMINDER_DAYS'] as $k) {
+        foreach (['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','BREVO_API_KEY','RESEND_API_KEY','MAIL_FROM','MAIL_FROM_NAME','REMINDER_DAYS','DEMO_BOT_PROVIDER','DEMO_BOT_BASE_URL','DEMO_BOT_API_KEY','DEMO_BOT_MODEL'] as $k) {
             $v = trim((string)($_POST[$k] ?? ''));
             if ($v !== '') setting_set($k, $v);   // only overwrite when a new value is provided
         }
@@ -109,12 +109,25 @@ if (($_GET['export'] ?? '') === 'csv') {
     $days = []; for ($i=13;$i>=0;$i--){ $dd=date('Y-m-d', strtotime("-$i day")); $days[$dd]=(int)($trend[$dd] ?? 0); }
     $maxd = max(1, max($days));
     $logins = $db->query("SELECT * FROM audit_log WHERE action IN ('user_login','admin_login','user_signup','profile_completed') ORDER BY id DESC LIMIT 12")->fetchAll();
+    // ── Deeper analytics ──
+    $planMix = $db->query("SELECT p.code, p.name, COUNT(*) c FROM licenses l JOIN plans p ON p.id=l.plan_id WHERE l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) GROUP BY p.id ORDER BY p.sort")->fetchAll();
+    $mrr = (int)$db->query("SELECT COALESCE(SUM(p.price_inr),0) FROM licenses l JOIN plans p ON p.id=l.plan_id WHERE l.status='active' AND p.period='month' AND (l.expires_at IS NULL OR l.expires_at>NOW())")->fetchColumn();
+    $usersWithLic = n("SELECT COUNT(DISTINCT user_id) FROM licenses");
+    $payingUsers  = n("SELECT COUNT(DISTINCT user_id) FROM payments WHERE status='paid'");
+    $rev6 = $db->query("SELECT DATE_FORMAT(paid_at,'%Y-%m') m, COALESCE(SUM(amount_inr),0) s FROM payments WHERE status='paid' AND paid_at >= (DATE_FORMAT(CURDATE(),'%Y-%m-01') - INTERVAL 5 MONTH) GROUP BY m")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $months = []; for ($i=5;$i>=0;$i--){ $mk=date('Y-m', strtotime("first day of -$i month")); $months[$mk]=(int)($rev6[$mk] ?? 0); }
+    $maxRev = max(1, max($months));
+    $convLic = $totUsers ? round($usersWithLic/$totUsers*100) : 0;
+    $convPay = $totUsers ? round($payingUsers/$totUsers*100) : 0;
+    $activeDomains = n("SELECT COUNT(*) FROM license_activations WHERE status='active'");
   ?>
     <h1>Overview</h1><p class="muted">Live platform metrics. Payment mode: <strong><?=e(payment_mode())?></strong> · Email: <strong><?=mailer_configured()?'configured':'dev mode'?></strong></p>
     <div class="stats">
       <div class="stat"><b><?=$totUsers?></b><span>Total users <?=$new7?'· +'.$new7.' (7d)':''?></span></div>
       <div class="stat"><b><?=$active30?></b><span>Active users (30d)</span></div>
       <div class="stat"><b><?=$activeLic?></b><span>Active keys running</span></div>
+      <div class="stat"><b><?=$activeDomains?></b><span>Active sites</span></div>
+      <div class="stat"><b>₹<?=number_format($mrr)?></b><span>MRR (monthly plans)</span></div>
       <div class="stat"><b>₹<?=number_format($rev)?></b><span>Revenue · <?=$paid?> paid</span></div>
     </div>
     <div class="panel"><h3>Signups — last 14 days <span class="small" style="color:var(--muted)">(+<?=$new7?> this week)</span></h3>
@@ -125,6 +138,40 @@ if (($_GET['export'] ?? '') === 'csv') {
             <span style="font-size:9px;color:var(--muted)"><?=date('d',strtotime($d))?></span>
           </div>
         <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="panel"><h3>Revenue — last 6 months</h3>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:104px;margin-top:12px">
+          <?php foreach ($months as $mk=>$amt): ?>
+            <div title="<?=e($mk)?>: ₹<?=number_format($amt)?>" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px">
+              <span style="font-size:10px;color:var(--muted);font-weight:700"><?=$amt?'₹'.($amt>=1000?round($amt/1000,1).'k':$amt):''?></span>
+              <div style="width:100%;background:linear-gradient(180deg,#FF6B5E,#f43f5e);border-radius:5px 5px 0 0;height:<?=max(3,(int)round($amt/$maxRev*72))?>px"></div>
+              <span style="font-size:9px;color:var(--muted)"><?=date('M',strtotime($mk.'-01'))?></span>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <div class="panel"><h3>Active plan mix</h3>
+        <?php if (!$planMix): ?><p class="small" style="margin-top:10px">No active licences yet.</p><?php else:
+          $mixTotal = array_sum(array_map(fn($r)=>(int)$r['c'], $planMix));
+          $palette = ['free'=>'#94a3b8','pro'=>'#6D5DFB','max'=>'#FF6B5E']; ?>
+          <div style="display:flex;height:14px;border-radius:99px;overflow:hidden;margin:14px 0 12px;background:#eee">
+            <?php foreach ($planMix as $r): $w=$mixTotal?round((int)$r['c']/$mixTotal*100):0; ?>
+              <div title="<?=e($r['name'])?>: <?=(int)$r['c']?>" style="width:<?=$w?>%;background:<?=$palette[$r['code']]??'#a78bfa'?>"></div>
+            <?php endforeach; ?>
+          </div>
+          <?php foreach ($planMix as $r): ?>
+            <div class="kv" style="display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0"><span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:<?=$palette[$r['code']]??'#a78bfa'?>;margin-right:7px"></span><?=e($r['name'])?></span><b><?=(int)$r['c']?></b></div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+    </div>
+    <div class="panel"><h3>Conversion funnel</h3>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">
+        <div style="flex:1;min-width:150px"><div class="bar" style="height:9px;background:#ece9fb;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:100%;background:#6D5DFB"></i></div><p class="small" style="margin:6px 0 0"><b><?=$totUsers?></b> signups · 100%</p></div>
+        <div style="flex:1;min-width:150px"><div class="bar" style="height:9px;background:#ece9fb;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:<?=$convLic?>%;background:#8b5cf6"></i></div><p class="small" style="margin:6px 0 0"><b><?=$usersWithLic?></b> got a licence · <?=$convLic?>%</p></div>
+        <div style="flex:1;min-width:150px"><div class="bar" style="height:9px;background:#ece9fb;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:<?=$convPay?>%;background:#FF6B5E"></i></div><p class="small" style="margin:6px 0 0"><b><?=$payingUsers?></b> paid · <?=$convPay?>%</p></div>
       </div>
     </div>
     <div class="panel"><h3>Recent activity</h3>
@@ -275,6 +322,29 @@ if (($_GET['export'] ?? '') === 'csv') {
         <div class="field"><label>From email</label><input name="MAIL_FROM" placeholder="no-reply@yourdomain" style="width:200px"></div>
         <button class="btn btn-primary" style="padding:11px 18px">Save</button>
       </form>
+    </div>
+    <div class="panel"><h3>Website demo bot (AI provider)</h3>
+      <p class="small">Powers the live chat bot on your marketing site (bottom-right corner). Current: provider <b><?=e(setting_get('DEMO_BOT_PROVIDER','OpenRouter'))?></b> · key <b><?=e($mask('DEMO_BOT_API_KEY'))?></b> · model <b><?=e(setting_get('DEMO_BOT_MODEL', getenv('OPENROUTER_MODEL') ?: 'deepseek/deepseek-chat-v3-0324:free'))?></b>. Without a key it falls back to safe canned answers. Any OpenAI-compatible provider works.</p>
+      <form method="post" class="inline-form"><?=csrf_field()?><input type="hidden" name="action" value="save_settings">
+        <div class="field"><label>Provider</label>
+          <select name="DEMO_BOT_PROVIDER" id="dbProv" onchange="dbSet()" style="border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit">
+            <?php $cur=setting_get('DEMO_BOT_PROVIDER','OpenRouter'); foreach (['OpenRouter','OpenAI','Groq','Together','DeepInfra','Custom'] as $pv): ?>
+            <option <?=$cur===$pv?'selected':''?>><?=$pv?></option><?php endforeach; ?>
+          </select></div>
+        <div class="field"><label>API base URL</label><input name="DEMO_BOT_BASE_URL" id="dbUrl" value="<?=e(setting_get('DEMO_BOT_BASE_URL',''))?>" placeholder="https://openrouter.ai/api/v1/chat/completions" style="width:300px"></div>
+        <div class="field"><label>API key</label><input name="DEMO_BOT_API_KEY" type="password" placeholder="<?=setting_get('DEMO_BOT_API_KEY','')!==''?'leave blank to keep current':'sk-...'?>" style="width:220px"></div>
+        <div class="field"><label>Model</label><input name="DEMO_BOT_MODEL" id="dbModel" value="<?=e(setting_get('DEMO_BOT_MODEL',''))?>" placeholder="deepseek/deepseek-chat-v3-0324:free" style="width:240px"></div>
+        <button class="btn btn-primary" style="padding:11px 18px">Save</button>
+      </form>
+      <script>
+      function dbSet(){var p=document.getElementById('dbProv').value,u=document.getElementById('dbUrl'),m=document.getElementById('dbModel');
+        var map={'OpenRouter':['https://openrouter.ai/api/v1/chat/completions','deepseek/deepseek-chat-v3-0324:free'],
+          'OpenAI':['https://api.openai.com/v1/chat/completions','gpt-4o-mini'],
+          'Groq':['https://api.groq.com/openai/v1/chat/completions','llama-3.3-70b-versatile'],
+          'Together':['https://api.together.xyz/v1/chat/completions','meta-llama/Llama-3.3-70B-Instruct-Turbo'],
+          'DeepInfra':['https://api.deepinfra.com/v1/openai/chat/completions','meta-llama/Llama-3.3-70B-Instruct']};
+        if(map[p]){u.value=map[p][0];if(!m.value)m.value=map[p][1];}}
+      </script>
     </div>
     <div class="panel"><h3>License renewals</h3>
       <p class="small">Send a reminder this many days before expiry. Current: <b><?=e(setting_get('REMINDER_DAYS', getenv('REMINDER_DAYS') ?: '7'))?></b> days.</p>

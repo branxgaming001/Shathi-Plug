@@ -1,7 +1,12 @@
 <?php
-/** Minimal OpenRouter chat caller. Returns ['ok'=>bool,'content'|'error']. */
-function or_chat(array $messages, string $key, string $model): array
+/**
+ * Minimal OpenAI-compatible chat caller (OpenRouter, OpenAI, Groq, Together,
+ * DeepInfra, local LM servers, …). Returns ['ok'=>bool,'content'|'error'].
+ * Pass $url to target any /chat/completions endpoint; defaults to OpenRouter.
+ */
+function or_chat(array $messages, string $key, string $model, string $url = 'https://openrouter.ai/api/v1/chat/completions'): array
 {
+    $url = $url !== '' ? $url : 'https://openrouter.ai/api/v1/chat/completions';
     $payload = json_encode([
         'model'       => $model,
         'messages'    => $messages,
@@ -9,17 +14,23 @@ function or_chat(array $messages, string $key, string $model): array
         'max_tokens'  => 600,
     ]);
 
-    $ch = curl_init('https://openrouter.ai/api/v1/chat/completions');
+    $headers = [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $key,
+    ];
+    // OpenRouter-specific attribution headers (ignored by other providers, but
+    // only sent to OpenRouter to stay clean).
+    if (stripos($url, 'openrouter.ai') !== false) {
+        $headers[] = 'HTTP-Referer: https://saathi.neermedia.com';
+        $headers[] = 'X-Title: Saathi';
+    }
+
+    $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => $payload,
-        CURLOPT_HTTPHEADER     => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $key,
-            'HTTP-Referer: https://website-production-7e70.up.railway.app',
-            'X-Title: Saathi',
-        ],
+        CURLOPT_HTTPHEADER     => $headers,
         CURLOPT_TIMEOUT        => 45,
     ]);
     $res  = curl_exec($ch);

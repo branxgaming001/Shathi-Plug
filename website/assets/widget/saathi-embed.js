@@ -38,7 +38,9 @@
   }
 
   function windowHtml() {
-    return '<div class="sbot-win" role="dialog" aria-label="Saathi chat">' +
+    return '<div class="sbot-win" role="dialog" aria-label="Saathi chat" style="position:relative">' +
+      '<div id="sbResize" title="Drag to resize" style="position:absolute;top:0;left:0;width:18px;height:18px;cursor:nwse-resize;z-index:6;touch-action:none">' +
+      '<svg viewBox="0 0 18 18" width="18" height="18" style="opacity:.5"><path d="M3 10 L10 3 M3 14 L14 3 M7 14 L14 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></div>' +
       '<div class="sbot-head">' +
       '<img src="' + MASCOT(state.mascot) + '" alt="" id="sbHeadAv">' +
       '<div><div class="h-name">Saathi</div><div class="h-stat"><span class="dot"></span>Online · ask me anything</div></div>' +
@@ -50,7 +52,7 @@
       '<div class="sbot-cust-row"><span id="sbColors" class="sbot-grp"></span><span class="sbot-div"></span><span id="sbMascots" class="sbot-grp"></span></div>' +
       '</div>' +
       '<div class="sbot-input"><input id="sbInput" placeholder="Type your message…" autocomplete="off"><button class="sbot-send" id="sbSend" aria-label="Send">➤</button></div>' +
-      '<div class="sbot-foot"><b>Saathi</b> · a product by RAI</div>' +
+      '<div class="sbot-foot"><b>Saathi</b> · a product by NEER Media</div>' +
       '</div>';
   }
 
@@ -61,9 +63,30 @@
     document.getElementById('sbSend').onclick = sendInput;
     var inp = document.getElementById('sbInput');
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendInput(); });
-    buildCustomizer(); greet(); inp.focus();
+    wireResize(); buildCustomizer(); greet(); inp.focus();
   }
   function close() { state.open = false; launcher(); }
+
+  // Drag-resize from the top-left grip (the window is anchored bottom-right, so
+  // it grows up & left). Size persists across visits via localStorage.
+  function wireResize() {
+    var win = root.querySelector('.sbot-win'); if (!win) return;
+    try { var sz = JSON.parse(localStorage.getItem('saathiBotSize') || 'null'); if (sz && sz.w) { win.style.width = sz.w + 'px'; win.style.height = sz.h + 'px'; } } catch (e) {}
+    var grip = document.getElementById('sbResize'); if (!grip) return;
+    grip.addEventListener('pointerdown', function (e) {
+      var r = win.getBoundingClientRect(); var sx = e.clientX, sy = e.clientY, sw = r.width, sh = r.height;
+      function mv(ev) {
+        var w = Math.min(Math.max(320, sw + (sx - ev.clientX)), Math.min(560, window.innerWidth - 24));
+        var h = Math.min(Math.max(420, sh + (sy - ev.clientY)), Math.min(820, window.innerHeight - 24));
+        win.style.width = w + 'px'; win.style.height = h + 'px';
+      }
+      function up() {
+        document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up);
+        try { var b = win.getBoundingClientRect(); localStorage.setItem('saathiBotSize', JSON.stringify({ w: Math.round(b.width), h: Math.round(b.height) })); } catch (e) {}
+      }
+      document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); e.preventDefault();
+    });
+  }
 
   function setColor(c) { state.color = c; root.style.setProperty('--bot', c); if (state.open) buildCustomizer(); }
   function setMascot(n) {

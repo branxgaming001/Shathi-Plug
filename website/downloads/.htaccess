@@ -1,0 +1,11 @@
+# Plugin archives are served only through /download.php (sign-in + plan gate).
+# Block direct URL access to any .zip in this folder.
+<FilesMatch "\.zip$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>

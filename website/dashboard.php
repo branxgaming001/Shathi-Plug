@@ -81,7 +81,7 @@ $pct = (int) round($done / count($steps) * 100);
       <a class="btn btn-lg" href="checkout.php?plan=free">Get my license →</a>
     <?php elseif ($activations === 0): ?>
       <div><h3>Download Saathi & activate it</h3><p>Install the plugin on WordPress, then paste your license key.</p></div>
-      <a class="btn btn-lg" href="downloads/saathi-agentic-ai.zip">Download plugin ↓</a>
+      <a class="btn btn-lg" href="download.php">Download plugin ↓</a>
     <?php else: ?>
       <div><h3>You're all set 🎉</h3><p>Saathi is active on your site. Manage licenses & billing below.</p></div>
       <a class="btn btn-lg" href="index.php#pricing">Upgrade plan</a>
@@ -98,8 +98,13 @@ $pct = (int) round($done / count($steps) * 100);
   <div class="grid2">
     <div class="panel">
       <h3>Get the plugin</h3>
+      <?php if (!$hasLicense): ?>
+      <p class="small">Choose a plan first — your download unlocks instantly once you have a licence (Free works too).</p>
+      <a class="btn btn-primary" href="pricing.php" style="margin:6px 0 4px">Choose a plan to unlock ↓</a>
+      <?php else: ?>
       <p class="small">Install Saathi on WordPress and activate it with your license key.</p>
-      <a class="btn btn-primary" href="downloads/saathi-agentic-ai.zip" style="margin:6px 0 4px">Download plugin (.zip) ↓</a>
+      <a class="btn btn-primary" href="download.php" style="margin:6px 0 4px">Download plugin (.zip) ↓</a>
+      <?php endif; ?>
       <ol class="steps3">
         <li>In WordPress: <strong>Plugins → Add New → Upload Plugin</strong>, choose the zip, Install &amp; Activate.</li>
         <li>Open <strong>Saathi AI → License</strong>, paste your key, click <strong>Activate</strong>.</li>
