@@ -64,6 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 // Prefill from a failed attempt, else from existing user record.
 foreach ($fields as $k) if (!isset($f[$k])) $f[$k] = (string)($u[$k] ?? '');
+// Friendly prefill: split the Google display name into first/last so returning
+// Google users don't retype what we already know.
+if (trim($f['first_name']) === '' && trim((string)($u['name'] ?? '')) !== '') {
+    $parts = preg_split('/\s+/', trim((string)$u['name']), 2);
+    $f['first_name'] = $parts[0] ?? '';
+    if (trim($f['last_name']) === '' && !empty($parts[1])) $f['last_name'] = $parts[1];
+}
 $v = fn(string $k): string => e($f[$k] ?? '');
 ?>
 <!doctype html><html lang="en"><head>
@@ -109,7 +116,7 @@ $v = fn(string $k): string => e($f[$k] ?? '');
     </div>
 
     <div class="grid2">
-      <div class="field"><label>Company / brand name <span class="req">*</span></label><input name="company" value="<?=$v('company')?>" placeholder="RAI Labs" maxlength="150" required></div>
+      <div class="field"><label>Company / brand name <span class="req">*</span></label><input name="company" value="<?=$v('company')?>" placeholder="NEER Media" maxlength="150" required></div>
       <div class="field"><label>Website domain <span class="req">*</span></label><input name="website" value="<?=$v('website')?>" placeholder="example.com" maxlength="190" required><div class="hint">The site where you'll run Saathi (used for your license).</div></div>
     </div>
 
