@@ -48,35 +48,25 @@ class SetupWizard {
     }
 
     /**
-     * Register the setup screen as a hidden submenu: a valid, capability-checked
-     * page with no visible menu item. Renders on its load hook (pre-chrome).
+     * Register the setup screen as a real submenu under the Saathi menu, so
+     * WordPress recognises admin.php?page=sathi-setup and its access check
+     * passes. We deliberately DO NOT call remove_submenu_page(): removing the
+     * submenu breaks get_admin_page_parent(), which makes WordPress compute a
+     * different page-hook name than the one registered and wrongly deny access
+     * ("Sorry, you are not allowed to access this page."). A visible "Setup
+     * wizard" item is fine — it also lets the owner re-run setup any time.
+     * Rendering happens on the page's load hook (fires before the admin header,
+     * so the wizard is full-screen / chrome-free).
      */
     public function register_page(): void {
         $hook = add_submenu_page(
             'sathi-dashboard',
             __( 'Set up Saathi', 'sathi-agentic-ai' ),
-            __( 'Setup', 'sathi-agentic-ai' ),
+            __( 'Setup wizard', 'sathi-agentic-ai' ),
             'manage_options',
             self::PAGE,
             [ $this, 'render_callback' ]
         );
-        // Fallback parent: if the main Saathi menu isn't present yet, hang it off
-        // the Dashboard so the page is still registered and reachable.
-        if ( ! $hook ) {
-            $hook = add_submenu_page(
-                'index.php',
-                __( 'Set up Saathi', 'sathi-agentic-ai' ),
-                __( 'Set up Saathi', 'sathi-agentic-ai' ),
-                'manage_options',
-                self::PAGE,
-                [ $this, 'render_callback' ]
-            );
-            if ( $hook ) {
-                remove_submenu_page( 'index.php', self::PAGE );
-            }
-        } else {
-            remove_submenu_page( 'sathi-dashboard', self::PAGE );
-        }
         if ( $hook ) {
             add_action( 'load-' . $hook, [ $this, 'render_callback' ] );
         }
@@ -135,9 +125,14 @@ class SetupWizard {
         }
 
         $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+        // The wizard is reachable via the registered page (?page=sathi-setup) OR
+        // a plain query flag (?sathi_setup=1). The flag path carries no `page`
+        // param, so WordPress never runs its plugin-page access check — a
+        // bulletproof fallback that cannot produce "not allowed".
+        $wants_setup = ( $page === self::PAGE ) || isset( $_GET['sathi_setup'] );
 
         // ── Finish / skip action (nonce-protected) ──────────────────────
-        if ( $page === self::PAGE && isset( $_GET['sathi_setup_action'] ) && $_GET['sathi_setup_action'] === 'complete' ) {
+        if ( $wants_setup && isset( $_GET['sathi_setup_action'] ) && $_GET['sathi_setup_action'] === 'complete' ) {
             check_admin_referer( 'sathi_setup_complete' );
             update_option( self::DONE_OPTION, 1, false );
             delete_transient( self::REDIRECT_TRANSIENT );
@@ -146,7 +141,7 @@ class SetupWizard {
         }
 
         // ── Render the standalone wizard page ───────────────────────────
-        if ( $page === self::PAGE ) {
+        if ( $wants_setup ) {
             $this->render_page();
             exit;
         }
@@ -155,14 +150,14 @@ class SetupWizard {
         if ( get_transient( self::REDIRECT_TRANSIENT ) ) {
             delete_transient( self::REDIRECT_TRANSIENT );
             if ( ! isset( $_GET['activate-multi'] ) && ! is_network_admin() && ! $this->is_complete() ) {
-                wp_safe_redirect( admin_url( 'admin.php?page=' . self::PAGE ) );
+                wp_safe_redirect( admin_url( 'admin.php?sathi_setup=1' ) );
                 exit;
             }
         }
 
         // ── License gate: hold Saathi pages on the wizard until licensed ─
         if ( $this->gate_active() && strpos( $page, 'sathi-' ) === 0 && $page !== self::PAGE ) {
-            wp_safe_redirect( admin_url( 'admin.php?page=' . self::PAGE ) );
+            wp_safe_redirect( admin_url( 'admin.php?sathi_setup=1' ) );
             exit;
         }
     }
@@ -223,7 +218,7 @@ class SetupWizard {
             'nonce'       => wp_create_nonce( 'wp_rest' ),
             'dashboard'   => esc_url_raw( admin_url( 'admin.php?page=sathi-dashboard' ) ),
             'settings'    => esc_url_raw( admin_url( 'admin.php?page=sathi-settings' ) ),
-            'completeUrl' => esc_url_raw( wp_nonce_url( admin_url( 'admin.php?page=' . self::PAGE . '&sathi_setup_action=complete' ), 'sathi_setup_complete' ) ),
+            'completeUrl' => esc_url_raw( wp_nonce_url( admin_url( 'admin.php?sathi_setup=1&sathi_setup_action=complete' ), 'sathi_setup_complete' ) ),
             'pricing'     => 'https://saathi.neermedia.com/pricing.php',
             'getKey'      => 'https://saathi.neermedia.com/login.php',
             'site'        => get_bloginfo( 'name' ),
