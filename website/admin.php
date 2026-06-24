@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/payments.php';
+require_once __DIR__ . '/includes/mailer.php';   // mailer_configured() used in Overview
 $IMG = require __DIR__ . '/assets/images.php';
 $a = require_admin();
 $db = pdo();
@@ -58,6 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $tab = $_GET['tab'] ?? 'overview';
 $tabs = ['overview'=>'Overview','users'=>'Users','licenses'=>'Licenses','payments'=>'Payments','pricing'=>'Pricing','admins'=>'Admins','audit'=>'Audit log','settings'=>'Settings'];
+$navIcons = [
+  'overview' => '<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zM3 21h8v-6H3zM13 21h8V11h-8zM13 3v6h8V3z"/></svg>',
+  'users'    => '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+  'licenses' => '<svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>',
+  'payments' => '<svg viewBox="0 0 24 24"><path d="M2 7h20v10H2zM2 11h20"/></svg>',
+  'pricing'  => '<svg viewBox="0 0 24 24"><path d="M20 12l-8 8-9-9V3h8zM7 7h.01"/></svg>',
+  'admins'   => '<svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>',
+  'audit'    => '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  'settings' => '<svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zM19 12a7 7 0 00-.1-1l2-1.5-2-3.5-2.4 1a7 7 0 00-1.7-1L14.5 2h-5l-.3 2.5a7 7 0 00-1.7 1l-2.4-1-2 3.5L3 11a7 7 0 000 2l-2 1.5 2 3.5 2.4-1a7 7 0 001.7 1L9.5 22h5l.3-2.5a7 7 0 001.7-1l2.4 1 2-3.5-2-1.5a7 7 0 00.1-1z"/></svg>',
+];
 function n($qq){ return (int)pdo()->query($qq)->fetchColumn(); }
 $q = trim((string)($_GET['q'] ?? ''));   // search term (users tab)
 
@@ -89,13 +100,45 @@ if (($_GET['export'] ?? '') === 'csv') {
 <title>Admin — Saathi</title><link rel="icon" href="<?=$IMG['logo']?>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
+<style>
+*{box-sizing:border-box}
+.acc{display:flex;min-height:100vh;background:var(--bg,#f6f5fb)}
+.acc-side{width:248px;flex:0 0 248px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.acc-brand{display:flex;align-items:center;gap:9px;font-family:'Baloo 2';font-weight:800;font-size:21px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.acc-brand img{width:30px;height:30px}
+.acc-nav{padding:12px 10px;flex:1;overflow:auto}
+.acc-nav a{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;color:var(--ink2,#4b4668);font-weight:600;font-size:14.5px;margin-bottom:3px;transition:.15s}
+.acc-nav a svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;flex:0 0 auto}
+.acc-nav a:hover{background:#f4f2fe;color:var(--v)}
+.acc-nav a.on{background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;box-shadow:0 8px 18px -10px var(--v)}
+.acc-user{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:10px}
+.acc-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;display:grid;place-items:center;font-weight:800;font-family:'Baloo 2'}
+.acc-user .nm{font-weight:700;font-size:13.5px;line-height:1.1}
+.acc-user .pl{font-size:11.5px;color:var(--muted);text-transform:capitalize}
+.acc-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.acc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}
+.acc-top h1{font-family:'Baloo 2';font-size:22px;margin:0}
+.acc-body{padding:24px 28px;max-width:1140px;width:100%}
+.acc-body h1{display:none}
+.acc-body .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin:0 0 18px}
+.acc-body .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 30px -24px rgba(40,30,90,.5)}
+.acc-body .stat b{font-family:'Baloo 2';font-size:28px;font-weight:800;display:block;line-height:1}
+.acc-body .stat span{color:var(--muted);font-size:12.5px}
+.acc-body .panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px -24px rgba(40,30,90,.5)}
+@media(max-width:820px){.acc-side{width:64px;flex:0 0 64px}.acc-brand span,.acc-nav a span,.acc-user div{display:none}.acc-nav a{justify-content:center}.acc-brand{justify-content:center;padding:16px 0}}
+</style>
 </head><body>
-<header class="topbar"><div class="wrap">
-  <a class="brand" href="admin.php"><img src="<?=$IMG['logo']?>" alt="" style="width:30px;height:30px">Saathi <span class="badge v" style="margin-left:4px">ADMIN</span></a>
-  <div class="sp"><span class="who"><?=e($a['username'])?> · <?=e($a['role'])?></span><a class="btn btn-ghost" href="logout.php" style="padding:8px 16px">Log out</a></div>
-</div></header>
-<div class="dash">
-  <div class="adminnav"><?php foreach ($tabs as $k=>$lbl): ?><a href="admin.php?tab=<?=$k?>" class="<?=$tab===$k?'on':''?>"><?=$lbl?></a><?php endforeach; ?></div>
+<div class="acc">
+  <aside class="acc-side">
+    <a class="acc-brand" href="admin.php"><img src="<?=$IMG['logo']?>" alt=""><span>Saathi</span></a>
+    <nav class="acc-nav">
+      <?php foreach ($tabs as $k=>$lbl): ?><a href="admin.php?tab=<?=$k?>" class="<?=$tab===$k?'on':''?>"><?=$navIcons[$k] ?? ''?><span><?=$lbl?></span></a><?php endforeach; ?>
+    </nav>
+    <div class="acc-user"><span class="acc-av"><?=e(strtoupper(substr((string)($a['username'] ?? 'A'),0,1)))?></span><div><div class="nm"><?=e($a['username'])?></div><div class="pl"><?=e($a['role'])?> · admin</div></div></div>
+  </aside>
+  <main class="acc-main">
+    <header class="acc-top"><h1><?=e($tabs[$tab] ?? 'Admin')?></h1><a class="btn btn-ghost" href="logout.php" style="padding:8px 16px">Log out</a></header>
+    <div class="acc-body">
   <?php if ($flash): ?><div class="msg ok"><?=e($flash)?></div><?php endif; ?>
 
   <?php if ($tab==='overview'):
@@ -365,4 +408,6 @@ if (($_GET['export'] ?? '') === 'csv') {
       </form>
     </div>
   <?php endif; ?>
+    </div>
+  </main>
 </div></body></html>
