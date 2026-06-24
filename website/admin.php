@@ -100,33 +100,7 @@ if (($_GET['export'] ?? '') === 'csv') {
 <title>Admin — Saathi</title><link rel="icon" href="<?=$IMG['logo']?>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
-<style>
-*{box-sizing:border-box}
-.acc{display:flex;min-height:100vh;background:var(--bg,#f6f5fb)}
-.acc-side{width:248px;flex:0 0 248px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.acc-brand{display:flex;align-items:center;gap:9px;font-family:'Baloo 2';font-weight:800;font-size:21px;padding:18px 20px;border-bottom:1px solid var(--line)}
-.acc-brand img{width:30px;height:30px}
-.acc-nav{padding:12px 10px;flex:1;overflow:auto}
-.acc-nav a{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;color:var(--ink2,#4b4668);font-weight:600;font-size:14.5px;margin-bottom:3px;transition:.15s}
-.acc-nav a svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;flex:0 0 auto}
-.acc-nav a:hover{background:#f4f2fe;color:var(--v)}
-.acc-nav a.on{background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;box-shadow:0 8px 18px -10px var(--v)}
-.acc-user{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:10px}
-.acc-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;display:grid;place-items:center;font-weight:800;font-family:'Baloo 2'}
-.acc-user .nm{font-weight:700;font-size:13.5px;line-height:1.1}
-.acc-user .pl{font-size:11.5px;color:var(--muted);text-transform:capitalize}
-.acc-main{flex:1;min-width:0;display:flex;flex-direction:column}
-.acc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}
-.acc-top h1{font-family:'Baloo 2';font-size:22px;margin:0}
-.acc-body{padding:24px 28px;max-width:1140px;width:100%}
-.acc-body h1{display:none}
-.acc-body .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin:0 0 18px}
-.acc-body .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 30px -24px rgba(40,30,90,.5)}
-.acc-body .stat b{font-family:'Baloo 2';font-size:28px;font-weight:800;display:block;line-height:1}
-.acc-body .stat span{color:var(--muted);font-size:12.5px}
-.acc-body .panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px -24px rgba(40,30,90,.5)}
-@media(max-width:820px){.acc-side{width:64px;flex:0 0 64px}.acc-brand span,.acc-nav a span,.acc-user div{display:none}.acc-nav a{justify-content:center}.acc-brand{justify-content:center;padding:16px 0}}
-</style>
+<link rel="stylesheet" href="assets/css/acc.css?v=4">
 </head><body>
 <div class="acc">
   <aside class="acc-side">
@@ -183,7 +157,7 @@ if (($_GET['export'] ?? '') === 'csv') {
         <?php endforeach; ?>
       </div>
     </div>
-    <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="grid2">
       <div class="panel"><h3>Revenue — last 6 months</h3>
         <div style="display:flex;align-items:flex-end;gap:8px;height:104px;margin-top:12px">
           <?php foreach ($months as $mk=>$amt): ?>
@@ -243,7 +217,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     ?>
     <div class="panel" style="border:2px solid var(--v)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">User #<?=(int)$detail['id']?> · <?=e(trim((($detail['first_name']??'').' '.($detail['last_name']??''))) ?: ($detail['email'] ?: '—'))?></h3><a class="btn btn-ghost" href="admin.php?tab=users<?=$q!==''?'&q='.urlencode($q):''?>" style="padding:6px 12px">✕ Close</a></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:10px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px 18px;margin-top:10px">
         <?php foreach ($drows as $k=>$v) if (trim((string)$v)!=='') echo '<div style="display:flex;gap:8px"><span style="color:var(--muted);min-width:92px;font-size:13px">'.e($k).'</span><span style="font-weight:600;font-size:13.5px">'.e((string)$v).'</span></div>'; ?>
       </div>
       <p class="small" style="margin-top:12px"><b><?=$dkeys?></b> license(s) · spent <b>₹<?=number_format($dpaid)?></b></p>

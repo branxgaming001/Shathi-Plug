@@ -312,7 +312,7 @@ $content = ob_get_clean();
 <title>Dashboard — Saathi</title><link rel="icon" href="<?=$IMG['logo']?>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
-<style><?=$css?></style>
+<link rel="stylesheet" href="assets/css/acc.css?v=4">
 </head><body>
 <div class="acc">
   <aside class="acc-side">
@@ -323,7 +323,7 @@ $content = ob_get_clean();
       <?php endforeach; ?>
       <?php if(!$isMax): ?><a href="dashboard.php?section=plan" style="margin-top:8px;background:#fff6f4;color:#FF6B5E"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>Go <?=$currentCode==='pro'?'Max':'Pro'?></a><?php endif; ?>
     </nav>
-    <div class="acc-user"><span class="acc-av"><?=e($initial)?></span><div><div class="nm"><?=e($name)?></div><div class="pl"><?=e($tierLabel)?> plan</div></div></div>
+    <div class="acc-user"><span class="acc-av"><?=e($initial)?></span><div><div class="nm"><?=e($name)?></div><div class="pl" title="<?=e($who)?>"><?=e($who)?></div></div></div>
   </aside>
   <main class="acc-main">
     <header class="acc-top"><h1><?=e($navItems[$section][0])?></h1>
