@@ -38,7 +38,57 @@ class SetupWizard {
 
     /** Wire hooks. Called from Plugin::boot during plugins_loaded. */
     public function register(): void {
+        // Register the wizard as a REAL (but hidden) admin page so WordPress
+        // recognises admin.php?page=sathi-setup and never shows "Sorry, you are
+        // not allowed to access this page." It is rendered chrome-free on its
+        // load hook (fires before the admin header), with an admin_init render
+        // as a secondary path and the page callback as a final fallback.
+        add_action( 'admin_menu', [ $this, 'register_page' ], 99 );
         add_action( 'admin_init', [ $this, 'maybe_intercept' ], 1 );
+    }
+
+    /**
+     * Register the setup screen as a hidden submenu: a valid, capability-checked
+     * page with no visible menu item. Renders on its load hook (pre-chrome).
+     */
+    public function register_page(): void {
+        $hook = add_submenu_page(
+            'sathi-dashboard',
+            __( 'Set up Saathi', 'sathi-agentic-ai' ),
+            __( 'Setup', 'sathi-agentic-ai' ),
+            'manage_options',
+            self::PAGE,
+            [ $this, 'render_callback' ]
+        );
+        // Fallback parent: if the main Saathi menu isn't present yet, hang it off
+        // the Dashboard so the page is still registered and reachable.
+        if ( ! $hook ) {
+            $hook = add_submenu_page(
+                'index.php',
+                __( 'Set up Saathi', 'sathi-agentic-ai' ),
+                __( 'Set up Saathi', 'sathi-agentic-ai' ),
+                'manage_options',
+                self::PAGE,
+                [ $this, 'render_callback' ]
+            );
+            if ( $hook ) {
+                remove_submenu_page( 'index.php', self::PAGE );
+            }
+        } else {
+            remove_submenu_page( 'sathi-dashboard', self::PAGE );
+        }
+        if ( $hook ) {
+            add_action( 'load-' . $hook, [ $this, 'render_callback' ] );
+        }
+    }
+
+    /** Render the standalone wizard and stop. Used by the load hook + page callback. */
+    public function render_callback(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You do not have permission to access this page.', 'sathi-agentic-ai' ) );
+        }
+        $this->render_page();
+        exit;
     }
 
     /** True when the gate should hold the user on the wizard. */
