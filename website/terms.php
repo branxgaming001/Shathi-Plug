@@ -34,7 +34,7 @@ site_nav('');
   </ul>
 
   <h2>6. Intellectual property</h2>
-  <p>Saathi, its branding and code are owned by NEER Media Your website content remains yours. You grant us the limited rights needed to operate the Service for you.</p>
+  <p>Saathi, its branding and code are owned by NEER Media. Your website content remains yours. You grant us the limited rights needed to operate the Service for you.</p>
 
   <h2>7. Disclaimers</h2>
   <p>The Service is provided "as is". AI responses may be imperfect; you are responsible for reviewing how the bot is configured and what it is allowed to do on your site.</p>

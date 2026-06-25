@@ -42,7 +42,7 @@ $css = '.cwrap{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:s
      . '.cinfo .row{display:flex;gap:12px;align-items:flex-start;margin:14px 0}.cinfo .ic{font-size:20px}';
 page_head([
   'title' => 'Contact Saathi — Support & Sales',
-  'desc'  => 'Get in touch with the Saathi team at NEER Media Questions about features, pricing or setup? Send us a message and we\'ll reply within 1 business day.',
+  'desc'  => 'Get in touch with the Saathi team at NEER Media. Questions about features, pricing or setup? Send us a message and we\'ll reply within 1 business day.',
   'slug'  => 'contact.php',
   'extra_css' => $css,
 ]);
