@@ -33,3 +33,12 @@ putenv('PUBLIC_URL=https://railabs.in');
 // putenv('OPENROUTER_API_KEY=...');  putenv('OPENROUTER_MODEL=...');   // real bot AI
 // putenv('RAZORPAY_KEY_ID=...');     putenv('RAZORPAY_KEY_SECRET=...'); // real payments
 // putenv('BREVO_API_KEY=...');       putenv('MAIL_FROM=no-reply@railabs.in'); // real OTP email
+
+// ---- Razorpay (license checkout) ----
+// Use rzp_test_* keys to validate end-to-end, then swap to rzp_live_* for production.
+// payment_mode() auto-switches to 'razorpay' once KEY_ID + KEY_SECRET are present.
+// putenv('RAZORPAY_KEY_ID=rzp_test_xxxxxxxx');
+// putenv('RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxx');
+// RAZORPAY_WEBHOOK_SECRET must match the secret you set on the Dashboard webhook
+// (Settings -> Webhooks -> https://saathi.neermedia.com/razorpay_webhook.php, events: payment.captured, order.paid)
+// putenv('RAZORPAY_WEBHOOK_SECRET=xxxxxxxxxxxxxxxx');
