@@ -3,8 +3,8 @@ require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
-  'title' => 'About Saathi & RAI Labs Pvt. Ltd.',
-  'desc'  => 'Saathi is built by RAI Labs Pvt. Ltd. — an AI chatbot for WordPress & WooCommerce that supports and sells, trained on your real website content.',
+  'title' => 'About Saathi & NEER Media',
+  'desc'  => 'Saathi is built by NEER Media — an AI chatbot for WordPress & WooCommerce that supports and sells, trained on your real website content.',
   'slug'  => 'about.php',
 ]);
 site_nav('about');
@@ -53,8 +53,8 @@ site_nav('about');
 <section class="section" style="padding-top:0"><div class="wrap">
   <div class="demo">
     <span class="eyebrow">The company</span>
-    <h2 style="margin-top:10px">Made by RAI Labs Pvt. Ltd.</h2>
-    <p>Saathi is built and maintained by <?=rai_labs()?>, a software studio focused on practical, privacy-respecting AI products. We believe powerful AI should be affordable, transparent, and genuinely useful for real businesses — not locked behind enterprise pricing. Learn more about us at <a href="https://railabs.in" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">railabs.in ↗</a>.</p>
+    <h2 style="margin-top:10px">Made by NEER Media</h2>
+    <p>Saathi is built and maintained by <?=rai_labs()?>, a software studio focused on practical, privacy-respecting AI products. We believe powerful AI should be affordable, transparent, and genuinely useful for real businesses — not locked behind enterprise pricing. Learn more about us at <a href="https://neermedia.com" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">neermedia.com ↗</a>.</p>
     <a class="btn btn-primary btn-lg" href="contact.php" style="margin-top:6px">Get in touch</a>
   </div>
 </div></section>

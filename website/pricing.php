@@ -41,6 +41,9 @@ function plan_period_label(string $code): string {
 <section class="phero"><div class="wrap">
   <span class="eyebrow">Pricing</span>
   <h1>Simple, honest pricing</h1>
+  <?php if (($_GET['need'] ?? '') === 'plan'): ?>
+  <div class="msg ok" style="margin:0 auto 14px;max-width:560px">Pick a plan to unlock your plugin download — the <strong>Free</strong> plan works too and takes seconds.</div>
+  <?php endif; ?>
   <p class="lead">Start <strong>free</strong> anywhere in the world. Upgrade when you're ready. You bring your own AI key, so there are no surprise usage bills from us. Prices in ₹ (USD shown too).</p>
 </div></section>
 
