@@ -312,7 +312,7 @@ $content = ob_get_clean();
 <title>Dashboard — Saathi</title><link rel="icon" href="<?=$IMG['logo']?>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
-<link rel="stylesheet" href="assets/css/acc.css?v=4">
+<link rel="stylesheet" href="assets/css/acc.css?v=5">
 </head><body>
 <div class="acc">
   <aside class="acc-side">
