@@ -4,8 +4,8 @@ require __DIR__ . '/includes/payments.php';
 $IMG = require __DIR__ . '/assets/images.php';
 $u = require_login();
 
-$order = $_SESSION['order'] ?? null;
-if (!$order) redirect('dashboard.php');
+$result   = null;   // fulfilment result to display
+$checkout = null;   // Razorpay checkout data to render
 
 $result = null;
 $razorpay = null;
@@ -63,6 +63,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+elseif ($method === 'POST') {
+    // ---- Start checkout: create a server-priced intent ----
+    csrf_check();
+    $order = $_SESSION['order'] ?? null;
+    if (!$order) redirect('dashboard.php');
+    $plan = plan_by_id((int)$order['plan_id']);
+    if (!$plan) redirect('index.php#pricing');
+    $renew  = !empty($order['renew']) ? (int)$order['renew'] : null;
+    $intent = payment_create((int)$u['id'], $plan, $renew);
+
+    if ($intent['mode'] === 'test' || (int)$plan['price_inr'] === 0) {
+        // Test mode / free plan: simulate a verified success then fulfil.
+        $result = fulfill_payment((int)$intent['payment_id'], $renew, 'TEST-' . bin2hex(random_bytes(4)));
+        unset($_SESSION['order']);
+    } elseif ($intent['mode'] === 'razorpay' && !empty($intent['order_id'])) {
+        $checkout = ['order_id'=>$intent['order_id'], 'amount_paise'=>(int)$intent['amount'] * 100, 'plan'=>$plan];
+    } else {
+        $result = ['ok'=>false,'error'=>$intent['error'] ?? 'Payment gateway is not available right now. Please try again shortly.'];
+    }
+}
+else {
+    // GET — checkout must originate from checkout.php
+    if (empty($_SESSION['order'])) redirect('dashboard.php');
+    redirect('checkout.php');
+}
+
+$RZP_KEY = (string)cfg('RAZORPAY_KEY_ID');
+$fullName = trim((string)($u['first_name'] ?? '') . ' ' . (string)($u['last_name'] ?? ''));
 ?>
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -116,8 +144,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a class="btn btn-primary btn-block" href="dashboard.php" style="margin-top:10px">Go to dashboard</a>
 
   <?php else: ?>
-    <h2 style="text-align:center">Couldn't complete</h2>
-    <div class="msg err"><?=e($result['error'] ?? 'Payment could not be processed. Please try again.')?></div>
-    <a class="btn btn-ghost btn-block" href="checkout.php">Try again</a>
+    <p class="auth-sub">Your license has been <?=!empty($result['renewed'])?'renewed':'updated'?>. See it in your dashboard.</p>
   <?php endif; ?>
+  <a class="btn btn-primary btn-block" href="dashboard.php" style="margin-top:10px">Go to dashboard</a>
+
+<?php else: ?>
+  <h2 style="text-align:center">Couldn't complete</h2>
+  <div class="msg err"><?=e($result['error'] ?? 'Payment could not be processed. Please try again.')?></div>
+  <a class="btn btn-ghost btn-block" href="checkout.php">Try again</a>
+<?php endif; ?>
 </div></div></body></html>

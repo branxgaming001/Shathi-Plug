@@ -9,6 +9,7 @@ function plans_all(bool $activeOnly=true): array {
 }
 function plan_by_code(string $code): ?array { $st=pdo()->prepare("SELECT * FROM plans WHERE code=?"); $st->execute([$code]); return $st->fetch() ?: null; }
 function plan_by_id(int $id): ?array { $st=pdo()->prepare("SELECT * FROM plans WHERE id=?"); $st->execute([$id]); return $st->fetch() ?: null; }
+function payment_by_order_id(string $orderId): ?array { $st=pdo()->prepare("SELECT * FROM payments WHERE gateway_order_id=?"); $st->execute([$orderId]); return $st->fetch() ?: null; }
 
 function payment_mode(): string { return (cfg('RAZORPAY_KEY_ID') && cfg('RAZORPAY_KEY_SECRET')) ? 'razorpay' : 'test'; }
 
@@ -16,21 +17,27 @@ function payment_mode(): string { return (cfg('RAZORPAY_KEY_ID') && cfg('RAZORPA
  * Create a payment intent. Amount is ALWAYS taken from the plan server-side
  * (never trusted from the client). Idempotency key prevents duplicate issues.
  */
-function payment_create(int $userId, array $plan): array {
+function payment_create(int $userId, array $plan, ?int $renewLicenseId=null): array {
     $db = pdo();
     $amount = (int)$plan['price_inr'];
     $idem = 'pay_' . $userId . '_' . $plan['id'] . '_' . bin2hex(random_bytes(6));
     $mode = payment_mode();
-    $orderId = null;
-    if ($mode === 'razorpay') {
-        $order = razorpay_create_order($amount * 100, $idem); // paise
-        $orderId = $order['id'] ?? null;
-    }
-    $db->prepare("INSERT INTO payments(user_id,plan_id,amount_inr,gateway,gateway_order_id,idempotency_key) VALUES(?,?,?,?,?,?)")
-       ->execute([$userId,(int)$plan['id'],$amount,$mode,$orderId,$idem]);
+    // Insert the payment row FIRST so callback + webhook can always reconcile by order id.
+    $db->prepare("INSERT INTO payments(user_id,plan_id,amount_inr,gateway,idempotency_key,renew_license_id) VALUES(?,?,?,?,?,?)")
+       ->execute([$userId,(int)$plan['id'],$amount,$mode,$idem,$renewLicenseId]);
     $pid = (int)$db->lastInsertId();
+    $orderId = null; $orderErr = null;
+    if ($mode === 'razorpay' && $amount > 0) {
+        $order = razorpay_create_order($amount * 100, $idem, ['payment_id'=>(string)$pid,'plan'=>(string)$plan['code'],'user_id'=>(string)$userId]); // paise
+        $orderId = $order['id'] ?? null;
+        if ($orderId) {
+            $db->prepare("UPDATE payments SET gateway_order_id=? WHERE id=?")->execute([$orderId,$pid]);
+        } else {
+            $orderErr = $order['error']['description'] ?? 'order_create_failed';
+        }
+    }
     audit('payment_created', ['payment_id'=>$pid,'plan'=>$plan['code'],'amount'=>$amount,'mode'=>$mode]);
-    return ['payment_id'=>$pid,'mode'=>$mode,'amount'=>$amount,'order_id'=>$orderId,'idem'=>$idem];
+    return ['payment_id'=>$pid,'mode'=>$mode,'amount'=>$amount,'order_id'=>$orderId,'idem'=>$idem,'error'=>$orderErr];
 }
 
 /** Mark a payment paid + issue license. Idempotent (safe to call twice). */
@@ -95,16 +102,20 @@ function fulfill_payment(int $paymentId, ?int $renewLicenseId=null, ?string $gpi
 }
 
 /* -------- Razorpay (ready; used only when keys configured) -------- */
-function razorpay_create_order(int $amountPaise, string $receipt): array {
+function razorpay_create_order(int $amountPaise, string $receipt, array $notes=[]): array {
     $kid=cfg('RAZORPAY_KEY_ID'); $ks=cfg('RAZORPAY_KEY_SECRET');
+    $payload=['amount'=>$amountPaise,'currency'=>'INR','receipt'=>$receipt,'payment_capture'=>1];
+    if ($notes) $payload['notes']=$notes;
     $ch=curl_init('https://api.razorpay.com/v1/orders');
     curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_POST=>true,
         CURLOPT_USERPWD=>$kid.':'.$ks,
         CURLOPT_HTTPHEADER=>['Content-Type: application/json'],
-        CURLOPT_POSTFIELDS=>json_encode(['amount'=>$amountPaise,'currency'=>'INR','receipt'=>$receipt,'payment_capture'=>1]),
+        CURLOPT_POSTFIELDS=>json_encode($payload),
         CURLOPT_TIMEOUT=>25]);
-    $res=curl_exec($ch); curl_close($ch);
-    return json_decode((string)$res,true) ?: [];
+    $res=curl_exec($ch); $err=curl_error($ch); curl_close($ch);
+    $j=json_decode((string)$res,true);
+    if (!is_array($j)) return ['error'=>['description'=>($err !== '' ? $err : 'invalid_response')]];
+    return $j;
 }
 function razorpay_verify_signature(string $orderId, string $paymentId, string $signature): bool {
     $ks=cfg('RAZORPAY_KEY_SECRET'); if(!$ks) return false;
