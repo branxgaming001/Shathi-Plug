@@ -42,7 +42,7 @@ $css = '.cwrap{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:s
      . '.cinfo .row{display:flex;gap:12px;align-items:flex-start;margin:14px 0}.cinfo .ic{font-size:20px}';
 page_head([
   'title' => 'Contact Saathi — Support & Sales',
-  'desc'  => 'Get in touch with the Saathi team at RAI Labs Pvt. Ltd. Questions about features, pricing or setup? Send us a message and we\'ll reply within 1 business day.',
+  'desc'  => 'Get in touch with the Saathi team at NEER Media. Questions about features, pricing or setup? Send us a message and we\'ll reply within 1 business day.',
   'slug'  => 'contact.php',
   'extra_css' => $css,
 ]);
@@ -72,7 +72,7 @@ site_nav('contact');
   </div>
   <div class="cinfo">
     <h3 style="margin-top:0">Other ways to reach us</h3>
-    <div class="row"><span class="ic">🏢</span><div><strong>RAI Labs Pvt. Ltd.</strong><br><span class="small" style="color:var(--ink2)">Maker of Saathi · <a href="https://railabs.in" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">railabs.in ↗</a></span></div></div>
+    <div class="row"><span class="ic">🏢</span><div><strong>NEER Media</strong><br><span class="small" style="color:var(--ink2)">Maker of Saathi · <a href="https://neermedia.com" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">neermedia.com ↗</a></span></div></div>
     <div class="row"><span class="ic">📚</span><div><strong>Self-serve help</strong><br><span class="small" style="color:var(--ink2)">Most setup questions are answered in our <a href="docs.php" style="color:var(--v);font-weight:600">Docs &amp; Help center</a>.</span></div></div>
     <div class="row"><span class="ic">💬</span><div><strong>Try the live bot</strong><br><span class="small" style="color:var(--ink2)">Ask Saathi itself on our <a href="index.php#top" style="color:var(--v);font-weight:600">home page</a>.</span></div></div>
     <div class="row"><span class="ic">⏱️</span><div><strong>Response time</strong><br><span class="small" style="color:var(--ink2)">Within 1 business day, Mon–Sat.</span></div></div>

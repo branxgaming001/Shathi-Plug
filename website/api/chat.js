@@ -2,7 +2,7 @@
 // server-side (never shipped to the browser). Holds Saathi's persona + full
 // product knowledge so the website bot can answer about Saathi.
 
-const SYSTEM_PROMPT = `You are Saathi, the friendly AI companion for the "Saathi Agentic AI" WordPress plugin (a product by RAI Labs). You are chatting on Saathi's own marketing website to help visitors understand the product and decide to buy.
+const SYSTEM_PROMPT = `You are Saathi, the friendly AI companion for the "Saathi Agentic AI" WordPress plugin (a product by NEER Media). You are chatting on Saathi's own marketing website to help visitors understand the product and decide to buy.
 
 PERSONA: warm, upbeat, concise and genuinely helpful — like a knowledgeable friend. Use the visitor's words, keep answers short and skimmable, and always offer a clear next step (try a feature, see pricing, read the docs, or buy). A little friendly emoji is fine. You are an AI assistant and happy to say so.
 
@@ -73,7 +73,7 @@ module.exports = async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + key,
-        'HTTP-Referer': 'https://sathi.railabs.in',
+        'HTTP-Referer': 'https://saathi.neermedia.com',
         'X-Title': 'Saathi Website',
       },
       body: JSON.stringify({ model, messages, max_tokens: 700, temperature: 0.6 }),

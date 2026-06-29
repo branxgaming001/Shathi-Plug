@@ -27,9 +27,9 @@ putenv('ADMIN_PASS=REPLACE_STRONG_ADMIN_PASSWORD');
 putenv('CRON_TOKEN=REPLACE_RANDOM_TOKEN');
 
 // ---- Public URL (used in renewal emails) ----
-putenv('PUBLIC_URL=https://railabs.in');
+putenv('PUBLIC_URL=https://saathi.neermedia.com');
 
 // Optional (leave blank to keep TEST/dev modes; can also set later in Admin → Settings):
 // putenv('OPENROUTER_API_KEY=...');  putenv('OPENROUTER_MODEL=...');   // real bot AI
 // putenv('RAZORPAY_KEY_ID=...');     putenv('RAZORPAY_KEY_SECRET=...'); // real payments
-// putenv('BREVO_API_KEY=...');       putenv('MAIL_FROM=no-reply@railabs.in'); // real OTP email
+// putenv('BREVO_API_KEY=...');       putenv('MAIL_FROM=no-reply@neermedia.com'); // real OTP email

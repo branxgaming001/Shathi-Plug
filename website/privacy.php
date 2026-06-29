@@ -4,7 +4,7 @@ $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Privacy Policy — Saathi',
-  'desc'  => 'How Saathi by RAI Labs Pvt. Ltd. collects, uses and protects your data, including account, profile and website-scan information.',
+  'desc'  => 'How Saathi by NEER Media collects, uses and protects your data, including account, profile and website-scan information.',
   'slug'  => 'privacy.php',
 ]);
 site_nav('');
@@ -12,7 +12,7 @@ site_nav('');
 <section class="phero"><div class="wrap"><span class="eyebrow">Legal</span><h1>Privacy Policy</h1><p class="lead">How we handle your information at Saathi.</p></div></section>
 <section class="section"><div class="wrap"><div class="prose">
   <p class="upd">Last updated: <?=date('d M Y')?></p>
-  <p>This Privacy Policy explains how <?=rai_labs()?> ("RAI Labs", "we", "us") collects, uses and protects information when you use the Saathi website, dashboard and WordPress plugin (the "Service").</p>
+  <p>This Privacy Policy explains how <?=rai_labs()?> ("NEER Media", "we", "us") collects, uses and protects information when you use the Saathi website, dashboard and WordPress plugin (the "Service").</p>
 
   <h2>1. Information we collect</h2>
   <ul>

@@ -70,68 +70,7 @@ $navItems = [
   'help'      => ['Help & Support', 'M12 2a10 10 0 100 20 10 10 0 000-20zm0 15h.01M12 7a3 3 0 013 3c0 2-3 2-3 4'],
 ];
 
-function badge_class(int $days=null): string { if ($days===null) return 'g'; if ($days<0) return 'r'; if ($days<=7) return 'm'; return 'g'; }
-
-$css = <<<CSS
-*{box-sizing:border-box}
-.acc{display:flex;min-height:100vh;background:var(--bg,#f6f5fb)}
-.acc-side{width:248px;flex:0 0 248px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.acc-brand{display:flex;align-items:center;gap:9px;font-family:'Baloo 2';font-weight:800;font-size:21px;padding:18px 20px;border-bottom:1px solid var(--line)}
-.acc-brand img{width:30px;height:30px}
-.acc-nav{padding:12px 10px;flex:1;overflow:auto}
-.acc-nav a{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;color:var(--ink2,#4b4668);font-weight:600;font-size:14.5px;margin-bottom:3px;transition:.15s}
-.acc-nav a svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;flex:0 0 auto}
-.acc-nav a:hover{background:#f4f2fe;color:var(--v)}
-.acc-nav a.on{background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;box-shadow:0 8px 18px -10px var(--v)}
-.acc-user{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:10px}
-.acc-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--v),#7c3aed);color:#fff;display:grid;place-items:center;font-weight:800;font-family:'Baloo 2'}
-.acc-user .nm{font-weight:700;font-size:13.5px;line-height:1.1}
-.acc-user .pl{font-size:11.5px;color:var(--muted)}
-.acc-main{flex:1;min-width:0;display:flex;flex-direction:column}
-.acc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}
-.acc-top h1{font-family:'Baloo 2';font-size:22px;margin:0}
-.acc-body{padding:24px 28px;max-width:1080px;width:100%}
-.acc-banner{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:13px;padding:12px 16px;margin-bottom:18px;font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 30px -24px rgba(40,30,90,.5)}
-.card.span2{grid-column:span 2}
-@media(max-width:720px){.card.span2{grid-column:span 1}.acc-side{display:none}}
-.card h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 10px;font-family:'Plus Jakarta Sans';font-weight:700}
-.card .big{font-family:'Baloo 2';font-size:30px;font-weight:800;line-height:1}
-.card .sub{color:var(--muted);font-size:13px;margin-top:4px}
-.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.pill.g{background:#ecfdf3;color:#15803d}.pill.m{background:#fff7ed;color:#9a3412}.pill.r{background:#fef2f2;color:#b3261e}.pill.v{background:#efeafe;color:var(--v)}
-.keyrow{display:flex;align-items:center;gap:8px;background:#f6f5fb;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-family:monospace;font-size:14px}
-.keyrow button{border:none;background:none;cursor:pointer;color:var(--v);font-weight:700;font:inherit;font-size:12px}
-.barwrap{height:8px;background:#ece9fb;border-radius:99px;overflow:hidden;margin:8px 0 4px}
-.barwrap>i{display:block;height:100%;background:linear-gradient(90deg,var(--v),#FF6B5E)}
-.ck{list-style:none;padding:0;margin:6px 0 0}
-.ck li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px;color:var(--ink2)}
-.ck .dot{width:21px;height:21px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:0 0 auto}
-.ck .dot.y{background:#19C37D;color:#fff}.ck .dot.n{background:#ece9fb;color:#b3acd9}
-.plans3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-.plan{background:#fff;border:2px solid var(--line);border-radius:18px;padding:22px;position:relative;display:flex;flex-direction:column}
-.plan.cur{border-color:var(--v);box-shadow:0 0 0 3px rgba(109,93,251,.14)}
-.plan.pop{border-color:#FF6B5E}
-.plan h4{font-family:'Baloo 2';font-size:20px;margin:0 0 2px}
-.plan .amt{font-family:'Baloo 2';font-size:30px;font-weight:800;margin:6px 0}
-.plan .amt span{font-size:13px;color:var(--muted);font-weight:600}
-.plan ul{list-style:none;padding:0;margin:10px 0 16px;flex:1}
-.plan li{font-size:13.5px;color:var(--ink2);margin:7px 0;display:flex;gap:7px}
-.plan li svg{width:15px;height:15px;stroke:#15803d;fill:none;stroke-width:3;flex:0 0 auto;margin-top:2px}
-.curbadge{position:absolute;top:14px;right:14px}
-.tbl{width:100%;border-collapse:collapse}
-.tbl th,.tbl td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);font-size:14px}
-.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.subtabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px}
-.subtabs a{padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:14px}
-.subtabs a.on{color:var(--v);border-bottom-color:var(--v)}
-.sect-head{margin-bottom:18px}
-.sect-head h2{font-family:'Baloo 2';font-size:26px;margin:0}
-.sect-head p{color:var(--muted);margin:4px 0 0}
-.btn-sm{padding:9px 16px;font-size:13.5px}
-.empty{text-align:center;color:var(--muted);padding:30px;border:1px dashed var(--line);border-radius:14px}
-CSS;
+function badge_class(?int $days=null): string { if ($days===null) return 'g'; if ($days<0) return 'r'; if ($days<=7) return 'm'; return 'g'; }
 
 // ── Section renderers ───────────────────────────────────────────────────
 $check = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -190,13 +129,13 @@ if ($section === 'overview'):
     <div class="card">
       <h3>Need a hand?</h3>
       <div class="sub" style="margin-bottom:10px">Docs, setup help and support — we reply fast.</div>
-      <a class="btn btn-ghost btn-sm" href="dashboard.php?section=help">Help & support</a>
+      <a class="btn btn-ghost btn-sm" href="dashboard.php?section=help">Help &amp; support</a>
     </div>
   </div>
 <?php
 elseif ($section === 'plan'):
 ?>
-  <div class="sect-head"><h2>Plan & Billing</h2><p>Choose or upgrade your plan — changes apply to your account instantly.</p></div>
+  <div class="sect-head"><h2>Plan &amp; Billing</h2><p>Choose or upgrade your plan — changes apply to your account instantly.</p></div>
   <div class="card" style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><div style="font-weight:700;font-size:16px"><?=$activeLicense?('You\'re on the '.e($currentName).' plan'):'No active subscription'?></div>
     <div class="sub"><?php if($activeLicense){echo $renewal?('Renews '.date('d M Y',$renewal)):'Lifetime access';}else{echo 'Pick a plan below to get started — Free works too.';}?></div></div>
@@ -297,7 +236,7 @@ elseif ($section === 'settings'):
 <?php
 elseif ($section === 'help'):
 ?>
-  <div class="sect-head"><h2>Help & Support</h2><p>We're here to help you get the most from Saathi.</p></div>
+  <div class="sect-head"><h2>Help &amp; Support</h2><p>We're here to help you get the most from Saathi.</p></div>
   <div class="cards">
     <div class="card"><h3>System status</h3><div class="sub"><span class="pill g">● All systems operational</span></div></div>
     <div class="card"><h3>Documentation</h3><div class="sub" style="margin-bottom:10px">Setup guides, FAQs and how-tos.</div><a class="btn btn-ghost btn-sm" href="docs.php">Open docs</a></div>
@@ -312,7 +251,7 @@ $content = ob_get_clean();
 <title>Dashboard — Saathi</title><link rel="icon" href="<?=$IMG['logo']?>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
-<link rel="stylesheet" href="assets/css/acc.css?v=4">
+<link rel="stylesheet" href="assets/css/acc.css?v=6">
 </head><body>
 <div class="acc">
   <aside class="acc-side">

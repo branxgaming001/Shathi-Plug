@@ -1,16 +1,16 @@
 <?php
 /**
  * Shared marketing layout: SEO <head>, sticky nav, footer.
- * Keeps every page consistent and the RAI Labs Pvt. Ltd. rebrand + links in one place.
+ * Keeps every page consistent and the NEER Media branding + links in one place.
  */
 declare(strict_types=1);
 
-/** Brand/company name as a new-tab link to railabs.in. */
+/** Brand/company name as a new-tab link to neermedia.com. */
 function rai_labs(): string {
-    return '<a href="https://railabs.in" target="_blank" rel="noopener">RAI Labs Pvt. Ltd.</a>';
+    return '<a href="https://neermedia.com" target="_blank" rel="noopener">NEER Media</a>';
 }
 function site_base(): string {
-    return rtrim((string)(getenv('PUBLIC_URL') ?: ('https://' . ($_SERVER['HTTP_HOST'] ?? 'saathi.railabs.in'))), '/');
+    return rtrim((string)(getenv('PUBLIC_URL') ?: ('https://' . ($_SERVER['HTTP_HOST'] ?? 'saathi.neermedia.com'))), '/');
 }
 
 /**
@@ -40,8 +40,8 @@ function page_head(array $o): void {
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <script type="application/ld+json"><?php echo json_encode([
-    '@context'=>'https://schema.org','@type'=>'Organization','name'=>'RAI Labs Pvt. Ltd.',
-    'url'=>'https://railabs.in','logo'=>$ogimg,'sameAs'=>['https://railabs.in'],
+    '@context'=>'https://schema.org','@type'=>'Organization','name'=>'NEER Media',
+    'url'=>'https://neermedia.com','logo'=>$ogimg,'sameAs'=>['https://neermedia.com'],
     'brand'=>['@type'=>'Brand','name'=>'Saathi']
 ], JSON_UNESCAPED_SLASHES); ?></script>
 <?php if (!empty($o['schema'])): ?><script type="application/ld+json"><?=$o['schema']?></script><?php endif; ?>
@@ -107,7 +107,7 @@ function site_footer(): void {
     <p style="color:#a99fe0;font-size:14px;margin-top:12px;max-width:300px">The agentic AI chatbot that supports and sells for your WordPress &amp; WooCommerce website. A product by <?=rai_labs()?>.</p>
   </div>
   <div><h5>Product</h5><a href="features.php">Features</a><a href="pricing.php">Pricing</a><a href="docs.php">Docs &amp; Help</a><a href="index.php#top">Live demo</a></div>
-  <div><h5>Company</h5><a href="about.php">About</a><a href="contact.php">Contact</a><a href="https://railabs.in" target="_blank" rel="noopener">RAI Labs Pvt. Ltd. ↗</a></div>
+  <div><h5>Company</h5><a href="about.php">About</a><a href="contact.php">Contact</a><a href="https://neermedia.com" target="_blank" rel="noopener">NEER Media ↗</a></div>
   <div><h5>Legal</h5><a href="privacy.php">Privacy</a><a href="terms.php">Terms</a><a href="refund.php">Refund</a></div>
 </div><div class="foot-bottom">© <?=$year?> Saathi · a product by <?=rai_labs()?>. All rights reserved.</div></footer>
 <?php }

@@ -4,7 +4,7 @@ $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Refund & Cancellation Policy — Saathi',
-  'desc'  => 'Saathi\'s refund and cancellation policy by RAI Labs Pvt. Ltd. — eligibility, the refund window, and how to request a refund.',
+  'desc'  => 'Saathi\'s refund and cancellation policy by NEER Media — eligibility, the refund window, and how to request a refund.',
   'slug'  => 'refund.php',
 ]);
 site_nav('');

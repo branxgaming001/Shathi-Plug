@@ -8,7 +8,7 @@ $schema = json_encode([
   'name' => 'Saathi', 'applicationCategory' => 'BusinessApplication',
   'operatingSystem' => 'WordPress', 'description' => 'Agentic AI chatbot for WordPress & WooCommerce that supports customers and sells products inside the chat.',
   'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR'],
-  'publisher' => ['@type' => 'Organization', 'name' => 'RAI Labs Pvt. Ltd.', 'url' => 'https://railabs.in'],
+  'publisher' => ['@type' => 'Organization', 'name' => 'NEER Media', 'url' => 'https://neermedia.com'],
 ], JSON_UNESCAPED_SLASHES);
 
 page_head([

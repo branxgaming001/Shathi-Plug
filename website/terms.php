@@ -4,7 +4,7 @@ $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Terms of Service — Saathi',
-  'desc'  => 'The terms for using Saathi by RAI Labs Pvt. Ltd. — plans, licenses, acceptable use, and liability.',
+  'desc'  => 'The terms for using Saathi by NEER Media — plans, licenses, acceptable use, and liability.',
   'slug'  => 'terms.php',
 ]);
 site_nav('');
@@ -34,13 +34,13 @@ site_nav('');
   </ul>
 
   <h2>6. Intellectual property</h2>
-  <p>Saathi, its branding and code are owned by RAI Labs Pvt. Ltd. Your website content remains yours. You grant us the limited rights needed to operate the Service for you.</p>
+  <p>Saathi, its branding and code are owned by NEER Media. Your website content remains yours. You grant us the limited rights needed to operate the Service for you.</p>
 
   <h2>7. Disclaimers</h2>
   <p>The Service is provided "as is". AI responses may be imperfect; you are responsible for reviewing how the bot is configured and what it is allowed to do on your site.</p>
 
   <h2>8. Limitation of liability</h2>
-  <p>To the maximum extent permitted by law, RAI Labs Pvt. Ltd. is not liable for indirect or consequential damages, and total liability is limited to the amount you paid for the Service in the preceding 12 months.</p>
+  <p>To the maximum extent permitted by law, NEER Media is not liable for indirect or consequential damages, and total liability is limited to the amount you paid for the Service in the preceding 12 months.</p>
 
   <h2>9. Termination</h2>
   <p>You may stop using the Service anytime. We may suspend or terminate accounts that violate these Terms.</p>

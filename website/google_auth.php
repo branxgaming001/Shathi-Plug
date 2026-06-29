@@ -10,7 +10,7 @@ if (!empty($_GET['next'])) $_SESSION['next'] = $_GET['next'];
 $state = bin2hex(random_bytes(16));
 $_SESSION['g_state'] = $state;
 
-$redirect = (string) cfg('GOOGLE_REDIRECT', rtrim((string) cfg('PUBLIC_URL', 'https://saathi.railabs.in'), '/') . '/google_callback.php');
+$redirect = (string) cfg('GOOGLE_REDIRECT', rtrim((string) cfg('PUBLIC_URL', 'https://saathi.neermedia.com'), '/') . '/google_callback.php');
 
 $q = http_build_query([
     'client_id'              => $cid,

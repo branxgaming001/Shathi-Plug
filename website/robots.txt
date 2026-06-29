@@ -9,4 +9,4 @@ Disallow: /renew.php
 Disallow: /verify.php
 Disallow: /google_callback.php
 
-Sitemap: https://saathi.railabs.in/sitemap.xml
+Sitemap: https://saathi.neermedia.com/sitemap.xml

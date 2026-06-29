@@ -40,7 +40,7 @@ if ($code === '' || $state === '' || $want === '' || !hash_equals($want, $state)
 
 $cid  = (string) cfg('GOOGLE_CLIENT_ID', '');
 $csec = (string) cfg('GOOGLE_CLIENT_SECRET', '');
-$redirect = (string) cfg('GOOGLE_REDIRECT', rtrim((string) cfg('PUBLIC_URL', 'https://saathi.railabs.in'), '/') . '/google_callback.php');
+$redirect = (string) cfg('GOOGLE_REDIRECT', rtrim((string) cfg('PUBLIC_URL', 'https://saathi.neermedia.com'), '/') . '/google_callback.php');
 if ($cid === '' || $csec === '') g_fail('not_configured');
 
 $resp = g_post('https://oauth2.googleapis.com/token', [
