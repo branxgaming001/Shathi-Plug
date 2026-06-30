@@ -1,0 +1,1204 @@
+/* ── Persona Studio — CSS ──────────────────────────────────────────── */
+/* Uses sathi-* CSS custom properties defined in the admin shell.        */
+
+.sathi-ps-root {
+  --ps-bg: #ffffff;
+  --ps-border: #e5e7eb;
+  --ps-border-light: #f3f4f6;
+  --ps-text: #1f2937;
+  --ps-text-secondary: #6b7280;
+  --ps-text-muted: #9ca3af;
+  --ps-accent: var(--sathi-600, #7c3aed);
+  --ps-accent-light: var(--sathi-50, #f5f3ff);
+  --ps-danger: #ef4444;
+  --ps-danger-light: #fef2f2;
+  --ps-success: #10b981;
+  --ps-success-light: #ecfdf5;
+  --ps-warning: #f59e0b;
+  --ps-radius: 12px;
+  --ps-radius-sm: 8px;
+  --ps-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ps-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ps-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --ps-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--ps-text);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+
+.sathi-ps-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.sathi-ps-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ps-text);
+  margin: 0 0 4px;
+  padding: 0;
+  line-height: 1.3;
+}
+
+.sathi-ps-subtitle {
+  font-size: 0.8125rem;
+  color: var(--ps-text-secondary);
+  margin: 0;
+  padding: 0;
+}
+
+.sathi-ps-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Stats Row ───────────────────────────────────────────────────────── */
+
+.sathi-ps-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sathi-ps-stat {
+  padding: 16px;
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+  border-left-width: 3px;
+  border-left-color: var(--ps-accent);
+  transition: box-shadow var(--ps-transition);
+}
+
+.sathi-ps-stat:hover {
+  box-shadow: var(--ps-shadow);
+}
+
+.sathi-ps-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ps-text);
+  line-height: 1.2;
+}
+
+.sathi-ps-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ps-text-secondary);
+  margin-top: 2px;
+}
+
+/* ── Card Grid ───────────────────────────────────────────────────────── */
+
+.sathi-ps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .sathi-ps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sathi-ps-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .sathi-ps-grid {
+    grid-template-columns: 1fr;
+  }
+  .sathi-ps-stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Persona Card ────────────────────────────────────────────────────── */
+
+.sathi-ps-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+  transition: border-color var(--ps-transition), box-shadow var(--ps-transition), transform var(--ps-transition), opacity var(--ps-transition);
+  overflow: hidden;
+}
+
+.sathi-ps-card:hover {
+  border-color: var(--ps-accent);
+  box-shadow: var(--ps-shadow);
+  transform: translateY(-1px);
+}
+
+.sathi-ps-card--selected {
+  border-color: var(--ps-accent);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.13);
+}
+
+.sathi-ps-card--highlighted {
+  opacity: 0.55;
+}
+
+.sathi-ps-card--highlighted:hover {
+  opacity: 0.85;
+}
+
+.sathi-ps-card--skeleton {
+  pointer-events: none;
+}
+
+/* ── Card: Main clickable area ──────────────────────────────────────── */
+
+.sathi-ps-card-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  transition: background var(--ps-transition);
+}
+
+.sathi-ps-card-main:hover {
+  background: var(--sathi-50, #f5f3ff);
+}
+
+.sathi-ps-card--selected .sathi-ps-card-main {
+  background: var(--sathi-50, #f5f3ff);
+}
+
+/* ── Card: Avatar ───────────────────────────────────────────────────── */
+
+.sathi-ps-card-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--ps-transition);
+}
+
+.sathi-ps-card:hover .sathi-ps-card-avatar {
+  transform: scale(1.08);
+}
+
+.sathi-ps-card-avatar-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* ── Card: Body ─────────────────────────────────────────────────────── */
+
+.sathi-ps-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sathi-ps-card-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ps-text);
+  margin: 0 0 2px;
+  flex-wrap: wrap;
+}
+
+.sathi-ps-card-role {
+  font-size: 0.75rem;
+  color: var(--ps-text-secondary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sathi-ps-card-tone {
+  font-size: 0.6875rem;
+  color: var(--ps-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+/* ── Badges ─────────────────────────────────────────────────────────── */
+
+.sathi-ps-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.sathi-ps-badge--custom {
+  background: var(--sathi-100, #ede9fe);
+  color: var(--sathi-700, #6d28d9);
+}
+
+/* ── Card: Color Swatch ─────────────────────────────────────────────── */
+
+.sathi-ps-card-swatch {
+  width: 10px;
+  height: 36px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  align-self: center;
+  opacity: 0.85;
+  transition: opacity var(--ps-transition);
+}
+
+.sathi-ps-card:hover .sathi-ps-card-swatch {
+  opacity: 1;
+}
+
+/* ── Card: Actions ──────────────────────────────────────────────────── */
+
+.sathi-ps-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px 12px;
+}
+
+.sathi-ps-card-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ps-text-muted);
+  cursor: pointer;
+  transition: all var(--ps-transition);
+}
+
+.sathi-ps-card-action-btn:hover {
+  background: var(--ps-danger-light);
+  color: var(--ps-danger);
+  border-color: var(--ps-danger);
+}
+
+/* ── Create Ghost Card ───────────────────────────────────────────────── */
+
+.sathi-ps-card--create {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  background: transparent;
+  border: 2px dashed var(--ps-border);
+  border-radius: var(--ps-radius);
+  cursor: pointer;
+  color: var(--ps-text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all var(--ps-transition);
+  min-height: 130px;
+}
+
+.sathi-ps-card--create:hover {
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+  background: var(--ps-accent-light);
+  box-shadow: var(--ps-shadow);
+}
+
+.sathi-ps-card--create svg {
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity var(--ps-transition);
+}
+
+.sathi-ps-card--create:hover svg {
+  opacity: 1;
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────── */
+
+.sathi-ps-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+}
+
+.sathi-ps-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.sathi-ps-empty h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ps-text);
+}
+
+.sathi-ps-empty p {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  color: var(--ps-text-secondary);
+  max-width: 320px;
+}
+
+/* ── Editor Panel ────────────────────────────────────────────────────── */
+
+.sathi-ps-editor {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 400ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              margin 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0;
+}
+
+.sathi-ps-editor--open {
+  max-height: 4000px;
+  opacity: 1;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.sathi-ps-editor-inner {
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+  padding: 24px;
+  box-shadow: var(--ps-shadow-lg);
+}
+
+.sathi-ps-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ps-border-light);
+}
+
+.sathi-ps-editor-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ps-text);
+}
+
+.sathi-ps-editor-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--ps-border);
+  background: var(--ps-bg);
+  color: var(--ps-text-secondary);
+  cursor: pointer;
+  transition: all var(--ps-transition);
+}
+
+.sathi-ps-editor-close:hover {
+  background: var(--sathi-50, #f5f3ff);
+  color: var(--ps-accent);
+  border-color: var(--ps-accent);
+}
+
+/* ── Editor Form Layout ─────────────────────────────────────────────── */
+
+.sathi-ps-editor-form {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+}
+
+.sathi-ps-editor-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sathi-ps-editor-col--side {
+  gap: 20px;
+}
+
+@media (max-width: 750px) {
+  .sathi-ps-editor-form {
+    grid-template-columns: 1fr;
+  }
+
+  .sathi-ps-editor-col--side {
+    order: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+/* ── Form Fields ─────────────────────────────────────────────────────── */
+
+.sathi-ps-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sathi-ps-field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ps-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sathi-ps-field-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--ps-accent);
+  background: var(--ps-accent-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sathi-ps-field-hint {
+  font-size: 0.6875rem;
+  color: var(--ps-text-muted);
+  line-height: 1.4;
+}
+
+.sathi-ps-input,
+.sathi-ps-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--ps-text);
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius-sm);
+  transition: border-color var(--ps-transition), box-shadow var(--ps-transition);
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.sathi-ps-input:focus,
+.sathi-ps-textarea:focus {
+  outline: none;
+  border-color: var(--ps-accent);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.sathi-ps-input::placeholder,
+.sathi-ps-textarea::placeholder {
+  color: var(--ps-text-muted);
+}
+
+.sathi-ps-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.sathi-ps-textarea--mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.75rem;
+}
+
+/* ── Emoji Picker ────────────────────────────────────────────────────── */
+
+.sathi-ps-avatar-picker {
+  position: relative;
+}
+
+.sathi-ps-avatar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 2px solid transparent;
+  border-radius: var(--ps-radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all var(--ps-transition);
+}
+
+.sathi-ps-avatar-btn:hover {
+  transform: scale(1.04);
+  box-shadow: var(--ps-shadow);
+}
+
+.sathi-ps-avatar-btn-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.sathi-ps-avatar-btn-label {
+  opacity: 0.75;
+  font-size: 0.75rem;
+}
+
+.sathi-ps-emoji-picker {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  width: 340px;
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius);
+  box-shadow: var(--ps-shadow-lg);
+  animation: psFadeSlideIn 150ms ease-out;
+}
+
+@keyframes psFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sathi-ps-emoji-tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--ps-border-light);
+  padding: 4px 6px;
+  gap: 2px;
+}
+
+.sathi-ps-emoji-tab {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--ps-transition);
+}
+
+.sathi-ps-emoji-tab:hover {
+  background: var(--ps-accent-light);
+}
+
+.sathi-ps-emoji-tab--active {
+  background: var(--ps-accent-light);
+  box-shadow: inset 0 0 0 2px var(--ps-accent);
+}
+
+.sathi-ps-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sathi-ps-emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  font-size: 1.15rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--ps-transition), transform var(--ps-transition);
+}
+
+.sathi-ps-emoji-item:hover {
+  background: var(--ps-accent-light);
+  transform: scale(1.3);
+}
+
+.sathi-ps-emoji-label {
+  padding: 4px 10px 8px;
+  font-size: 0.6875rem;
+  color: var(--ps-text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* ── Color Picker ────────────────────────────────────────────────────── */
+
+.sathi-ps-color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sathi-ps-color-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sathi-ps-color-input {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--ps-border);
+  border-radius: var(--ps-radius-sm);
+  padding: 3px;
+  cursor: pointer;
+  background: none;
+  transition: border-color var(--ps-transition);
+}
+
+.sathi-ps-color-input:hover,
+.sathi-ps-color-input:focus {
+  border-color: var(--ps-accent);
+}
+
+.sathi-ps-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.sathi-ps-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.sathi-ps-color-hex {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+  color: var(--ps-text-secondary);
+  font-weight: 500;
+}
+
+.sathi-ps-color-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sathi-ps-color-preset {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--ps-transition);
+  padding: 0;
+  box-shadow: var(--ps-shadow-sm);
+}
+
+.sathi-ps-color-preset:hover {
+  transform: scale(1.2);
+  box-shadow: var(--ps-shadow);
+}
+
+.sathi-ps-color-preset--active {
+  border-color: var(--ps-text);
+  box-shadow: 0 0 0 2px var(--ps-bg), 0 0 0 4px var(--ps-text);
+  transform: scale(1.15);
+}
+
+/* ── Card Mini Preview ───────────────────────────────────────────────── */
+
+.sathi-ps-card-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--ps-accent-light);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius-sm);
+  border-left-width: 3px;
+}
+
+.sathi-ps-card-mini-avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.sathi-ps-card-mini-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ps-text);
+}
+
+.sathi-ps-card-mini-role {
+  font-size: 0.6875rem;
+  color: var(--ps-text-secondary);
+}
+
+.sathi-ps-card-mini-tone {
+  font-size: 0.625rem;
+  color: var(--ps-text-muted);
+  font-style: italic;
+}
+
+/* ── Preview Panel ───────────────────────────────────────────────────── */
+
+.sathi-ps-editor-preview {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ps-border-light);
+}
+
+.sathi-ps-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.sathi-ps-preview-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ps-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sathi-ps-preview-hint {
+  font-size: 0.6875rem;
+  color: var(--ps-text-muted);
+}
+
+.sathi-ps-preview-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sathi-ps-preview-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.sathi-ps-preview-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ps-text);
+}
+
+.sathi-ps-preview-role {
+  font-size: 0.75rem;
+  color: var(--ps-text-secondary);
+}
+
+.sathi-ps-preview-bubble {
+  padding: 14px 16px;
+  background: var(--sathi-50, #f5f3ff);
+  border: 1px solid var(--ps-border);
+  border-left-width: 4px;
+  border-radius: var(--ps-radius-sm);
+  border-top-left-radius: 2px;
+  margin-bottom: 12px;
+}
+
+.sathi-ps-preview-bubble-text {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--ps-text);
+}
+
+.sathi-ps-preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--ps-bg);
+  border: 1px solid var(--ps-border-light);
+  border-radius: var(--ps-radius-sm);
+  margin-bottom: 12px;
+}
+
+.sathi-ps-preview-meta-item {
+  font-size: 0.75rem;
+  color: var(--ps-text-secondary);
+  line-height: 1.5;
+}
+
+.sathi-ps-preview-meta-item strong {
+  color: var(--ps-text);
+  font-weight: 600;
+}
+
+.sathi-ps-preview-system {
+  padding: 10px 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--ps-radius-sm);
+}
+
+.sathi-ps-preview-system-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.sathi-ps-preview-system-text {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: #78350f;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* ── Editor Footer ───────────────────────────────────────────────────── */
+
+.sathi-ps-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ps-border-light);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+
+.sathi-ps-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--ps-radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--ps-transition);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.sathi-ps-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sathi-ps-btn--primary {
+  background: var(--ps-accent);
+  color: #ffffff;
+  border-color: var(--ps-accent);
+}
+
+.sathi-ps-btn--primary:hover:not(:disabled) {
+  background: var(--sathi-700, #6d28d9);
+  border-color: var(--sathi-700, #6d28d9);
+  box-shadow: var(--ps-shadow);
+}
+
+.sathi-ps-btn--ghost {
+  background: var(--ps-bg);
+  color: var(--ps-text-secondary);
+  border-color: var(--ps-border);
+}
+
+.sathi-ps-btn--ghost:hover:not(:disabled) {
+  background: var(--sathi-50, #f5f3ff);
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+}
+
+.sathi-ps-btn--active {
+  background: var(--ps-accent-light);
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+}
+
+.sathi-ps-btn--danger {
+  background: var(--ps-danger);
+  color: #ffffff;
+  border-color: var(--ps-danger);
+}
+
+.sathi-ps-btn--danger:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: var(--ps-shadow);
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────── */
+
+.sathi-ps-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--ps-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  animation: psFadeSlideIn 200ms ease-out;
+}
+
+.sathi-ps-toast--success {
+  background: var(--ps-success-light);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.sathi-ps-toast--error {
+  background: var(--ps-danger-light);
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.sathi-ps-toast-dismiss {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 0 0 12px;
+  line-height: 1;
+}
+
+.sathi-ps-toast-dismiss:hover {
+  opacity: 1;
+}
+
+/* ── Confirmation Dialog ─────────────────────────────────────────────── */
+
+.sathi-ps-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  animation: psFadeIn 150ms ease-out;
+  padding: 24px;
+}
+
+@keyframes psFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sathi-ps-dialog {
+  background: var(--ps-bg);
+  border-radius: var(--ps-radius);
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: psDialogSlide 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes psDialogSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.sathi-ps-dialog-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ps-text);
+}
+
+.sathi-ps-dialog-message {
+  margin: 0 0 20px;
+  font-size: 0.8125rem;
+  color: var(--ps-text-secondary);
+  line-height: 1.5;
+}
+
+.sathi-ps-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────────── */
+
+.sathi-ps-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: psSpin 500ms linear infinite;
+}
+
+@keyframes psSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Error State ─────────────────────────────────────────────────────── */
+
+.sathi-ps-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 12px;
+}
+
+.sathi-ps-error svg {
+  color: var(--ps-danger);
+  opacity: 0.7;
+}
+
+.sathi-ps-error p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ps-text-secondary);
+  max-width: 400px;
+}
+
+/* ── Skeleton Loading ────────────────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: psShimmer 1.5s infinite ease-in-out;
+}
+
+@keyframes psShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sathi-ps-card-avatar.skeleton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skeleton-line {
+  height: 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: psShimmer 1.5s infinite ease-in-out;
+}
+
+.skeleton-line--name {
+  width: 70%;
+  height: 13px;
+}
+
+.skeleton-line--role {
+  width: 50%;
+}
+
+.skeleton-line--tone {
+  width: 60%;
+  height: 9px;
+}
+
+/* ── Reduced Motion ──────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .sathi-ps-editor,
+  .sathi-ps-emoji-picker,
+  .sathi-ps-overlay,
+  .sathi-ps-dialog,
+  .sathi-ps-toast,
+  .sathi-ps-card,
+  .sathi-ps-spinner,
+  .skeleton,
+  .skeleton-line {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .sathi-ps-editor--open {
+    max-height: none;
+    opacity: 1;
+    overflow: visible;
+  }
+}

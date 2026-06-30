@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         beStrictAboutCoverageMetadata="true">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <php>
+        <const name="WP_DEBUG" value="true"/>
+        <const name="SATHI_VERSION" value="1.0.0"/>
+        <const name="SATHI_PATH" value="./"/>
+        <const name="SATHI_URL" value="http://example.com/wp-content/plugins/sathi/"/>
+        <const name="SATHI_SRC" value="./src/"/>
+        <const name="SATHI_DOMAIN" value="sathi-agentic-ai"/>
+        <const name="SATHI_PREFIX" value="sathi"/>
+        <const name="SATHI_DEFAULT_TIMEOUT" value="300"/>
+        <const name="SATHI_STREAM_CHUNK_SIZE" value="1024"/>
+        <const name="SATHI_MAX_HISTORY_LENGTH" value="50"/>
+    </php>
+</phpunit>

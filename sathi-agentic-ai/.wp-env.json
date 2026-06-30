@@ -1,0 +1,18 @@
+{
+  "core": "WordPress/WordPress#7.0-branch",
+  "phpVersion": "8.1",
+  "plugins": [".", "https://downloads.wordpress.org/plugin/wordpress-importer.latest-stable.zip"],
+  "themes": [],
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_LOG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "SCRIPT_DEBUG": true
+  },
+  "mappings": {},
+  "port": 8888,
+  "testsPort": 8889,
+  "lifecycleScripts": {
+    "afterStart": "wp plugin activate sathi-agentic-ai"
+  }
+}
