@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
@@ -17,7 +17,7 @@ $faqSchema = json_encode([
 page_head([
   'title' => 'Saathi Docs — Install, Setup & License Help',
   'desc'  => 'Step-by-step help for Saathi: install the plugin, connect an AI provider, scan your website, customize the widget, and activate your license.',
-  'slug'  => 'docs.php',
+  'slug' => 'docs',
   'schema'=> $faqSchema,
 ]);
 site_nav('docs');
@@ -51,9 +51,9 @@ site_nav('docs');
     <div class="docblock" id="place"><h3>5 · Placement rules</h3>
       <p>Choose where the launcher appears (corner, offset above mobile nav bars) and on which pages it shows or hides. Visitors can drag and resize the window; you set the defaults.</p></div>
     <div class="docblock" id="license"><h3>6 · Activate your license</h3>
-      <p>Copy your license key from your <a href="dashboard.php">Saathi dashboard</a>, then paste it in <code>Saathi AI → License</code> and click <strong>Activate</strong>. One key activates the number of domains your plan allows.</p></div>
+      <p>Copy your license key from your <a href="/dashboard">Saathi dashboard</a>, then paste it in <code>Saathi AI → License</code> and click <strong>Activate</strong>. One key activates the number of domains your plan allows.</p></div>
     <div class="docblock" id="trouble"><h3>Troubleshooting</h3>
-      <p><strong>Bot not replying?</strong> Re-check your AI key in AI Providers and click Test connection. <strong>Answers seem generic?</strong> Run the website scan again. <strong>Widget not visible?</strong> Check Placement rules and that it isn't hidden on that page. Still stuck? <a href="contact.php">Contact us</a>.</p></div>
+      <p><strong>Bot not replying?</strong> Re-check your AI key in AI Providers and click Test connection. <strong>Answers seem generic?</strong> Run the website scan again. <strong>Widget not visible?</strong> Check Placement rules and that it isn't hidden on that page. Still stuck? <a href="/contact">Contact us</a>.</p></div>
     <div class="docblock" id="faq"><h3>FAQ</h3>
       <?php foreach ($faqs as $q): ?><p><strong><?=$q[0]?></strong><br><?=$q[1]?></p><?php endforeach; ?>
     </div>
@@ -63,6 +63,6 @@ site_nav('docs');
 <section class="wrap"><div class="cta-band">
   <h2>Need a hand?</h2>
   <p>Our team is happy to help you get set up. Reach out anytime.</p>
-  <a class="btn btn-ghost btn-lg" href="contact.php">Contact support</a>
+  <a class="btn btn-ghost btn-lg" href="/contact">Contact support</a>
 </div></section>
 <?php site_footer(); page_foot();

@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Privacy Policy — Saathi',
   'desc'  => 'How Saathi by NEER Media collects, uses and protects your data, including account, profile and website-scan information.',
-  'slug'  => 'privacy.php',
+  'slug' => 'privacy',
 ]);
 site_nav('');
 ?>
@@ -53,6 +53,6 @@ site_nav('');
   <p>We may update this policy; material changes will be posted here with a new "last updated" date.</p>
 
   <h2>10. Contact</h2>
-  <p>Questions about privacy? Reach us via our <a href="contact.php">contact page</a>. Data controller: <?=rai_labs()?>.</p>
+  <p>Questions about privacy? Reach us via our <a href="/contact">contact page</a>. Data controller: <?=rai_labs()?>.</p>
 </div></div></section>
 <?php site_footer(); page_foot();

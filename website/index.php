@@ -77,7 +77,7 @@ require __DIR__ . '/includes/layout.php';
     <h1>Meet <span class="grad shine">Saathi</span> — the bot that <span class="grad shine">supports &amp; sells</span> for you.</h1>
     <p class="lead">An agentic AI assistant that learns your real website content, recommends and sells your products inside chat, speaks every visitor's language, and gets smarter over time.</p>
     <div class="cta-row">
-      <a class="btn btn-primary btn-lg" href="login.php">Start free →</a>
+      <a class="btn btn-primary btn-lg" href="/login">Start free →</a>
       <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sbFab')&&document.getElementById('sbFab').click()">▶ Try the live bot</button>
     </div>
   </div>
@@ -282,6 +282,22 @@ window.SAATHI_IMG = <?php
 window.SAATHI_FRAMES = <?php echo json_encode(array_values($FR)); ?>;
 </script>
 <script src="assets/widget/saathi-embed.js" defer></script>
+<script>
+// Auto-open bot when arriving via Live Demo button (?demo=1)
+(function () {
+  if (new URLSearchParams(location.search).get('demo') !== '1') return;
+  var tries = 0;
+  var iv = setInterval(function () {
+    var fab = document.getElementById('sbFab');
+    if (fab) { clearInterval(iv); fab.click();
+      // Scroll demo section into view
+      var demo = document.querySelector('.demo');
+      if (demo) demo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (++tries > 40) clearInterval(iv); // give up after 4s
+  }, 100);
+})();
+</script>
 <script>
 (function () {
   // Hero signature mascot — cycle emotion frames with a soft fade.

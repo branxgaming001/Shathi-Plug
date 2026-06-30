@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Refund & Cancellation Policy — Saathi',
   'desc'  => 'Saathi\'s refund and cancellation policy by NEER Media — eligibility, the refund window, and how to request a refund.',
-  'slug'  => 'refund.php',
+  'slug' => 'refund',
 ]);
 site_nav('');
 ?>
@@ -30,9 +30,9 @@ site_nav('');
   <p>Saathi uses your own AI provider key. Any charges from your AI provider are billed by them and are outside our control and refunds.</p>
 
   <h2>6. How to request a refund</h2>
-  <p>Email us through the <a href="contact.php">contact page</a> with your account email and order details. Approved refunds are issued to your original payment method within 5–10 business days.</p>
+  <p>Email us through the <a href="/contact">contact page</a> with your account email and order details. Approved refunds are issued to your original payment method within 5–10 business days.</p>
 
   <h2>7. Contact</h2>
-  <p>Questions about refunds? Reach <?=rai_labs()?> via our <a href="contact.php">contact page</a>.</p>
+  <p>Questions about refunds? Reach <?=rai_labs()?> via our <a href="/contact">contact page</a>.</p>
 </div></div></section>
 <?php site_footer(); page_foot();

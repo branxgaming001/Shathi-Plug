@@ -14,7 +14,7 @@ $schema = json_encode([
 page_head([
   'title' => 'Saathi Features — Support, Sales & Multilingual AI',
   'desc'  => 'Grounded answers from your real content, in-chat WooCommerce selling, 15 AI providers, 40+ languages, 8 mascots and a fully customizable widget for WordPress.',
-  'slug'  => 'features.php',
+  'slug'  => 'features',
   'schema'=> $schema,
 ]);
 site_nav('features');
@@ -24,7 +24,7 @@ $check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
   <span class="eyebrow">Features</span>
   <h1>Everything your website needs in one bot</h1>
   <p class="lead">Saathi blends agentic support, in-chat commerce and deep site knowledge — wrapped in a premium, fully-customizable widget for WordPress &amp; WooCommerce.</p>
-  <div class="cta-row"><a class="btn btn-primary btn-lg" href="login.php">Start free</a><a class="btn btn-ghost btn-lg" href="pricing.php">See pricing</a></div>
+  <div class="cta-row"><a class="btn btn-primary btn-lg" href="/login">Start free</a><a class="btn btn-ghost btn-lg" href="/pricing">See pricing</a></div>
 </div></section>
 
 <section class="section"><div class="wrap">
@@ -99,6 +99,6 @@ $check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
 <section class="wrap"><div class="cta-band">
   <h2>Ready to see it on your site?</h2>
   <p>Start free, or talk to the live bot right now — the best AI chatbot for WordPress.</p>
-  <a class="btn btn-ghost btn-lg" href="login.php">Get started free</a>
+  <a class="btn btn-ghost btn-lg" href="/login">Get started free</a>
 </div></section>
 <?php site_footer(); page_foot();

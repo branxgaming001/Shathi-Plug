@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/auth.php';
 $IMG = require __DIR__ . '/assets/images.php';
@@ -37,7 +37,7 @@ $dev = $_SESSION['otp_dev'] ?? null;
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
 </head><body><div class="auth-wrap"><div class="auth-card">
-  <a class="brand" href="index.php" style="justify-content:center;margin-bottom:14px"><img src="<?=$IMG['logo']?>" alt="" style="width:34px;height:34px">Saathi</a>
+  <a class="brand" href="/" style="justify-content:center;margin-bottom:14px"><img src="<?=$IMG['logo']?>" alt="" style="width:34px;height:34px">Saathi</a>
   <h2>Enter your code</h2>
   <p class="auth-sub">We sent a 6-digit code to <strong><?=e($pending['dest'])?></strong>.</p>
   <?php if ($err): ?><div class="msg err"><?=e($err)?></div><?php endif; ?>
@@ -50,5 +50,5 @@ $dev = $_SESSION['otp_dev'] ?? null;
   <form method="post" style="margin-top:10px"><?=csrf_field()?><input type="hidden" name="action" value="resend">
     <button class="btn btn-ghost btn-block">Resend code</button>
   </form>
-  <p class="small" style="text-align:center;margin-top:14px"><a href="login.php" style="color:var(--v)">← Use a different method</a></p>
+  <p class="small" style="text-align:center;margin-top:14px"><a href="/login" style="color:var(--v)">← Use a different method</a></p>
 </div></div></body></html>

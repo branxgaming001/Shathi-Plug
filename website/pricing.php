@@ -27,7 +27,7 @@ $css = '.price .usd{display:block;font-size:13px;color:var(--muted);font-weight:
 page_head([
   'title' => 'Saathi Pricing — Free, Pro & Max',
   'desc'  => 'Simple, honest pricing for the Saathi WordPress AI chatbot. Start free worldwide, go Pro at ₹499/mo, or unlock everything with Max at ₹699/mo. Bring your own AI key.',
-  'slug'  => 'pricing.php',
+  'slug'  => 'pricing',
   'schema'=> $faqSchema,
   'extra_css' => $css,
 ]);
@@ -63,7 +63,7 @@ function plan_period_label(string $code): string {
       <ul>
         <?php foreach ($feats as $f): ?><li><?=$check?> <?=e($f)?></li><?php endforeach; ?>
       </ul>
-      <a class="btn <?=$pop?'btn-primary':'btn-ghost'?>" href="checkout.php?plan=<?=urlencode($code)?>"><?=$isFree?'Start free':'Choose '.e($p['name'])?></a>
+      <a class="btn <?=$pop?'btn-primary':'btn-ghost'?>" href="/checkout?plan=<?=urlencode($code)?>"><?=$isFree?'Start free':'Choose '.e($p['name'])?></a>
     </div>
     <?php endforeach; ?>
   </div>
@@ -80,6 +80,6 @@ function plan_period_label(string $code): string {
 <section class="wrap"><div class="cta-band">
   <h2>Try Saathi on your site today</h2>
   <p>Free to start, anywhere in the world — built by <?=rai_labs()?>.</p>
-  <a class="btn btn-ghost btn-lg" href="login.php">Get started free</a>
+  <a class="btn btn-ghost btn-lg" href="/login">Get started free</a>
 </div></section>
 <?php site_footer(); page_foot();

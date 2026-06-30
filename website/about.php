@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'About Saathi & NEER Media',
   'desc'  => 'Saathi is built by NEER Media — an AI chatbot for WordPress & WooCommerce that supports and sells, trained on your real website content.',
-  'slug'  => 'about.php',
+  'slug' => 'about',
 ]);
 site_nav('about');
 ?>
@@ -14,8 +14,8 @@ site_nav('about');
   <h1>We're building the friendliest AI for your website</h1>
   <p class="lead">Saathi is an agentic AI chatbot that answers your visitors from your <strong>real</strong> content and sells your products right inside the chat — made by <?=rai_labs()?>.</p>
   <div class="cta-row">
-    <a class="btn btn-primary btn-lg" href="login.php">Get started free</a>
-    <a class="btn btn-ghost btn-lg" href="index.php#top">Try the live bot</a>
+    <a class="btn btn-primary btn-lg" href="/login">Get started free</a>
+    <a class="btn btn-ghost btn-lg" href="/index#top">Try the live bot</a>
   </div>
 </div></section>
 
@@ -55,13 +55,13 @@ site_nav('about');
     <span class="eyebrow">The company</span>
     <h2 style="margin-top:10px">Made by NEER Media</h2>
     <p>Saathi is built and maintained by <?=rai_labs()?>, a software studio focused on practical, privacy-respecting AI products. We believe powerful AI should be affordable, transparent, and genuinely useful for real businesses — not locked behind enterprise pricing. Learn more about us at <a href="https://neermedia.com" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">neermedia.com ↗</a>.</p>
-    <a class="btn btn-primary btn-lg" href="contact.php" style="margin-top:6px">Get in touch</a>
+    <a class="btn btn-primary btn-lg" href="/contact" style="margin-top:6px">Get in touch</a>
   </div>
 </div></section>
 
 <section class="wrap"><div class="cta-band">
   <h2>Give your website a Saathi</h2>
   <p>Turn visitors into customers with an AI that supports and sells — set up in about five minutes.</p>
-  <a class="btn btn-ghost btn-lg" href="login.php">Start free</a>
+  <a class="btn btn-ghost btn-lg" href="/login">Start free</a>
 </div></section>
 <?php site_footer(); page_foot();

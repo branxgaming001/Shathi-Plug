@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 $IMG = require __DIR__ . '/assets/images.php';
 require __DIR__ . '/includes/layout.php';
 page_head([
   'title' => 'Terms of Service — Saathi',
   'desc'  => 'The terms for using Saathi by NEER Media — plans, licenses, acceptable use, and liability.',
-  'slug'  => 'terms.php',
+  'slug' => 'terms',
 ]);
 site_nav('');
 ?>
@@ -49,6 +49,6 @@ site_nav('');
   <p>These Terms are governed by the laws of India, with exclusive jurisdiction of the competent courts at our registered location.</p>
 
   <h2>11. Contact</h2>
-  <p>Questions about these Terms? Use our <a href="contact.php">contact page</a>.</p>
+  <p>Questions about these Terms? Use our <a href="/contact">contact page</a>.</p>
 </div></div></section>
 <?php site_footer(); page_foot();

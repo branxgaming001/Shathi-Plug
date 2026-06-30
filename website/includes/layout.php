@@ -80,17 +80,17 @@ function site_nav(string $active = ''): void {
     $on = fn(string $k) => $active === $k ? ' style="color:var(--v)"' : '';
     ?>
 <header class="nav"><div class="wrap">
-  <a class="brand" href="index.php"><img src="<?=$logo?>" alt="Saathi logo">Saathi</a>
+  <a class="brand" href="/"><img src="<?=$logo?>" alt="Saathi logo">Saathi</a>
   <nav class="nav-links">
-    <a href="features.php"<?=$on('features')?>>Features</a>
-    <a href="pricing.php"<?=$on('pricing')?>>Pricing</a>
-    <a href="docs.php"<?=$on('docs')?>>Docs</a>
-    <a href="about.php"<?=$on('about')?>>About</a>
-    <a href="contact.php"<?=$on('contact')?>>Contact</a>
+    <a href="/features"<?=$on('features')?>>Features</a>
+    <a href="/pricing"<?=$on('pricing')?>>Pricing</a>
+    <a href="/docs"<?=$on('docs')?>>Docs</a>
+    <a href="/about"<?=$on('about')?>>About</a>
+    <a href="/contact"<?=$on('contact')?>>Contact</a>
   </nav>
   <div class="nav-cta">
-    <a class="btn btn-ghost" href="index.php#top">Live demo</a>
-    <a class="btn btn-primary" href="login.php">Get started</a>
+    <a class="btn btn-ghost" href="/?demo=1">Live demo</a>
+    <a class="btn btn-primary" href="/login">Get started</a>
   </div>
 </div></header>
 <?php }
@@ -103,12 +103,12 @@ function site_footer(): void {
     ?>
 <footer><div class="wrap">
   <div>
-    <a class="brand" href="index.php"><img src="<?=$logo?>" alt="" style="width:30px;height:30px"> Saathi</a>
+    <a class="brand" href="/"><img src="<?=$logo?>" alt="" style="width:30px;height:30px"> Saathi</a>
     <p style="color:#a99fe0;font-size:14px;margin-top:12px;max-width:300px">The agentic AI chatbot that supports and sells for your WordPress &amp; WooCommerce website. A product by <?=rai_labs()?>.</p>
   </div>
-  <div><h5>Product</h5><a href="features.php">Features</a><a href="pricing.php">Pricing</a><a href="docs.php">Docs &amp; Help</a><a href="index.php#top">Live demo</a></div>
-  <div><h5>Company</h5><a href="about.php">About</a><a href="contact.php">Contact</a><a href="https://neermedia.com" target="_blank" rel="noopener">NEER Media ↗</a></div>
-  <div><h5>Legal</h5><a href="privacy.php">Privacy</a><a href="terms.php">Terms</a><a href="refund.php">Refund</a></div>
+  <div><h5>Product</h5><a href="/features">Features</a><a href="/pricing">Pricing</a><a href="/docs">Docs &amp; Help</a><a href="/?demo=1">Live demo</a></div>
+  <div><h5>Company</h5><a href="/about">About</a><a href="/contact">Contact</a><a href="https://neermedia.com" target="_blank" rel="noopener">NEER Media ↗</a></div>
+  <div><h5>Legal</h5><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refund">Refund</a></div>
 </div><div class="foot-bottom">© <?=$year?> Saathi · a product by <?=rai_labs()?>. All rights reserved.</div></footer>
 <?php }
 

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/mailer.php';
 $IMG = require __DIR__ . '/assets/images.php';
@@ -43,7 +43,7 @@ $css = '.cwrap{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:s
 page_head([
   'title' => 'Contact Saathi — Support & Sales',
   'desc'  => 'Get in touch with the Saathi team at NEER Media. Questions about features, pricing or setup? Send us a message and we\'ll reply within 1 business day.',
-  'slug'  => 'contact.php',
+  'slug' => 'contact',
   'extra_css' => $css,
 ]);
 site_nav('contact');
@@ -73,8 +73,8 @@ site_nav('contact');
   <div class="cinfo">
     <h3 style="margin-top:0">Other ways to reach us</h3>
     <div class="row"><span class="ic">🏢</span><div><strong>NEER Media</strong><br><span class="small" style="color:var(--ink2)">Maker of Saathi · <a href="https://neermedia.com" target="_blank" rel="noopener" style="color:var(--v);font-weight:600">neermedia.com ↗</a></span></div></div>
-    <div class="row"><span class="ic">📚</span><div><strong>Self-serve help</strong><br><span class="small" style="color:var(--ink2)">Most setup questions are answered in our <a href="docs.php" style="color:var(--v);font-weight:600">Docs &amp; Help center</a>.</span></div></div>
-    <div class="row"><span class="ic">💬</span><div><strong>Try the live bot</strong><br><span class="small" style="color:var(--ink2)">Ask Saathi itself on our <a href="index.php#top" style="color:var(--v);font-weight:600">home page</a>.</span></div></div>
+    <div class="row"><span class="ic">📚</span><div><strong>Self-serve help</strong><br><span class="small" style="color:var(--ink2)">Most setup questions are answered in our <a href="/docs" style="color:var(--v);font-weight:600">Docs &amp; Help center</a>.</span></div></div>
+    <div class="row"><span class="ic">💬</span><div><strong>Try the live bot</strong><br><span class="small" style="color:var(--ink2)">Ask Saathi itself on our <a href="/index#top" style="color:var(--v);font-weight:600">home page</a>.</span></div></div>
     <div class="row"><span class="ic">⏱️</span><div><strong>Response time</strong><br><span class="small" style="color:var(--ink2)">Within 1 business day, Mon–Sat.</span></div></div>
   </div>
 </div></div></section>

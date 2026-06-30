@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/auth.php';
 $IMG = require __DIR__ . '/assets/images.php';
@@ -35,7 +35,7 @@ $googleOn = (string) cfg('GOOGLE_CLIENT_ID', '') !== '';
 <link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/app.css">
 <style>.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700}.gbtn svg{flex:0 0 auto}</style>
 </head><body><div class="auth-wrap"><div class="auth-card">
-  <a class="brand" href="index.php" style="justify-content:center;margin-bottom:14px"><img src="<?=$IMG['logo']?>" alt="" style="width:34px;height:34px">Saathi</a>
+  <a class="brand" href="/" style="justify-content:center;margin-bottom:14px"><img src="<?=$IMG['logo']?>" alt="" style="width:34px;height:34px">Saathi</a>
   <h2>Welcome 👋</h2>
   <p class="auth-sub">Sign in or create your account. The same login works for everyone — you'll land on the right dashboard automatically.</p>
   <?php if ($err): ?><div class="msg err"><?=e($err)?></div><?php endif; ?>
@@ -54,5 +54,5 @@ $googleOn = (string) cfg('GOOGLE_CLIENT_ID', '') !== '';
     <button class="btn btn-primary btn-block">Email me a sign-in code</button>
   </form>
 
-  <p class="small" style="text-align:center;margin-top:16px"><a href="index.php" style="color:var(--v)">← Back to site</a></p>
+  <p class="small" style="text-align:center;margin-top:16px"><a href="/" style="color:var(--v)">← Back to site</a></p>
 </div></div></body></html>

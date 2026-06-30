@@ -1,0 +1,33 @@
+Options -Indexes
+
+# ── Clean URLs: strip .php extension ──────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # If the request is for an existing file or directory, serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Redirect slug.php → slug (canonical clean URL, 301)
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+([^.]+)\.php[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # Internally rewrite clean slug → slug.php
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^([^.]+)/?$ $1.php [L]
+</IfModule>
+
+# ── Protect downloads directory ────────────────────────────────────────────
+<FilesMatch "^config\.local\.php$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# ── Security headers ───────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
