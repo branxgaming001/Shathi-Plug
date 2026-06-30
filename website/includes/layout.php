@@ -95,6 +95,35 @@ function site_nav(string $active = ''): void {
 </div></header>
 <?php }
 
+/** Inject the Saathi demo bot widget on every marketing page. */
+function sitewide_bot(): void {
+    $IMG = $GLOBALS['IMG'] ?? require __DIR__ . '/../assets/images.php';
+    $m = [];
+    for ($i = 1; $i <= 8; $i++) { $m['mascot-' . $i] = $IMG['mascot-' . $i] ?? ''; }
+    $imgJson = json_encode($m, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
+    ?>
+<div id="sbot"></div>
+<script>
+if (!window.SAATHI_IMG) {
+  window.SAATHI_IMG = <?=$imgJson?>;
+}
+// Auto-open bot when arriving via Live Demo button (?demo=1)
+(function () {
+  if (new URLSearchParams(location.search).get('demo') !== '1') return;
+  var tries = 0;
+  var iv = setInterval(function () {
+    var fab = document.getElementById('sbFab');
+    if (fab) { clearInterval(iv); fab.click();
+      var demo = document.querySelector('.demo');
+      if (demo) demo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (++tries > 40) clearInterval(iv);
+  }, 100);
+})();
+</script>
+<script src="assets/widget/saathi-embed.js" defer></script>
+<?php }
+
 /** Site footer with rebrand + real links. */
 function site_footer(): void {
     $IMG = $GLOBALS['IMG'] ?? [];
@@ -110,6 +139,6 @@ function site_footer(): void {
   <div><h5>Company</h5><a href="/about">About</a><a href="/contact">Contact</a><a href="https://neermedia.com" target="_blank" rel="noopener">NEER Media ↗</a></div>
   <div><h5>Legal</h5><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/refund">Refund</a></div>
 </div><div class="foot-bottom">© <?=$year?> Saathi · a product by <?=rai_labs()?>. All rights reserved.</div></footer>
-<?php }
+<?php sitewide_bot(); }
 
 function page_foot(): void { echo "\n</body></html>"; }

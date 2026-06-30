@@ -271,33 +271,11 @@ require __DIR__ . '/includes/layout.php';
 <!-- FOOTER -->
 <?php site_footer(); ?>
 
-<!-- SAATHI DEMO BOT -->
-<div id="sbot"></div>
+<!-- SAATHI DEMO BOT frames (for hero mascot animation) -->
 <script>
-window.SAATHI_IMG = <?php
-  $m = [];
-  for ($i = 1; $i <= 8; $i++) { $m['mascot-' . $i] = $IMG['mascot-' . $i]; }
-  echo json_encode($m);
-?>;
 window.SAATHI_FRAMES = <?php echo json_encode(array_values($FR)); ?>;
 </script>
-<script src="assets/widget/saathi-embed.js" defer></script>
-<script>
-// Auto-open bot when arriving via Live Demo button (?demo=1)
-(function () {
-  if (new URLSearchParams(location.search).get('demo') !== '1') return;
-  var tries = 0;
-  var iv = setInterval(function () {
-    var fab = document.getElementById('sbFab');
-    if (fab) { clearInterval(iv); fab.click();
-      // Scroll demo section into view
-      var demo = document.querySelector('.demo');
-      if (demo) demo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    if (++tries > 40) clearInterval(iv); // give up after 4s
-  }, 100);
-})();
-</script>
+
 <script>
 (function () {
   // Hero signature mascot — cycle emotion frames with a soft fade.
