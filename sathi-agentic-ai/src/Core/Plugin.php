@@ -172,7 +172,9 @@ final class Plugin {
                 $this->get( 'gdpr' )->give_consent( $user_id );
                 return new \WP_REST_Response( [ 'success' => true ] );
             },
-            'permission_callback' => '__return_true',
+            'permission_callback' => function () {
+                return is_user_logged_in();
+            },
         ] );
 
         // Usage analytics endpoint

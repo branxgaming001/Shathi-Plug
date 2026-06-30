@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /** License key generation, issuing, validation, activations. */
 
-function _key_hash(string $plain): string { return hash('sha256', strtoupper(trim($plain)) . '|' . (getenv('APP_SECRET') ?: 'saathi-dev-pepper-change-me')); }
+function _key_hash(string $plain): string { return hash_hmac('sha256', strtoupper(trim($plain)), _otp_pepper()); }
 
 function gen_license_key(): array {
     $alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
@@ -51,7 +51,9 @@ function license_validate(string $plain, ?string $domain=null): array {
         $ex = $db->prepare("SELECT id FROM license_activations WHERE license_id=? AND domain=? AND status='active'");
         $ex->execute([(int)$lic['id'],$domain]);
         if (!$ex->fetch()) {
-            $cnt = (int)$db->query("SELECT COUNT(*) FROM license_activations WHERE license_id=".(int)$lic['id']." AND status='active'")->fetchColumn();
+            $cst = $db->prepare("SELECT COUNT(*) FROM license_activations WHERE license_id=? AND status='active'");
+            $cst->execute([(int)$lic['id']]);
+            $cnt = (int)$cst->fetchColumn();
             if ($cnt >= (int)$lic['max_activations']) return ['valid'=>false,'reason'=>'activation_limit','max'=>(int)$lic['max_activations']];
             $db->prepare("INSERT INTO license_activations(license_id,domain,last_seen) VALUES(?,?,NOW()) ON DUPLICATE KEY UPDATE status='active', last_seen=NOW()")
                ->execute([(int)$lic['id'],$domain]);

@@ -24,9 +24,21 @@ class Helpers {
      * Generate a guest ID hash from IP and User-Agent.
      */
     public static function guest_id(): string {
-        $ip  = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        $ua  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        return hash( 'sha256', $ip . '|' . $ua );
+        // Check for existing cookie first
+        if ( ! empty( $_COOKIE['sathi_guest'] ) && preg_match( '/^[a-f0-9]{64}$/', $_COOKIE['sathi_guest'] ) ) {
+            return $_COOKIE['sathi_guest'];
+        }
+        // Generate new, set cookie
+        $id = hash( 'sha256', random_bytes( 32 ) );
+        setcookie( 'sathi_guest', $id, [
+            'expires'  => time() + YEAR_IN_SECONDS,
+            'path'     => '/',
+            'secure'   => is_ssl(),
+            'httponly'  => true,
+            'samesite'  => 'Lax',
+        ] );
+        $_COOKIE['sathi_guest'] = $id;
+        return $id;
     }
 
     /**
@@ -155,6 +167,7 @@ class Helpers {
             return '';
         }
         if ( ! function_exists( 'openssl_encrypt' ) ) {
+            error_log( 'Saathi: openssl_encrypt unavailable — API keys stored as plaintext.' );
             return $plain; // Graceful fallback if OpenSSL is unavailable.
         }
         $key    = hash( 'sha256', self::crypto_salt(), true );

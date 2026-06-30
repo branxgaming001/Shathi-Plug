@@ -35,5 +35,8 @@ $wpdb->query(
     "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_sathi_%' OR option_name LIKE '_transient_timeout_sathi_%'"
 );
 
+// ── Clean user meta ───────────────────────────────────────────────
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '%_sathi_%'" );
+
 // ── Flush rewrite rules ───────────────────────────────────────────────
 delete_option( 'rewrite_rules' );

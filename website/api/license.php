@@ -13,7 +13,15 @@
 require __DIR__ . '/../includes/bootstrap.php';
 require __DIR__ . '/../includes/license.php';
 require __DIR__ . '/../includes/crypto.php';
-header('Access-Control-Allow-Origin: *');
+$allowed_origins = array_filter([
+    cfg('PUBLIC_URL', ''),
+    'https://saathi.neermedia.com',
+]);
+$request_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($request_origin, $allowed_origins, true)) {
+    header('Access-Control-Allow-Origin: ' . $request_origin);
+    header('Vary: Origin');
+}
 header('Content-Type: application/json; charset=utf-8');
 
 $key    = trim((string)($_REQUEST['key'] ?? ''));

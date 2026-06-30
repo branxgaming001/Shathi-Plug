@@ -2,7 +2,16 @@
 declare(strict_types=1);
 require_once __DIR__ . '/mailer.php';
 
-function _otp_pepper(): string { return getenv('APP_SECRET') ?: 'saathi-dev-pepper-change-me'; }
+function _otp_pepper(): string {
+    $db_pepper = setting_get('APP_SECRET', '');
+    if ($db_pepper !== null && $db_pepper !== '') return $db_pepper;
+    $env = getenv('APP_SECRET');
+    if ($env) return $env;
+    // Auto-generate and persist on first call
+    $generated = bin2hex(random_bytes(32));
+    setting_set('APP_SECRET', $generated);
+    return $generated;
+}
 function _otp_hash(string $code): string { return hash('sha256', $code . '|' . _otp_pepper()); }
 
 /**

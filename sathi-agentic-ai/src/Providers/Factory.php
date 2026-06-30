@@ -164,6 +164,6 @@ class Factory {
      * @return string[]
      */
     public function available_keys(): array {
-        return [ 'openai', 'anthropic', 'google', 'openrouter', 'local' ];
+        return ProviderCatalog::keys();
     }
 }

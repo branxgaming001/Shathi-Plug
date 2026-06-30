@@ -121,11 +121,11 @@ class StreamEndpoint {
             return;
         }
 
-        // ── Load or create conversation ────────────────────────────
-        $settings = new Settings();
-        $factory  = new Factory( $settings );
-        $memory   = new MemoryStore();
-        $chat     = new ChatManager( $factory, $memory );
+        $plugin   = \NeerMedia\Sathi\Core\Plugin::instance();
+        $settings = $plugin->get( 'settings' ) ?: new Settings();
+        $factory  = $plugin->get( 'factory' )  ?: new Factory( $settings );
+        $memory   = $plugin->get( 'memory' )   ?: new MemoryStore();
+        $chat     = $plugin->get( 'chat' )     ?: new ChatManager( $factory, $memory );
 
         $conv = null;
         if ( $conversation_uuid && $conversation_uuid !== 'new' ) {
@@ -180,6 +180,15 @@ class StreamEndpoint {
             [ '%d', '%s', '%s', '%d', '%s' ]
         );
         $conv->add_message( $user_msg );
+
+        // ── Content moderation (defense-in-depth, only when enabled) ──
+        $moderator = $plugin->get( 'moderator' ) ?: new \NeerMedia\Sathi\Support\ContentModerator();
+        $mod_result = $moderator->moderate_input( $message );
+        if ( ! $mod_result['passed'] ) {
+            $this->emit( 'error', [ 'message' => 'Your message contains content that cannot be processed.' ] );
+            $this->done();
+            return;
+        }
 
         // ── Get provider ──────────────────────────────────────────
         $provider = $factory->for_task( 'chat' );
@@ -290,13 +299,10 @@ class StreamEndpoint {
     private function emit( string $type, array $data ): void {
         $data['type'] = $type;
         echo "data: " . wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "\n\n";
-        if ( function_exists( 'fastcgi_finish_request' ) ) {
-            @fastcgi_finish_request();
-            flush();
-        } else {
+        if ( ob_get_level() > 0 ) {
             @ob_flush();
-            flush();
         }
+        flush();
     }
 
     /**

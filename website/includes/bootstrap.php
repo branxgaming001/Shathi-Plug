@@ -101,6 +101,13 @@ function ensure_schema(): void {
         k VARCHAR(60) PRIMARY KEY, v TEXT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    // Ensure renew_license_id column exists on payments (added after initial schema)
+    $payHave = [];
+    foreach ($db->query("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='payments'") as $r) { $payHave[$r['COLUMN_NAME']] = 1; }
+    if (!isset($payHave['renew_license_id'])) {
+        try { $db->exec("ALTER TABLE payments ADD COLUMN renew_license_id BIGINT UNSIGNED NULL"); } catch (Throwable $e) { /* ignore */ }
+    }
+
     // Profile / onboarding columns on users — added idempotently (works on existing tables).
     $profileCols = [
         'first_name'=>"VARCHAR(80)", 'last_name'=>"VARCHAR(80)", 'mobile'=>"VARCHAR(30)",
@@ -127,12 +134,14 @@ function seed(): void {
         $st->execute(['pro','Pro',499,6,'month',1,'Everything in Free|All 8 mascots + full theming|Multiple & AI-built personas|Memory + site navigation|Content moderation|Priority support|1 website',2]);
         $st->execute(['max','Max',699,9,'month',1,'Everything in Pro|WooCommerce product showcase|Deep scan (site knowledge)|Self-improving AI|Smart follow-up questions|Direct add-to-cart in chat|1 website',3]);
     }
-    // Initial admin (from env, else default — change after first login)
+    // Initial admin (only when env vars are explicitly set — no hardcoded fallback)
     if ((int)$db->query("SELECT COUNT(*) FROM admins")->fetchColumn() === 0) {
-        $u = getenv('ADMIN_USER') ?: 'admin';
-        $p = getenv('ADMIN_PASS') ?: 'Saathi@Admin#2026';
-        $st = $db->prepare("INSERT INTO admins(username,pass_hash,name,role) VALUES(?,?,?, 'super')");
-        $st->execute([$u, password_hash($p, PASSWORD_DEFAULT), 'Owner']);
+        $u = getenv('ADMIN_USER');
+        $p = getenv('ADMIN_PASS');
+        if ($u && $p) {
+            $st = $db->prepare("INSERT INTO admins(username,pass_hash,name,role) VALUES(?,?,?, 'super')");
+            $st->execute([$u, password_hash($p, PASSWORD_DEFAULT), 'Owner']);
+        }
     }
 }
 
@@ -149,7 +158,13 @@ function boot_session(): void {
 function e(?string $s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function redirect(string $to): void { header('Location: ' . $to); exit; }
 function json_out($d, int $code=200): void { http_response_code($code); header('Content-Type: application/json'); echo json_encode($d); exit; }
-function client_ip(): string { return substr((string)($_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? ''),0,45); }
+function client_ip(): string {
+    if ((bool)cfg('TRUST_PROXY', false) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ips = explode(',', (string)$_SERVER['HTTP_X_FORWARDED_FOR']);
+        return substr(trim((string)$ips[0]), 0, 45);
+    }
+    return substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+}
 
 function csrf_token(): string {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
